@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.optimizationBenchmarking</groupId>
-	<artifactId>utils-math</artifactId>
+	<artifactId>utils-ml</artifactId>
 	<version>0.8.5-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>Mathematics Utilities</name>
@@ -44,6 +44,7 @@
 		<jdk.version>1.7</jdk.version>
 		<junit.version>4.11</junit.version>
 		<utils-base.version>${project.version}</utils-base.version>
+		<utils-math.version>${project.version}</utils-math.version>
 		<commons.math.majorVersion>3</commons.math.majorVersion>
 		<commons.math.version>${commons.math.majorVersion}.5</commons.math.version>
 	</properties>
@@ -90,6 +91,12 @@
 			<groupId>org.optimizationBenchmarking</groupId>
 			<artifactId>utils-base</artifactId>
 			<version>${utils-base.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.optimizationBenchmarking</groupId>
+			<artifactId>utils-math</artifactId>
+			<version>${utils-math.version}</version>
 		</dependency>
 
 		<dependency>
