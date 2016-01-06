@@ -1,0 +1,21 @@
+<project basedir="." default="build">
+	<description>
+	Build the utils-ml project, the project holding the
+	Machine Learning utility classes, includings its
+	dependencies of group "org.optimizationBenchmarking".
+	</description>
+
+	<import>
+		<url url="https://raw.githubusercontent.com/optimizationBenchmarking/utils-build/master/dependencyBuilder.xml" />
+	</import>
+
+	<target name="build">
+		<sequential>
+			<buildWithDependencies githubProject="utils-ml">
+				<dependencies>
+					<dependency githubProject="utils-base" />
+				</dependencies>
+			</buildWithDependencies>
+		</sequential>
+	</target>
+</project>

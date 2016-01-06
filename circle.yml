@@ -1,0 +1,40 @@
+##
+## Build with CircleCI
+##
+## https://circleci.com/gh/optimizationBenchmarking/utils-ml
+#
+machine:
+# Install the newest version of ant.
+  pre:
+# Install the required Ant version
+  - sudo apt-get -q -y -f update
+  - wget "https://raw.githubusercontent.com/optimizationBenchmarking/utils-build/master/antWebInstallerLinux.sh"
+  - chmod 755 antWebInstallerLinux.sh
+  - sudo ./antWebInstallerLinux.sh
+  environment:
+# We set the environment variable JAVA_OPTS to reduce
+# the memory footprint in order to prevent unexpected
+# test termination.
+    JAVA_OPTS: -Xms1536m -Xmx1536m
+    MAVEN_OPTS: -Xms1536m -Xmx1536m
+    _JAVA_OPTIONS: -Xms1536m -Xmx1536m
+    
+    
+# We do nothing here.
+dependencies:
+  override:
+    - echo "Nothing"
+      
+# We set a high timeout to prevent the test from being
+# terminated unexpectedly.
+test:
+  override:
+    - ant:
+        timeout: 10000
+        
+# The branches to be ignored
+general:
+  branches:
+    ignore:
+      - gh-pages
+      - documentation

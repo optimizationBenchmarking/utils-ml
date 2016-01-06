@@ -1,0 +1,12 @@
+##
+## Build with Wercker
+##
+## https://app.wercker.com/#applications/ TODO
+#
+box: guligo/jdk-maven-ant
+#
+build:
+    steps:
+        - script:
+            name: Ant-based Maven Build
+            code: ant
