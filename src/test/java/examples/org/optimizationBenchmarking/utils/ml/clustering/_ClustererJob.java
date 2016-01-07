@@ -9,6 +9,8 @@ import org.optimizationBenchmarking.utils.math.statistics.aggregate.ArithmeticMe
 import org.optimizationBenchmarking.utils.ml.clustering.spec.IClusterer;
 import org.optimizationBenchmarking.utils.parallel.Execute;
 
+import shared.junit.org.optimizationBenchmarking.utils.ml.clustering.ClusteringExampleDataset;
+
 /** the multiple clustering job */
 final class _ClustererJob implements Callable<ClustererOutcome> {
 

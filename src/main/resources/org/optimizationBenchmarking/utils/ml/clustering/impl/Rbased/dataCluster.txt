@@ -26,6 +26,12 @@ tryCatch(
    data <- prcomp(data, center=TRUE, tol=0.05)$x
   })
 #
+rcommUsePackage("fpc");#
+rcommUsePackage("mclust");#
+rcommUsePackage("apcluster");#
+rcommUsePackage("cluster");#
+rcommUsePackage("NbClust");#
+#
 ## If the number of clusters has been specified, then use it as-is
 if(nCluster > 0) {
 	cluster.n <- c(nCluster);
@@ -46,23 +52,19 @@ cluster.n   <- integer(0);
 #
 # Determine the ideal number of clusters with the pamk function of the
 # fpc package
-rcommUsePackage("fpc");
 rcommExec(cluster.n <- c(cluster.n, as.integer(pamk(data)$nc)));  
 #
 # Determine the optimal number of clusters according to the Bayesian
 # Information Criterion for expectation-maximization, initialized by
 # hierarchical clustering for parameterized Gaussian mixture models.
-rcommUsePackage("mclust");
 rcommExec(cluster.n <- c(cluster.n, as.integer(dim(
                             Mclust(data, G=1:maxClusters)$z)[2])));
 #
 # Determine the ideal number of clusters by using Affinity propagation
 # (AP) clustering, see http://dx.doi.org/10.1126/science.1136800.
-rcommUsePackage("apcluster");
 rcommExec(cluster.n <- c(cluster.n, as.integer(length(apcluster(
                               negDistMat(r=2), data)@clusters))));
 #
-rcommUsePackage("cluster");
 rcommExec( {
   findCluster <- clusGap(data, kmeans, maxClusters, B=500, verbose=FALSE);
   cluster.n <- c(cluster.n, as.integer(maxSE(findCluster$Tab[, "gap"],
@@ -70,7 +72,6 @@ rcommExec( {
   rm(findCluster);
 } );
 #
-rcommUsePackage("NbClust");
 oldPlot <- plot;
 plot <- function(...) { }
 oldPar <- par;

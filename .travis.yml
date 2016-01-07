@@ -33,6 +33,15 @@ before_install:
   - sudo hostname "$(hostname | cut -c1-63)"
   - sed -e "s/^\\(127\\.0\\.0\\.1.*\\)/\\1 $(hostname | cut -c1-63)/" /etc/hosts | sudo tee /etc/hosts
   - cat /etc/hosts # optionally check the content *after*
+# installing R and required packages
+  - sudo apt-get -q -y -f install r-base r-base-dev
+  - sudo Rscript -e 'if(!(require("vegan"))) install.packages("vegan", repos="http://cran.us.r-project.org", dependencies=TRUE, clean=TRUE)'
+  - sudo Rscript -e 'if(!(require("cluster"))) install.packages("cluster", repos="http://cran.us.r-project.org", dependencies=TRUE, clean=TRUE)'
+  - sudo Rscript -e 'if(!(require("fpc"))) install.packages("fpc", repos="http://cran.us.r-project.org", dependencies=TRUE, clean=TRUE)'
+  - sudo Rscript -e 'if(!(require("NbClust"))) install.packages("NbClust", repos="http://cran.us.r-project.org", dependencies=TRUE, clean=TRUE)'
+  - sudo Rscript -e 'if(!(require("mclust"))) install.packages("mclust", repos="http://cran.us.r-project.org", dependencies=TRUE, clean=TRUE)'
+  - sudo Rscript -e 'if(!(require("stats"))) install.packages("stats", repos="http://cran.us.r-project.org", dependencies=TRUE, clean=TRUE)'
+  - sudo Rscript -e 'if(!(require("apcluster"))) install.packages("apcluster", repos="http://cran.us.r-project.org", dependencies=TRUE, clean=TRUE)'
   
 # prevent Maven from running
 install:

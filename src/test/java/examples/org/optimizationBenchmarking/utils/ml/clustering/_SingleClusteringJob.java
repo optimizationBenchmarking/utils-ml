@@ -12,6 +12,8 @@ import org.optimizationBenchmarking.utils.ml.clustering.spec.IClusteringJobBuild
 import org.optimizationBenchmarking.utils.ml.clustering.spec.IClusteringResult;
 import org.optimizationBenchmarking.utils.ml.clustering.spec.IDataClusteringJobBuilder;
 
+import shared.junit.org.optimizationBenchmarking.utils.ml.clustering.ClusteringExampleDataset;
+
 /** the single clustering job */
 final class _SingleClusteringJob
     implements Callable<SingleClusteringOutcome> {

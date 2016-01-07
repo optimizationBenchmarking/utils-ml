@@ -2,6 +2,8 @@ package examples.org.optimizationBenchmarking.utils.ml.clustering;
 
 import org.optimizationBenchmarking.utils.collections.lists.ArrayListView;
 
+import shared.junit.org.optimizationBenchmarking.utils.ml.clustering.ClusteringExampleDataset;
+
 /** a multi-clustering outcome */
 public final class MultiClusteringOutcome
     extends _MultiOutcome<SingleClusteringOutcome> {

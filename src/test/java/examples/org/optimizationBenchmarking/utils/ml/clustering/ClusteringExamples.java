@@ -10,6 +10,8 @@ import org.optimizationBenchmarking.utils.ml.clustering.spec.IClusterer;
 import org.optimizationBenchmarking.utils.parallel.Execute;
 import org.optimizationBenchmarking.utils.parsers.LoggerParser;
 
+import shared.junit.org.optimizationBenchmarking.utils.ml.clustering.ClusteringExampleDataset;
+
 /** The clustering examples. */
 public final class ClusteringExamples {
 
@@ -66,8 +68,7 @@ public final class ClusteringExamples {
 
     logger = LoggerParser.INSTANCE.parseString("global;ALL");//$NON-NLS-1$
 
-    datasets = Execute.submitToCommonPool(new ClusteringExampleDatasets())
-        .get();
+    datasets = ClusteringExampleDatasets.EXAMPLES;
 
     outcomes = ClusteringExamples.runAll(datasets, logger);
 

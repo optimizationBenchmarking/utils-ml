@@ -36,6 +36,7 @@ rcommUsePackage("fpc");#
 #
 if(nCluster > 0) {#
   # The number of clusters has been supplied, directly use it.
+  rcommUsePackage("cluster");#
   pamResult    <- pam(x=distance, k=nCluster, diss=TRUE);#
   clusterRange <- nCluster:nCluster;
 } else {#
