@@ -47,7 +47,7 @@ import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
  * <dt>b.1.2 [=b.1.1]</dt>
  * <dd>{@code b=(x^(-c)*(d+a-y))/(y-d)}</dd>
  * <dt>c.1.1</dt>
- * <dd>{@code c=log((y-d-a)/(b*(d-y)))/log(x)}</code>
+ * <dd>{@code c=log((y-d-a)/(b*(d-y)))/log(x)}</dd>
  * <dt>d.1.1</dt>
  * <dd>{@code d=((1+b*x^c)*y-a)/(1+b*x^c)}</dd>
  * </dl>
@@ -85,7 +85,7 @@ import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
  * </dd>
  * <dt>b.2.5 [from a.1.1]</dt>
  * <dd>{@code b=(y1-y2)/(d*x1^c-d*x2^c-x1^c*y1+x2^c*y2)}</dd>
- * <dd>c.2.1 [from b.1.1]</dt>
+ * <dt>c.2.1 [from b.1.1]</dt>
  * <dd>
  * {@code c=(log(((d-y2)*(d+a-y1))/((d-y1)*(d+a-y2))))/(log(x1)-log(x2))}
  * </dd>

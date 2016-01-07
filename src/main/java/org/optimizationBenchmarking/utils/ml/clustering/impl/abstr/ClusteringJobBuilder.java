@@ -89,6 +89,7 @@ public class ClusteringJobBuilder<R extends ClusteringJobBuilder<R>>
    * @param number
    *          the number of clusters
    * @param undefAllowed
+   *          is it allowed to have an undefined cluster number?
    */
   static final void _checkClusterNumber(final int number,
       final boolean undefAllowed) {

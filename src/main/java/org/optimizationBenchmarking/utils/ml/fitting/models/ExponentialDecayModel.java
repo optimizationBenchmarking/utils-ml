@@ -37,7 +37,7 @@ import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
  * <dt>a.2.2</dt>
  * <dd>
  * {@code a=(y2*exp(c*x1^d)-y1*(exp(c*x1^d))^(x2^d*x1^(-d)))/(exp(c*x1^d)-(exp(c*x1^d))^(x2^d*x1^(-d)))}
- * </dd></dd>
+ * </dd>
  * <dt>b.2.1</dt>
  * <dd>{@code b=(y1-y2)/(exp(c*x1^d)-exp(c*x2^d))}</dd>
  * <dt>b.2.2</dt>
