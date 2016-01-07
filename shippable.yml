@@ -27,13 +27,13 @@ before_install:
   - shippable_retry sudo ./antWebInstallerLinux.sh --purgeAnt=false
 # installing R and required packages
   - shippable_retry sudo apt-get -q -y -f install r-base r-base-dev
-  - shippable_retry sudo Rscript -e 'if(!(require("vegan"))) install.packages("vegan", repos="http://cran.us.r-project.org", dependencies=TRUE, clean=TRUE)'
-  - shippable_retry sudo Rscript -e 'if(!(require("cluster"))) install.packages("cluster", repos="http://cran.us.r-project.org", dependencies=TRUE, clean=TRUE)'
-  - shippable_retry sudo Rscript -e 'if(!(require("fpc"))) install.packages("fpc", repos="http://cran.us.r-project.org", dependencies=TRUE, clean=TRUE)'
-  - shippable_retry sudo Rscript -e 'if(!(require("NbClust"))) install.packages("NbClust", repos="http://cran.us.r-project.org", dependencies=TRUE, clean=TRUE)'
-  - shippable_retry sudo Rscript -e 'if(!(require("mclust"))) install.packages("mclust", repos="http://cran.us.r-project.org", dependencies=TRUE, clean=TRUE)'
-  - shippable_retry sudo Rscript -e 'if(!(require("stats"))) install.packages("stats", repos="http://cran.us.r-project.org", dependencies=TRUE, clean=TRUE)'
-  - shippable_retry sudo Rscript -e 'if(!(require("apcluster"))) install.packages("apcluster", repos="http://cran.us.r-project.org", dependencies=TRUE, clean=TRUE)'
+  - sudo Rscript -e 'if(!(require("vegan"))) install.packages("vegan", repos="http://cran.us.r-project.org", dependencies=TRUE, clean=TRUE)'
+  - sudo Rscript -e 'if(!(require("cluster"))) install.packages("cluster", repos="http://cran.us.r-project.org", dependencies=TRUE, clean=TRUE)'
+  - sudo Rscript -e 'if(!(require("fpc"))) install.packages("fpc", repos="http://cran.us.r-project.org", dependencies=TRUE, clean=TRUE)'
+  - sudo Rscript -e 'if(!(require("NbClust"))) install.packages("NbClust", repos="http://cran.us.r-project.org", dependencies=TRUE, clean=TRUE)'
+  - sudo Rscript -e 'if(!(require("mclust"))) install.packages("mclust", repos="http://cran.us.r-project.org", dependencies=TRUE, clean=TRUE)'
+  - sudo Rscript -e 'if(!(require("stats"))) install.packages("stats", repos="http://cran.us.r-project.org", dependencies=TRUE, clean=TRUE)'
+  - sudo Rscript -e 'if(!(require("apcluster"))) install.packages("apcluster", repos="http://cran.us.r-project.org", dependencies=TRUE, clean=TRUE)'
   
 # install override
 install:
