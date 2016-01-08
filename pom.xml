@@ -6,8 +6,8 @@
 	<artifactId>utils-ml</artifactId>
 	<version>0.8.5-SNAPSHOT</version>
 	<packaging>jar</packaging>
-	<name>Mathematics Utilities</name>
-	<description>This project holds the mathematics utilities used in the projects of the Optimization Benchmarking Tool Suite.</description>
+	<name>Machine Learning Utilities</name>
+	<description>This project holds the machine learning utilities used in the projects of the Optimization Benchmarking Tool Suite.</description>
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
