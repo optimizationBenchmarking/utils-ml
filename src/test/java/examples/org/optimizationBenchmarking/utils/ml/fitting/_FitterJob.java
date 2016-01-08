@@ -25,7 +25,7 @@ final class _FitterJob implements Callable<FitterOutcome> {
   private final IFunctionFitter m_fitter;
 
   /** the data sets */
-  private final ArrayListView<FittingExampleDataset> m_datasets;
+  private final ArrayListView<MultiFittingExampleDataset> m_datasets;
 
   /** the root path */
   private final Path m_root;
@@ -45,7 +45,7 @@ final class _FitterJob implements Callable<FitterOutcome> {
    *          the logger
    */
   _FitterJob(final Logger logger, final IFunctionFitter fitter,
-      final ArrayListView<FittingExampleDataset> datasets,
+      final ArrayListView<MultiFittingExampleDataset> datasets,
       final Path root) {
     super();
     this.m_fitter = fitter;
@@ -62,7 +62,7 @@ final class _FitterJob implements Callable<FitterOutcome> {
     final Future<FittingOutcome>[] jobs;
     final FittingOutcome[] res;
     final FitterOutcome outcome;
-    final ArrayListView<FittingExampleDataset> data;
+    final ArrayListView<MultiFittingExampleDataset> data;
     final ITextOutput text;
     int i;
     final Path destFolder, dest;

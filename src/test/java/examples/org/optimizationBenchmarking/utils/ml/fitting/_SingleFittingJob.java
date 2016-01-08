@@ -25,7 +25,7 @@ import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 final class _SingleFittingJob implements Callable<SingleFittingOutcome> {
 
   /** the fitting example data set */
-  private final FittingExampleDataset m_example;
+  private final MultiFittingExampleDataset m_example;
 
   /** the fitter to apply */
   private final IFunctionFitter m_fitter;
@@ -54,8 +54,8 @@ final class _SingleFittingJob implements Callable<SingleFittingOutcome> {
    *          the logger
    */
   _SingleFittingJob(final Logger logger,
-      final FittingExampleDataset example, final IFunctionFitter fitter,
-      final int index, final Path root) {
+      final MultiFittingExampleDataset example,
+      final IFunctionFitter fitter, final int index, final Path root) {
     super();
     this.m_example = example;
     this.m_fitter = fitter;

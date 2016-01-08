@@ -10,7 +10,7 @@ import org.optimizationBenchmarking.utils.math.statistics.aggregate.StandardDevi
 public final class FittingOutcome {
 
   /** the example data set */
-  public final FittingExampleDataset example;
+  public final MultiFittingExampleDataset example;
 
   /** the single fitting outcomes */
   public final ArrayListView<SingleFittingOutcome> outcomes;
@@ -48,8 +48,9 @@ public final class FittingOutcome {
    * @param maxParams
    *          the maximum number of parameters
    */
-  FittingOutcome(final FittingExampleDataset _example, final int maxParams,
-      final SingleFittingOutcome[] results, final Path _path) {
+  FittingOutcome(final MultiFittingExampleDataset _example,
+      final int maxParams, final SingleFittingOutcome[] results,
+      final Path _path) {
     super();
 
     int i;

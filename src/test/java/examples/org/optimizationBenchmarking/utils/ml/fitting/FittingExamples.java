@@ -29,7 +29,7 @@ public class FittingExamples {
    */
   @SuppressWarnings("rawtypes")
   public static final void main(final String[] args) throws Exception {
-    final ArrayListView<FittingExampleDataset> data;
+    final ArrayListView<MultiFittingExampleDataset> data;
     final Path dest;
     final Future[] wait;
     final Logger logger;
@@ -37,8 +37,7 @@ public class FittingExamples {
 
     logger = LoggerParser.INSTANCE.parseString("global;ALL");//$NON-NLS-1$
 
-    data = Execute.submitToCommonPool(new FittingExampleDatasets(//
-        logger, true)).get();
+    data = MultiFittingExampleDatasets.EXAMPLES;
 
     dest = PathUtils.createPathInside(PathUtils.getTempDir(), "results"); //$NON-NLS-1$
     i = FittingExamples.FITTERS.size();

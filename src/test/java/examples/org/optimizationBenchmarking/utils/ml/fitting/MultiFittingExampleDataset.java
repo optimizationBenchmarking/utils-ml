@@ -13,8 +13,8 @@ import org.optimizationBenchmarking.utils.math.statistics.aggregate.StableSum;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.ParametricUnaryFunction;
 
 /** An example data set for the fitting of data. */
-public class FittingExampleDataset
-    implements Comparable<FittingExampleDataset> {
+public class MultiFittingExampleDataset
+    implements Comparable<MultiFittingExampleDataset> {
 
   /** the name of the example data set */
   public final String name;
@@ -25,9 +25,6 @@ public class FittingExampleDataset
   /** the model to be fitted */
   public final ArrayListView<ParametricUnaryFunction> models;
 
-  /** the number of sources this data set is composed from */
-  public final int sources;
-
   /**
    * create the fitting example
    *
@@ -37,17 +34,14 @@ public class FittingExampleDataset
    *          the data matrix
    * @param _models
    *          the models to be fitted
-   * @param _sources
-   *          the number of sources this data set is composed from
    */
-  public FittingExampleDataset(final String _name, final IMatrix _data,
-      final ArrayListView<ParametricUnaryFunction> _models,
-      final int _sources) {
+  public MultiFittingExampleDataset(final String _name,
+      final IMatrix _data,
+      final ArrayListView<ParametricUnaryFunction> _models) {
     super();
 
     this.data = _data;
     this.models = _models;
-    this.sources = _sources;
     this.name = _name;
   }
 
@@ -123,7 +117,7 @@ public class FittingExampleDataset
 
   /** {@inheritDoc} */
   @Override
-  public final int compareTo(final FittingExampleDataset o) {
+  public final int compareTo(final MultiFittingExampleDataset o) {
     return ((o == this) ? 0 : (this.name.compareTo(o.name)));
   }
 }

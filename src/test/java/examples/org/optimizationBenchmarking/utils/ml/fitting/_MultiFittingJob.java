@@ -26,7 +26,7 @@ final class _MultiFittingJob implements Callable<FittingOutcome> {
   private static final int NUM_RUNS = 10;
 
   /** the fitting example data set */
-  private final FittingExampleDataset m_example;
+  private final MultiFittingExampleDataset m_example;
 
   /** the fitter to apply */
   private final IFunctionFitter m_fitter;
@@ -49,8 +49,8 @@ final class _MultiFittingJob implements Callable<FittingOutcome> {
    *          the logger
    */
   _MultiFittingJob(final Logger logger,
-      final FittingExampleDataset example, final IFunctionFitter fitter,
-      final Path root) {
+      final MultiFittingExampleDataset example,
+      final IFunctionFitter fitter, final Path root) {
     super();
     this.m_example = example;
     this.m_fitter = fitter;

@@ -1,365 +1,420 @@
 package examples.org.optimizationBenchmarking.utils.ml.fitting;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Random;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import org.optimizationBenchmarking.utils.collections.lists.ArrayListView;
-import org.optimizationBenchmarking.utils.io.paths.PathUtils;
+import org.optimizationBenchmarking.utils.math.matrix.AbstractMatrix;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
-import org.optimizationBenchmarking.utils.math.matrix.impl.DoubleMatrix2D;
-import org.optimizationBenchmarking.utils.parallel.Execute;
+import org.optimizationBenchmarking.utils.math.matrix.impl.MatrixBuilder;
+import org.optimizationBenchmarking.utils.ml.fitting.models.ExponentialDecayModel;
+import org.optimizationBenchmarking.utils.ml.fitting.models.LogisticModelWithOffsetOverLogX;
+import org.optimizationBenchmarking.utils.ml.fitting.models.QuadraticModel;
 import org.optimizationBenchmarking.utils.text.TextUtils;
 
-import shared.junit.TestBase;
+import shared.junit.org.optimizationBenchmarking.utils.ml.fitting.FittingExampleDataset;
 
-/** Some examples for data fitting. */
-public final class FittingExampleDatasets extends TestBase
-    implements Callable<ArrayListView<FittingExampleDataset>> {
+/** The fitting example datasets. */
+public final class FittingExampleDatasets {
 
-  /** the resources */
-  private static final String[] RESOURCES = { //
-      "1FlipHC-uf020-01.txt", //$NON-NLS-1$
-      "mFlipHC-uf100-01.txt", //$NON-NLS-1$
-      "2FlipHCrs-uf250-01.txt", //$NON-NLS-1$
-      "2FlipHC-uf250-01.txt", //$NON-NLS-1$
-      "2FlipHC-uf250-02.txt", //$NON-NLS-1$
-      "2FlipHC-uf250-03.txt", //$NON-NLS-1$
-      "2FlipHC-uf250-04.txt", //$NON-NLS-1$
-      "2FlipHC-uf250-05.txt", //$NON-NLS-1$
-      "2FlipHC-uf250-06.txt", //$NON-NLS-1$
-      "2FlipHC-uf250-07.txt", //$NON-NLS-1$
-      "2FlipHC-uf250-08.txt", //$NON-NLS-1$
-      "2FlipHC-uf250-09.txt", //$NON-NLS-1$
-      "2FlipHC-uf250-10.txt", //$NON-NLS-1$
-  };
+  /** the example: fes/o logistics model */
+  public static final FittingExampleDataset A_1FlipHC_uf020_01_FOL;
+  /** the example: fes/o decay model */
+  public static final FittingExampleDataset A_1FlipHC_uf020_01_FOE;
+  /** the example: t/o logistics model */
+  public static final FittingExampleDataset A_1FlipHC_uf020_01_TOL;
+  /** the example: t/o decay model */
+  public static final FittingExampleDataset A_1FlipHC_uf020_01_TOE;
+  /** the example: t/fes quadratic model */
+  public static final FittingExampleDataset A_1FlipHC_uf020_01_FTQ;
 
-  /** the internal sorter */
-  private final __Sorter m_sorter;
+  /** the example: fes/o logistics model */
+  public static final FittingExampleDataset B_mFlipHC_uf100_01_FOL;
+  /** the example: fes/o decay model */
+  public static final FittingExampleDataset B_mFlipHC_uf100_01_FOE;
+  /** the example: t/o logistics model */
+  public static final FittingExampleDataset B_mFlipHC_uf100_01_TOL;
+  /** the example: t/o decay model */
+  public static final FittingExampleDataset B_mFlipHC_uf100_01_TOE;
+  /** the example: t/fes quadratic model */
+  public static final FittingExampleDataset B_mFlipHC_uf100_01_FTQ;
 
-  /** the logger */
-  final Logger m_logger;
+  /** the example: fes/o logistics model */
+  public static final FittingExampleDataset C_2FlipHCrs_uf250_01_FOL;
+  /** the example: fes/o decay model */
+  public static final FittingExampleDataset C_2FlipHCrs_uf250_01_FOE;
+  /** the example: t/o logistics model */
+  public static final FittingExampleDataset C_2FlipHCrs_uf250_01_TOL;
+  /** the example: t/o decay model */
+  public static final FittingExampleDataset C_2FlipHCrs_uf250_01_TOE;
+  /** the example: t/fes quadratic model */
+  public static final FittingExampleDataset C_2FlipHCrs_uf250_01_FTQ;
 
-  /** allow time-time and objective-objective data sets? */
-  private final boolean m_useSameType;
+  /** the example: fes/o logistics model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_01_FOL;
+  /** the example: fes/o decay model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_01_FOE;
+  /** the example: t/o logistics model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_01_TOL;
+  /** the example: t/o decay model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_01_TOE;
+  /** the example: t/fes quadratic model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_01_FTQ;
 
-  /**
-   * create
-   *
-   * @param logger
-   *          the logger
-   * @param useSameType
-   *          allow time-time and objective-objective data sets?
-   */
-  public FittingExampleDatasets(final Logger logger,
-      final boolean useSameType) {
+  /** the example: fes/o logistics model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_02_FOL;
+  /** the example: fes/o decay model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_02_FOE;
+  /** the example: t/o logistics model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_02_TOL;
+  /** the example: t/o decay model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_02_TOE;
+  /** the example: t/fes quadratic model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_02_FTQ;
+
+  /** the example: fes/o logistics model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_03_FOL;
+  /** the example: fes/o decay model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_03_FOE;
+  /** the example: t/o logistics model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_03_TOL;
+  /** the example: t/o decay model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_03_TOE;
+  /** the example: t/fes quadratic model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_03_FTQ;
+
+  /** the example: fes/o logistics model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_04_FOL;
+  /** the example: fes/o decay model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_04_FOE;
+  /** the example: t/o logistics model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_04_TOL;
+  /** the example: t/o decay model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_04_TOE;
+  /** the example: t/fes quadratic model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_04_FTQ;
+
+  /** the example: fes/o logistics model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_05_FOL;
+  /** the example: fes/o decay model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_05_FOE;
+  /** the example: t/o logistics model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_05_TOL;
+  /** the example: t/o decay model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_05_TOE;
+  /** the example: t/fes quadratic model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_05_FTQ;
+
+  /** the example: fes/o logistics model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_06_FOL;
+  /** the example: fes/o decay model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_06_FOE;
+  /** the example: t/o logistics model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_06_TOL;
+  /** the example: t/o decay model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_06_TOE;
+  /** the example: t/fes quadratic model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_06_FTQ;
+
+  /** the example: fes/o logistics model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_07_FOL;
+  /** the example: fes/o decay model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_07_FOE;
+  /** the example: t/o logistics model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_07_TOL;
+  /** the example: t/o decay model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_07_TOE;
+  /** the example: t/fes quadratic model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_07_FTQ;
+
+  /** the example: fes/o logistics model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_08_FOL;
+  /** the example: fes/o decay model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_08_FOE;
+  /** the example: t/o logistics model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_08_TOL;
+  /** the example: t/o decay model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_08_TOE;
+  /** the example: t/fes quadratic model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_08_FTQ;
+
+  /** the example: fes/o logistics model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_09_FOL;
+  /** the example: fes/o decay model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_09_FOE;
+  /** the example: t/o logistics model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_09_TOL;
+  /** the example: t/o decay model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_09_TOE;
+  /** the example: t/fes quadratic model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_09_FTQ;
+
+  /** the example: fes/o logistics model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_10_FOL;
+  /** the example: fes/o decay model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_10_FOE;
+  /** the example: t/o logistics model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_10_TOL;
+  /** the example: t/o decay model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_10_TOE;
+  /** the example: t/fes quadratic model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_10_FTQ;
+
+  static {
+    FittingExampleDatasets sets;
+
+    sets = new FittingExampleDatasets();
+    sets.__loadMatrix("1FlipHC-uf020-01"); //$NON-NLS-1$
+    A_1FlipHC_uf020_01_FOL = sets.__fol();
+    A_1FlipHC_uf020_01_FOE = sets.__foe();
+    A_1FlipHC_uf020_01_TOL = sets.__tol();
+    A_1FlipHC_uf020_01_TOE = sets.__toe();
+    A_1FlipHC_uf020_01_FTQ = sets.__ftq();
+
+    sets.__loadMatrix("mFlipHC-uf100-01"); //$NON-NLS-1$
+    B_mFlipHC_uf100_01_FOL = sets.__fol();
+    B_mFlipHC_uf100_01_FOE = sets.__foe();
+    B_mFlipHC_uf100_01_TOL = sets.__tol();
+    B_mFlipHC_uf100_01_TOE = sets.__toe();
+    B_mFlipHC_uf100_01_FTQ = sets.__ftq();
+
+    sets.__loadMatrix("2FlipHCrs-uf250-01"); //$NON-NLS-1$
+    C_2FlipHCrs_uf250_01_FOL = sets.__fol();
+    C_2FlipHCrs_uf250_01_FOE = sets.__foe();
+    C_2FlipHCrs_uf250_01_TOL = sets.__tol();
+    C_2FlipHCrs_uf250_01_TOE = sets.__toe();
+    C_2FlipHCrs_uf250_01_FTQ = sets.__ftq();
+
+    sets.__loadMatrix("2FlipHC-uf250-01"); //$NON-NLS-1$
+    D_2FlipHC_uf250_01_FOL = sets.__fol();
+    D_2FlipHC_uf250_01_FOE = sets.__foe();
+    D_2FlipHC_uf250_01_TOL = sets.__tol();
+    D_2FlipHC_uf250_01_TOE = sets.__toe();
+    D_2FlipHC_uf250_01_FTQ = sets.__ftq();
+
+    sets.__loadMatrix("2FlipHC-uf250-02"); //$NON-NLS-1$
+    D_2FlipHC_uf250_02_FOL = sets.__fol();
+    D_2FlipHC_uf250_02_FOE = sets.__foe();
+    D_2FlipHC_uf250_02_TOL = sets.__tol();
+    D_2FlipHC_uf250_02_TOE = sets.__toe();
+    D_2FlipHC_uf250_02_FTQ = sets.__ftq();
+
+    sets.__loadMatrix("2FlipHC-uf250-03"); //$NON-NLS-1$
+    D_2FlipHC_uf250_03_FOL = sets.__fol();
+    D_2FlipHC_uf250_03_FOE = sets.__foe();
+    D_2FlipHC_uf250_03_TOL = sets.__tol();
+    D_2FlipHC_uf250_03_TOE = sets.__toe();
+    D_2FlipHC_uf250_03_FTQ = sets.__ftq();
+
+    sets.__loadMatrix("2FlipHC-uf250-04"); //$NON-NLS-1$
+    D_2FlipHC_uf250_04_FOL = sets.__fol();
+    D_2FlipHC_uf250_04_FOE = sets.__foe();
+    D_2FlipHC_uf250_04_TOL = sets.__tol();
+    D_2FlipHC_uf250_04_TOE = sets.__toe();
+    D_2FlipHC_uf250_04_FTQ = sets.__ftq();
+
+    sets.__loadMatrix("2FlipHC-uf250-05"); //$NON-NLS-1$
+    D_2FlipHC_uf250_05_FOL = sets.__fol();
+    D_2FlipHC_uf250_05_FOE = sets.__foe();
+    D_2FlipHC_uf250_05_TOL = sets.__tol();
+    D_2FlipHC_uf250_05_TOE = sets.__toe();
+    D_2FlipHC_uf250_05_FTQ = sets.__ftq();
+
+    sets.__loadMatrix("2FlipHC-uf250-06"); //$NON-NLS-1$
+    D_2FlipHC_uf250_06_FOL = sets.__fol();
+    D_2FlipHC_uf250_06_FOE = sets.__foe();
+    D_2FlipHC_uf250_06_TOL = sets.__tol();
+    D_2FlipHC_uf250_06_TOE = sets.__toe();
+    D_2FlipHC_uf250_06_FTQ = sets.__ftq();
+
+    sets.__loadMatrix("2FlipHC-uf250-07"); //$NON-NLS-1$
+    D_2FlipHC_uf250_07_FOL = sets.__fol();
+    D_2FlipHC_uf250_07_FOE = sets.__foe();
+    D_2FlipHC_uf250_07_TOL = sets.__tol();
+    D_2FlipHC_uf250_07_TOE = sets.__toe();
+    D_2FlipHC_uf250_07_FTQ = sets.__ftq();
+
+    sets.__loadMatrix("2FlipHC-uf250-08"); //$NON-NLS-1$
+    D_2FlipHC_uf250_08_FOL = sets.__fol();
+    D_2FlipHC_uf250_08_FOE = sets.__foe();
+    D_2FlipHC_uf250_08_TOL = sets.__tol();
+    D_2FlipHC_uf250_08_TOE = sets.__toe();
+    D_2FlipHC_uf250_08_FTQ = sets.__ftq();
+
+    sets.__loadMatrix("2FlipHC-uf250-09"); //$NON-NLS-1$
+    D_2FlipHC_uf250_09_FOL = sets.__fol();
+    D_2FlipHC_uf250_09_FOE = sets.__foe();
+    D_2FlipHC_uf250_09_TOL = sets.__tol();
+    D_2FlipHC_uf250_09_TOE = sets.__toe();
+    D_2FlipHC_uf250_09_FTQ = sets.__ftq();
+
+    sets.__loadMatrix("2FlipHC-uf250-10"); //$NON-NLS-1$
+    D_2FlipHC_uf250_10_FOL = sets.__fol();
+    D_2FlipHC_uf250_10_FOE = sets.__foe();
+    D_2FlipHC_uf250_10_TOL = sets.__tol();
+    D_2FlipHC_uf250_10_TOE = sets.__toe();
+    D_2FlipHC_uf250_10_FTQ = sets.__ftq();
+  }
+
+  /** the time-objective model 1 */
+  private final LogisticModelWithOffsetOverLogX m_modelLogistic;
+  /** the time-objective model 2 */
+  private final ExponentialDecayModel m_modelDecay;
+  /** the time-time model 2 */
+  private final QuadraticModel m_modelQuadratic;
+
+  /** the name */
+  private String m_name;
+
+  /** the current matrix. */
+  private AbstractMatrix m_matrix;
+
+  /** the f-o matrix */
+  private IMatrix m_fo;
+  /** the t-o matrix */
+  private IMatrix m_to;
+  /** the f-t matrix */
+  private IMatrix m_ft;
+
+  /** the forbidden constructor */
+  private FittingExampleDatasets() {
     super();
-
-    this.m_sorter = new __Sorter();
-    this.m_logger = logger;
-    this.m_useSameType = useSameType;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public final ArrayListView<FittingExampleDataset> call()
-      throws IOException {
-    final ArrayListView<FittingExampleDataset> result;
-    final ArrayList<Future<Void>> jobs;
-    ArrayList<FittingExampleDataset> list;
-    FittingExampleDataset[] sets;
-
-    if ((this.m_logger != null)
-        && (this.m_logger.isLoggable(Level.FINE))) {
-      this.m_logger.fine("Begin loading example datasets."); //$NON-NLS-1$
-    }
-
-    list = new ArrayList<>();
-    jobs = new ArrayList<>();
-
-    for (final String resource : FittingExampleDatasets.RESOURCES) {
-      jobs.add(Execute.parallel(new __AppendResource(resource, list)));
-    }
-
-    Execute.join(jobs);
-
-    sets = list.toArray(new FittingExampleDataset[list.size()]);
-    Arrays.sort(sets);
-    result = new ArrayListView<>(sets);
-
-    list.clear();
-    list = null;
-
-    if ((this.m_logger != null)
-        && (this.m_logger.isLoggable(Level.FINE))) {
-      this.m_logger.fine("Finished loading example datasets."); //$NON-NLS-1$
-    }
-
-    return result;
+    this.m_modelLogistic = new LogisticModelWithOffsetOverLogX();
+    this.m_modelDecay = new ExponentialDecayModel();
+    this.m_modelQuadratic = new QuadraticModel();
   }
 
   /**
-   * append a given resource
+   * the f-o matrix
+   *
+   * @return the matrix
+   */
+  private final IMatrix __fo() {
+    if (this.m_fo == null) {
+      this.m_fo = this.m_matrix.selectColumns(0, 2).copy();
+    }
+    return this.m_fo;
+  }
+
+  /**
+   * the t-o matrix
+   *
+   * @return the matrix
+   */
+  private final IMatrix __to() {
+    if (this.m_to == null) {
+      this.m_to = this.m_matrix.selectColumns(1, 2).copy();
+    }
+    return this.m_to;
+  }
+
+  /**
+   * the f-t matrix
+   *
+   * @return the matrix
+   */
+  private final IMatrix __ft() {
+    if (this.m_ft == null) {
+      this.m_ft = this.m_matrix.selectColumns(0, 1).copy();
+    }
+    return this.m_ft;
+  }
+
+  /**
+   * create the logistic model example
+   *
+   * @return the example
+   */
+  private final FittingExampleDataset __fol() {
+    return new FittingExampleDataset(this.m_name + "_fol", //$NON-NLS-1$
+        this.__fo(), this.m_modelLogistic);
+  }
+
+  /**
+   * create the exponential decay example
+   *
+   * @return the example
+   */
+  private final FittingExampleDataset __foe() {
+    return new FittingExampleDataset(this.m_name + "_foe", //$NON-NLS-1$
+        this.__fo(), this.m_modelDecay);
+  }
+
+  /**
+   * create the logistic model example
+   *
+   * @return the example
+   */
+  private final FittingExampleDataset __tol() {
+    return new FittingExampleDataset(this.m_name + "_tol", //$NON-NLS-1$
+        this.__to(), this.m_modelLogistic);
+  }
+
+  /**
+   * create the exponential decay example
+   *
+   * @return the example
+   */
+  private final FittingExampleDataset __toe() {
+    return new FittingExampleDataset(this.m_name + "_toe", //$NON-NLS-1$
+        this.__to(), this.m_modelDecay);
+  }
+
+  /**
+   * create the quadractic
+   *
+   * @return the example
+   */
+  private final FittingExampleDataset __ftq() {
+    return new FittingExampleDataset(this.m_name + "_ftq", //$NON-NLS-1$
+        this.__ft(), this.m_modelQuadratic);
+  }
+
+  /**
+   * load a data matrix example
    *
    * @param resource
    *          the resource
-   * @param list
-   *          the list
-   * @throws IOException
-   *           if i/o fails
    */
-  final void _appendResource(final String resource,
-      final ArrayList<FittingExampleDataset> list) throws IOException {
-    final ArrayList<IMatrix> loaded;
-    final ArrayList<double[]> current;
-    int i, j, size;
+  private final void __loadMatrix(final String resource) {
+    final MatrixBuilder builder;
+    int i, j;
     String str;
-    double[] data;
 
-    loaded = new ArrayList<>();
-    current = new ArrayList<>();
-    try (InputStream is = this.getClass().getResourceAsStream(resource)) {
+    this.m_matrix = null;
+    this.m_fo = null;
+    this.m_ft = null;
+    this.m_to = null;
+    this.m_name = resource;
+
+    builder = new MatrixBuilder();
+    builder.setN(3);
+
+    try (InputStream is = this.getClass()
+        .getResourceAsStream(resource + ".txt")) { //$NON-NLS-1$
       try (InputStreamReader isr = new InputStreamReader(is)) {
         try (BufferedReader br = new BufferedReader(isr)) {
           while ((str = br.readLine()) != null) {
             if ((str = TextUtils.prepare(str)) == null) {
-              size = current.size();
-              if (size > 0) {
-                loaded.add(new DoubleMatrix2D(
-                    current.toArray(new double[size][])));
-              }
-              current.clear();
               continue;
             }
-            data = new double[3];
 
             i = str.indexOf('\t');
-            data[0] = Double.parseDouble(str.substring(0, i));
+
+            builder.append(Double.parseDouble(str.substring(0, i)));
 
             i++;
             j = str.indexOf('\t', i);
-            data[1] = Double.parseDouble(str.substring(i, j));
+            builder.append(Double.parseDouble(str.substring(i, j)));
 
-            data[2] = Double.parseDouble(str.substring(j + 1));
-            current.add(data);
+            builder.append(Double.parseDouble(str.substring(j + 1)));
           }
         }
       }
+    } catch (final Throwable error) {
+      throw new RuntimeException(error);
     }
 
-    size = current.size();
-    if (size > 0) {
-      loaded.add(new DoubleMatrix2D(current.toArray(new double[size][])));
-    }
-
-    if (loaded.size() > 0) {
-      this.__postprocess(
-          ("maxSat_" + //$NON-NLS-1$
-              PathUtils.getFileNameWithoutExtension(resource)), //
-          loaded, list, new int[] { -1, -1, 1 });
-    }
-  }
-
-  /**
-   * Post-process the loaded data
-   *
-   * @param name
-   *          the name of the example data set
-   * @param loaded
-   *          the data
-   * @param list
-   *          the list to append to
-   * @param dimTypes
-   *          the description of the dimensions: {@code -1} for time
-   *          dimensions, {@code 1} for objective dimensions, {@code 0} for
-   *          skip
-   */
-  private final void __postprocess(final String name,
-      final Collection<? extends IMatrix> loaded,
-      final ArrayList<FittingExampleDataset> list, final int[] dimTypes) {
-    FittingExampleDataset ds;
-    int dimA, dimB, useDimA, useDimB, total, index, size, row;
-    double[][] rawPoints;
-    String useName;
-
-    total = 0;
-    for (final IMatrix current : loaded) {
-      total += current.m();
-    }
-
-    for (dimA = 0; dimA < dimTypes.length; dimA++) {
-      if (dimTypes[dimA] == 0) {
-        continue;
-      }
-      for (dimB = (dimA + 1); dimB < dimTypes.length; dimB++) {
-        if (dimTypes[dimB] == 0) {
-          continue;
-        }
-
-        if ((!this.m_useSameType) && (dimTypes[dimA] == dimTypes[dimB])) {
-          continue;
-        }
-
-        if ((dimTypes[dimA] > 0) && (dimTypes[dimB] < 0)) {
-          useDimA = dimB;
-          useDimB = dimA;
-        } else {
-          useDimA = dimA;
-          useDimB = dimB;
-        }
-
-        rawPoints = new double[total][2];
-
-        index = 0;
-        for (final IMatrix run : loaded) {
-          size = run.m();
-          for (row = 0; row < size; row++) {
-            rawPoints[index][0] = run.getDouble(row, useDimA);
-            rawPoints[index][1] = run.getDouble(row, useDimB);
-            index++;
-          }
-        }
-
-        Arrays.sort(rawPoints, this.m_sorter);
-
-        useName = name;
-        if (dimTypes.length > 2) {
-          useName = ((((((useName + '_')
-              + ((dimTypes[useDimA] < 0) ? 't' : 'f')) + useDimA)//
-              + '_') + ((dimTypes[useDimB] < 0) ? 't' : 'f')) + useDimB);
-        }
-
-        ds = new FittingExampleDataset(useName, //
-            new DoubleMatrix2D(rawPoints), //
-            DimensionRelationshipModels.getModels((dimTypes[useDimA] < 0),
-                (dimTypes[useDimB] < 0)),
-            loaded.size());
-        synchronized (list) {
-          list.add(ds);
-        }
-      }
-    }
-  }
-
-  /**
-   * The main method
-   *
-   * @param args
-   *          the arguments
-   * @throws IOException
-   *           if i/o fails
-   */
-  public static final void main(final String[] args) throws IOException {
-    final ArrayListView<FittingExampleDataset> data;
-    final Path root;
-    final Random rand;
-    Path dest;
-    double[] randFitting;
-    int index;
-
-    data = new FittingExampleDatasets(null, true).call();
-    root = PathUtils.getTempDir();
-    rand = new Random();
-    index = 0;
-
-    for (final FittingExampleDataset ds : data) {
-
-      System.out.print(++index);
-      System.out.print('\t');
-      System.out.println(ds);
-
-      randFitting = new double[ds.models.get(0).getParameterCount()];
-      ds.models.get(0).createParameterGuesser(ds.data)
-          .createRandomGuess(randFitting, rand);
-
-      dest = PathUtils.createPathInside(root,
-          (Integer.toString(index) + ".txt")); //$NON-NLS-1$
-      ds.plot(dest, ds.models.get(0), randFitting, 0d);
-    }
-  }
-
-  /** The internal sorter class */
-  private static final class __Sorter implements Comparator<double[]> {
-
-    /** create */
-    __Sorter() {
-      super();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public final int compare(final double[] o1, final double[] o2) {
-      int idx, cr;
-      if (o1 == o2) {
-        return 0;
-      }
-
-      idx = 0;
-      for (final double d : o1) {
-        cr = Double.compare(d, o2[idx++]);
-        if (cr != 0) {
-          return cr;
-        }
-      }
-
-      return 0;
-    }
-
-  }
-
-  /** the internal append resource job */
-  private final class __AppendResource implements Callable<Void> {
-
-    /** the resource */
-    private final String m_resource;
-
-    /** the list */
-    private final ArrayList<FittingExampleDataset> m_list;
-
-    /**
-     * create the job
-     *
-     * @param resource
-     *          the resource
-     * @param list
-     *          the list
-     */
-    __AppendResource(final String resource,
-        final ArrayList<FittingExampleDataset> list) {
-      super();
-      this.m_list = list;
-      this.m_resource = resource;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public final Void call() throws Exception {
-      if ((FittingExampleDatasets.this.m_logger != null)
-          && (FittingExampleDatasets.this.m_logger
-              .isLoggable(Level.FINER))) {
-        FittingExampleDatasets.this.m_logger
-            .finer("Now beginning to load resource " + this.m_resource); //$NON-NLS-1$
-      }
-      FittingExampleDatasets.this._appendResource(this.m_resource,
-          this.m_list);
-      if ((FittingExampleDatasets.this.m_logger != null)
-          && (FittingExampleDatasets.this.m_logger
-              .isLoggable(Level.FINER))) {
-        FittingExampleDatasets.this.m_logger
-            .finer("Finished loading resource " + this.m_resource); //$NON-NLS-1$
-      }
-      return null;
-    }
+    this.m_matrix = builder.make();
   }
 }
