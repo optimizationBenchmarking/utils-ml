@@ -3,8 +3,6 @@
 ##
 ## https://travis-ci.org/optimizationBenchmarking/utils-ml
 #
-# The basic utility classes of the optimizationBenchmarking.org tool chain
-# are a Java 7.0 Project.
 language: java
 
 # By default, it runs under Java 7
