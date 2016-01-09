@@ -58,14 +58,14 @@
 	</licenses>
 
 	<issueManagement>
-		<url>https://github.com/optimizationBenchmarking/utils-math/issues</url>
+		<url>https://github.com/optimizationBenchmarking/utils-ml/issues</url>
 		<system>GitHub</system>
 	</issueManagement>
 
 	<scm>
-		<connection>scm:git:git@github.com:optimizationBenchmarking/utils-math.git</connection>
-		<developerConnection>scm:git:git@github.com:optimizationBenchmarking/utils-math.git</developerConnection>
-		<url>git@github.com:optimizationBenchmarking/utils-math.git</url>
+		<connection>scm:git:git@github.com:optimizationBenchmarking/utils-ml.git</connection>
+		<developerConnection>scm:git:git@github.com:optimizationBenchmarking/utils-ml.git</developerConnection>
+		<url>git@github.com:optimizationBenchmarking/utils-ml.git</url>
 	</scm>
 
 	<inceptionYear>2014</inceptionYear>
