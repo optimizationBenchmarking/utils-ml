@@ -36,7 +36,8 @@ public final class MeasureBasedDistanceMatrixBuilder
   /** {@inheritDoc} */
   @Override
   protected final EPrimitiveType getDistanceType() {
-    return EPrimitiveType.DOUBLE;
+    return (this.m_measure.isInteger() ? EPrimitiveType.INT
+        : EPrimitiveType.DOUBLE);
   }
 
   /** {@inheritDoc} */

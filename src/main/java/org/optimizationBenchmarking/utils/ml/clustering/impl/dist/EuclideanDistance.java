@@ -32,4 +32,10 @@ public final class EuclideanDistance implements IDistanceMeasure {
     }
     return Math.sqrt(sum.doubleValue());
   }
+
+  /** {@inheritDoc} */
+  @Override
+  public final boolean isInteger() {
+    return false;
+  }
 }
