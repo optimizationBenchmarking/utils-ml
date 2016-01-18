@@ -25,6 +25,12 @@ public final class MultiFunctionFitter extends Tool {
     return "Multi-Function Fitter"; //$NON-NLS-1$
   }
 
+  /** {@inheritDoc} */
+  @Override
+  public boolean canUse() {
+    return true;
+  }
+
   /**
    * create the job
    *
