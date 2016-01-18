@@ -12,6 +12,11 @@
 # output: "clusters": the assignment of instances to clusters 
 #         "quality" : the quality measure
 #
+m<-dim(data)[1];#
+if((m <= 2) && (nCluster<=0)) {
+	clusters <- 1:m;
+	quality  <- 0;
+} else {#
 #
 ##
 ## Step 1: Reduce number of features via Principal Component Analysis
@@ -47,7 +52,7 @@ if(nCluster > 0) {
 #
 ## Having more than ten clusters makes no sense, as understanding
 ## the data will become very hard.
-maxClusters <- max(1, min(12, dim(data)[1]));
+maxClusters <- max(1, min(12, m));
 cluster.n   <- integer(0);
 #
 # Determine the ideal number of clusters with the pamk function of the
@@ -173,3 +178,4 @@ rm(hierarchicalClustering);
 clusters <- bestClustering$clustering;
 quality  <- 1-bestClustering$silhouette;
 rm(bestClustering);
+}

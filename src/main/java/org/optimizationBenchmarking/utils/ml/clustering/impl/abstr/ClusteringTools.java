@@ -198,7 +198,9 @@ public final class ClusteringTools {
           0d);
     }
 
-    if ((m == 1) || ((numClasses >= 0) && (numClasses <= 1))) {
+    if ((m == 1) || //
+        ((numClasses >= 0) && (numClasses <= 1)) || //
+        ((numClasses <= 0) && (m <= 2))) {
       return new _DirectResult(new int[m], 0d);
     }
 

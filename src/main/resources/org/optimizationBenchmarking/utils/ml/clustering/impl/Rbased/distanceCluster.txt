@@ -10,9 +10,14 @@
 # output: "clusters": the assignment of instances to clusters 
 #         "quality" : the quality measure
 #
+if((m <= 2) && (nCluster<=0)) {
+	clusters <- 1:m;
+	quality  <- 0;
+} else {#
 ##
 ## 1. Building Distance Matrix
 ##
+#
 dimDist<-dim(distance);#
 #
 if((m != 1) && ((dimDist[1]==1) || (dimDist[2]==1))) {
@@ -83,3 +88,4 @@ rcommExec( {#
 ## 3. Return Results
 quality <- (1 - quality);#
 #
+}
