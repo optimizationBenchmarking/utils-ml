@@ -7,7 +7,10 @@ import org.optimizationBenchmarking.utils.error.ErrorUtils;
 import org.optimizationBenchmarking.utils.ml.clustering.impl.Rbased.RBasedDataClusterer;
 import org.optimizationBenchmarking.utils.ml.clustering.impl.Rbased.RBasedDistanceClusterer;
 import org.optimizationBenchmarking.utils.ml.clustering.spec.IDataClusterer;
+import org.optimizationBenchmarking.utils.ml.clustering.spec.IDataClusteringJobBuilder;
 import org.optimizationBenchmarking.utils.ml.clustering.spec.IDistanceClusterer;
+import org.optimizationBenchmarking.utils.ml.clustering.spec.IDistanceClusteringJobBuilder;
+import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
 /** The default clusterers. */
 public final class DefaultClusterer {
@@ -17,23 +20,13 @@ public final class DefaultClusterer {
     ErrorUtils.doNotCall();
   }
 
-  /** No useable data clusterer was found. */
-  private static final void __noDataInstance() {
-    throw new IllegalStateException("No useable data clusterer detected."); //$NON-NLS-1$
-  }
-
   /**
    * Get the default data clusterer
    *
    * @return the default data clusterer
    */
   public static final IDataClusterer getDataInstance() {
-    final IDataClusterer inst;
-    inst = __DefaultDataClusterer.INSTANCE;
-    if (inst == null) {
-      DefaultClusterer.__noDataInstance();
-    }
-    return inst;
+    return __DefaultDataClusterer.INSTANCE;
   }
 
   /**
@@ -42,18 +35,7 @@ public final class DefaultClusterer {
    * @return all available data clusterers
    */
   public static final ArrayListView<IDataClusterer> getAllDataInstances() {
-    final ArrayListView<IDataClusterer> insts;
-    insts = __AllDataClusterers.INSTANCES;
-    if (insts == null) {
-      DefaultClusterer.__noDataInstance();
-    }
-    return insts;
-  }
-
-  /** No useable distance clusterer was found. */
-  private static final void __noDistanceInstance() {
-    throw new IllegalStateException(
-        "No useable distance clusterer detected."); //$NON-NLS-1$
+    return __AllDataClusterers.INSTANCES;
   }
 
   /**
@@ -62,12 +44,7 @@ public final class DefaultClusterer {
    * @return the default distance clusterer
    */
   public static final IDistanceClusterer getDistanceInstance() {
-    final IDistanceClusterer inst;
-    inst = __DefaultDistanceClusterer.INSTANCE;
-    if (inst == null) {
-      DefaultClusterer.__noDistanceInstance();
-    }
-    return inst;
+    return __DefaultDistanceClusterer.INSTANCE;
   }
 
   /**
@@ -76,16 +53,12 @@ public final class DefaultClusterer {
    * @return all available distance clusterers
    */
   public static final ArrayListView<IDistanceClusterer> getAllDistanceInstances() {
-    final ArrayListView<IDistanceClusterer> insts;
-    insts = __AllDistanceClusterers.INSTANCES;
-    if (insts == null) {
-      DefaultClusterer.__noDistanceInstance();
-    }
-    return insts;
+    return __AllDistanceClusterers.INSTANCES;
   }
 
   /** the default data clusterer */
-  private static final class __DefaultDataClusterer {
+  private static final class __DefaultDataClusterer
+      implements IDataClusterer {
     /** the instance */
     static final IDataClusterer INSTANCE;
 
@@ -99,9 +72,53 @@ public final class DefaultClusterer {
         if (inst.canUse()) {
           INSTANCE = inst;
         } else {
-          INSTANCE = null;
+          INSTANCE = new __DefaultDataClusterer();
         }
       }
+    }
+
+    /** create */
+    private __DefaultDataClusterer() {
+      super();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public final boolean canUse() {
+      return false;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public final void checkCanUse() {
+      throw __DefaultDataClusterer.__noDataInstance();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public final String toString() {
+      return "Unusable Data Clusterer"; //$NON-NLS-1$
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public final void toText(final ITextOutput textOut) {
+      textOut.append(this.toString());
+    }
+
+    @Override
+    public IDataClusteringJobBuilder use() {
+      throw __DefaultDataClusterer.__noDataInstance();
+    }
+
+    /**
+     * No useable data clusterer was found.
+     *
+     * @return the exception
+     */
+    private static final IllegalStateException __noDataInstance() {
+      throw new IllegalStateException(
+          "No useable data clusterer detected."); //$NON-NLS-1$
     }
   }
 
@@ -115,7 +132,9 @@ public final class DefaultClusterer {
       IDataClusterer inst;
 
       inst = __DefaultDataClusterer.INSTANCE;
-      if (inst != null) {
+      if (inst instanceof __DefaultDataClusterer) {
+        INSTANCES = new ArrayListView<>(new IDataClusterer[] { inst });
+      } else {
         insts = new LinkedHashSet<>();
         insts.add(inst);
         inst = RBasedDistanceClusterer.getInstance();
@@ -127,14 +146,13 @@ public final class DefaultClusterer {
           insts.add(inst);
         }
         INSTANCES = ArrayListView.collectionToView(insts);
-      } else {
-        INSTANCES = null;
       }
     }
   }
 
   /** the default distance clusterer */
-  private static final class __DefaultDistanceClusterer {
+  private static final class __DefaultDistanceClusterer
+      implements IDistanceClusterer {
     /** the instance */
     static final IDistanceClusterer INSTANCE;
 
@@ -144,8 +162,52 @@ public final class DefaultClusterer {
       if (inst.canUse()) {
         INSTANCE = inst;
       } else {
-        INSTANCE = null;
+        INSTANCE = new __DefaultDistanceClusterer();
       }
+    }
+
+    /** create */
+    private __DefaultDistanceClusterer() {
+      super();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public final boolean canUse() {
+      return false;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public final void checkCanUse() {
+      throw __DefaultDistanceClusterer.__noDistanceInstance();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public final String toString() {
+      return "Unusable Distance Clusterer"; //$NON-NLS-1$
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public final void toText(final ITextOutput textOut) {
+      textOut.append(this.toString());
+    }
+
+    @Override
+    public IDistanceClusteringJobBuilder use() {
+      throw __DefaultDistanceClusterer.__noDistanceInstance();
+    }
+
+    /**
+     * No useable distance clusterer was found.
+     *
+     * @return the exception
+     */
+    private static final IllegalStateException __noDistanceInstance() {
+      throw new IllegalStateException(
+          "No useable distance clusterer detected."); //$NON-NLS-1$
     }
   }
 
@@ -159,7 +221,9 @@ public final class DefaultClusterer {
       IDistanceClusterer inst;
 
       inst = __DefaultDistanceClusterer.INSTANCE;
-      if (inst != null) {
+      if (inst instanceof __DefaultDistanceClusterer) {
+        INSTANCES = new ArrayListView<>(new IDistanceClusterer[] { inst });
+      } else {
         insts = new LinkedHashSet<>();
         insts.add(inst);
         inst = RBasedDistanceClusterer.getInstance();
@@ -167,10 +231,7 @@ public final class DefaultClusterer {
           insts.add(inst);
         }
         INSTANCES = ArrayListView.collectionToView(insts);
-      } else {
-        INSTANCES = null;
       }
     }
   }
-
 }
