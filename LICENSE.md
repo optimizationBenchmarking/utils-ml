@@ -1,4 +1,4 @@
-# License of the Optimization Benchmarking Project
+# License of the Optimization Benchmarking Library `utils-ml`
 
 The `utils-ml` library (from now on referred to as *the library*) of the *Optimization Benchmarking Project* is licensed under the [GNU General Public License Version 3](http://www.gnu.org/meta/licenses/gpl-3.0-standalone.html), 29 June 2007. This license applies to all of the software and all other parts of *the library*, except for the exceptions listed under point "Exceptions" below.
 
