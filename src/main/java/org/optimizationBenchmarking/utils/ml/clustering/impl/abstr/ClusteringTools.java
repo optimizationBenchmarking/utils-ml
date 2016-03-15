@@ -242,11 +242,13 @@ public final class ClusteringTools {
     for (i = alloc.length; (--i) >= 0;) {
       alloc[i] = new __TempCluster();
     }
+    i = 0;
     for (final int a : clusters) {
       cur = alloc[a - min];
       ++cur.m_size;
-      if (a < cur.m_minMember) {
-        cur.m_minMember = a;
+      ++i;
+      if (i < cur.m_minMember) {
+        cur.m_minMember = i;
       }
     }
 

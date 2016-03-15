@@ -10,82 +10,88 @@
 # output: "clusters": the assignment of instances to clusters 
 #         "quality" : the quality measure
 #
-if((m <= 2) && (nCluster<=0)) {
-	clusters <- 1:m;
-	quality  <- 0;
-} else {#
-##
-## 1. Building Distance Matrix
-##
+if( (m > 2) && (nCluster < m) ) {
 #
-dimDist<-dim(distance);#
+# 1. Building Distance Matrix
+dimDist<-dim(distance);
 #
 if((m != 1) && ((dimDist[1]==1) || (dimDist[2]==1))) {
   # Only a distance vector was supplied.
   # We transform it first to a full distance matrix, then
   # to a `dist` object.
-  distanceMatrix <- matrix(NA, ncol=m, nrow=m);#
-  distanceMatrix[lower.tri(distanceMatrix)] <- distance;#
-  distance <- as.dist(distanceMatrix);#
-  rm(distanceMatrix);#
-} else {#
+  distanceMatrix <- matrix(NA, ncol=m, nrow=m);
+  distanceMatrix[lower.tri(distanceMatrix)] <- distance;
+  distance <- as.dist(distanceMatrix);
+  rm(distanceMatrix);
+} else {
   # A full distance matrix was supplied, transform to `dist`
   # object directly.
-  distance <- as.dist(distance);#
-}#
-##
+  distance <- as.dist(distance);
+}# / distance matrix building
+#
 ## 2. Clustering Step
-## 2.1. Use Partitioning Around Medoids
-## 
-rcommUsePackage("fpc");#
-#
+## 2.1. set up range of validclusters
 if(nCluster > 0) {#
-  # The number of clusters has been supplied, directly use it.
-  rcommUsePackage("cluster");#
-  pamResult    <- pam(x=distance, k=nCluster, diss=TRUE);#
   clusterRange <- nCluster:nCluster;
-} else {#
-  # No cluster number has been supplied. Try to find the best one.
+} else {
   clusterRange <- 2:(min(m-1, 12));
-  pamResult    <- pamk(data=distance, krange=clusterRange, diss=TRUE)$pamobject;#
-}#
+}
 #
-clusters <- pamResult$clustering;#
-quality  <- pamResult$silinfo$avg.width;#
+## 2.2. Use Partitioning Around Medoids
+if(nCluster > 0) {#
+  if(safeUsePackage("cluster")) {
+    safeExec(pamResult<-pam(x=distance, k=nCluster, diss=TRUE));
+  }
+} else {
+  if(safeUsePackage("fpc")) {
+    safeExec(pamResult<-pamk(data=distance, krange=clusterRange, diss=TRUE)$pamobject);  
+  }
+}
+if(exists("pamResult")) {
+  clusters<-as.vector(pamResult$clustering);#
+  quality <-as.double(pamResult$silinfo$avg.width);#
+}
 #
-##
-## 2.2. Use Hierarchical Clustering
-##
-rcommUsePackage("stats");#
-#
-rcommExec( {#
-hclustList <- list(#
-  hclust(distances, method="centroid"),#
-  hclust(distances, method="ward.D"),#
-  hclust(distances, method="ward.D2"),#
-  hclust(distances, method="single"),#
-  hclust(distances, method="complete"),#
-  hclust(distances, method="average"),#
-  hclust(distances, method="mcquitty"),#
-  hclust(distances, method="median"));#
-#
-  for(i in clusterRange) {#
-    for(hres in hclustList) {#
-      hclustering <- as.vector(cutree(hres, k=i));#
-      hquality    <- cluster.stats(d=distances, clustering=hclustering)$avg.silwidth;#
-      if(hquality > quality) {#
-        quality   <- hquality;#
-        clusters  <- hclustering;#
+## 2.3. Use Hierarchical Clustering
+if(safeUsePackage("stats")) {
+  safeExec({#
+    hclustList <- list(#
+      hclust(distances, method="centroid"),#
+      hclust(distances, method="ward.D"),#
+      hclust(distances, method="ward.D2"),#
+      hclust(distances, method="single"),#
+      hclust(distances, method="complete"),#
+      hclust(distances, method="average"),#
+      hclust(distances, method="mcquitty"),#
+      hclust(distances, method="median"));#
+    #
+      for(i in clusterRange) {#
+        for(hres in hclustList) {#
+          hclustering <- as.vector(cutree(hres, k=i));#
+          hquality    <- as.double(cluster.stats(d=distances, clustering=hclustering)$avg.silwidth);#
+          if((!(exists("clusters"))) ||
+             (!(exists("quality")))  || (hquality > quality)) {#
+            quality   <- hquality;#
+            clusters  <- hclustering;#
+          }#
+        }#
       }#
-    }#
-  }#
-});#
+    });
 #
-rcommExec( {#
- rm(hclustList);#
- rm(hres); })#
+  safeExec( { rm(hclustering); rm(hquality); } )
+}
 #
-## 3. Return Results
-quality <- (1 - quality);#
+}# / clusterable data
 #
+# fallback
+if( (!(exists("clusters"))) || (!(exists("quality"))) ||
+    (!(is.vector(clusters))) || (!(is.double(quality)))) {
+  if((nCluster > 0) && (nCluster < m)) {
+    clusters <- c(rep(1, m-nCluster), 1:nCluster);
+  } else {
+    clusters <- 1:m;
+  }
+  quality  <- as.double(1);
+} else {
+  quality  <- (1.0-quality);
 }
