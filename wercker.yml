@@ -5,8 +5,7 @@
 #
 box: optimizationbenchmarking/linux-evaluator-build
 #
-no-response-timeout: 30
-command-timeout: 30
+no-response-timeout: 10
 #
 build:
     steps:
