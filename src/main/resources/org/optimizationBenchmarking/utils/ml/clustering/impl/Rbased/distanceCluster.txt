@@ -10,6 +10,7 @@
 # output: "clusters": the assignment of instances to clusters 
 #         "quality" : the quality measure
 #
+safeExec({#
 if( (m > 2) && (nCluster < m) ) {
 #
 # 1. Building Distance Matrix
@@ -83,6 +84,7 @@ if(safeUsePackage("stats")) {
 #
 }# / clusterable data
 #
+})# / safe exec wrapper
 # fallback
 if( (!(exists("clusters"))) || (!(exists("quality"))) ||
     (!(is.vector(clusters))) || (!(is.double(quality)))) {
