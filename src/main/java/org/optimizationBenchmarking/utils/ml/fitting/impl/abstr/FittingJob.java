@@ -1,11 +1,15 @@
 package org.optimizationBenchmarking.utils.ml.fitting.impl.abstr;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
 import org.optimizationBenchmarking.utils.ml.fitting.quality.FittingQualityMeasure;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IFittingJob;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IFittingQualityMeasure;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.ParametricUnaryFunction;
+import org.optimizationBenchmarking.utils.text.textOutput.MemoryTextOutput;
 import org.optimizationBenchmarking.utils.tools.impl.abstr.ToolJob;
 
 /** The fitting job */
@@ -79,28 +83,91 @@ public class FittingJob extends ToolJob implements IFittingJob {
     }
   }
 
+  /**
+   * create the basic message body
+   *
+   * @return the message body
+   */
+  private final MemoryTextOutput __createMessageBody() {
+    final MemoryTextOutput textOut;
+
+    textOut = new MemoryTextOutput(512);
+    textOut.append(" function '"); //$NON-NLS-1$
+    textOut.append(this.m_function);
+    textOut.append("' on ");//$NON-NLS-1$
+    textOut.append(this.m_data.m());
+    textOut.append(" data points with method ");//$NON-NLS-1$
+    textOut.append(this);
+    textOut.append(" using quality measure ");//$NON-NLS-1$
+    textOut.append(this.m_measure.getClass().getSimpleName());
+    textOut.append(" with method ");//$NON-NLS-1$
+    textOut.append(this.getClass().getSimpleName());
+    return textOut;
+  }
+
   /** {@inheritDoc} */
+  @SuppressWarnings("null")
   @Override
   public final FittingResult call() throws IllegalArgumentException {
+    final Logger logger;
+    MemoryTextOutput textOut;
     Throwable error;
     String message;
+    char separator;
+    boolean canLog, isFinite;
 
+    logger = this.getLogger();
+
+    textOut = null;
+    message = null;
     error = null;
+
+    if ((logger != null) && (logger.isLoggable(Level.FINER))) {
+      textOut = this.__createMessageBody();
+      message = textOut.toString();
+      logger.finer("Beginning to fit" + message);//$NON-NLS-1$
+    }
+
     try {
       this.fit();
 
-      if (MathUtils.isFinite(this.m_result.quality)) {
+      canLog = (logger != null) && (logger.isLoggable(Level.FINER));
+      isFinite = MathUtils.isFinite(this.m_result.quality);
+      if (canLog || (!isFinite)) {
+        if (textOut == null) {
+          textOut = this.__createMessageBody();
+        }
+        textOut.append(", obtained result ");//$NON-NLS-1$
+        separator = '[';
+        for (final double value : this.m_result.solution) {
+          textOut.append(separator);
+          separator = ',';
+          textOut.append(value);
+        }
+        textOut.append("] with quality ");//$NON-NLS-1$
+        textOut.append(this.m_result.quality);
+        message = null;
+      }
+
+      if (isFinite) {
+        if (canLog) {
+          textOut.append('.');
+          logger.finer("Finished fitting" + //$NON-NLS-1$
+              textOut.toString());
+        }
         return this.m_result;
       }
-    } catch (final IllegalArgumentException iae) {
-      throw iae;
     } catch (final Throwable cause) {
       error = cause;
     }
 
-    message = ((("Could not fit the function " + this.m_function) + //$NON-NLS-1$
-        " with method ") //$NON-NLS-1$
-        + this + '.');
+    if (textOut == null) {
+      textOut = this.__createMessageBody();
+    }
+    if (message == null) {
+      message = textOut.toString();
+    }
+    message = ("Error while trying to fit" + message + '.'); //$NON-NLS-1$
     if (error != null) {
       throw new IllegalArgumentException(message, error);
     }
