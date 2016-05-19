@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import org.optimizationBenchmarking.utils.collections.lists.ArrayListView;
 import org.optimizationBenchmarking.utils.io.paths.PathUtils;
@@ -54,6 +56,39 @@ public class MultiFittingExampleDataset
   }
 
   /**
+   * get a plot
+   *
+   * @param model
+   *          the model to plot
+   * @param fitting
+   *          the fitting
+   * @return the plot
+   */
+  final double[][] _plot(final ParametricUnaryFunction model,
+      final double[] fitting) {
+    final int size;
+    double[][] dataArray;
+    int index;
+    double x, y, calc;
+
+    size = this.data.m();
+    dataArray = new double[size][4];
+    for (index = 0; index < size; index++) {
+      dataArray[index][0] = x = this.data.getDouble(index, 0);
+      dataArray[index][1] = y = this.data.getDouble(index, 1);
+      dataArray[index][2] = calc = model.value(x, fitting);
+      calc = Math.abs(calc - y);
+      y = Math.abs(y);
+      if (y > 0d) {
+        calc /= y;
+      }
+      dataArray[index][3] = calc;
+    }
+    Arrays.sort(dataArray, new __DblComparator());
+    return dataArray;
+  }
+
+  /**
    * Plot the data and the fitting to the given file
    *
    * @param dest
@@ -71,29 +106,26 @@ public class MultiFittingExampleDataset
       final ParametricUnaryFunction model, final double[] fitting,
       final double quality) throws IOException {
     final StableSum sum;
-    final int size;
-    int index;
-    double x, y, calc;
+    double[][] dataArray;
+
+    dataArray = this._plot(model, fitting);
 
     try (final OutputStream os = PathUtils.openOutputStream(dest)) {
       try (final OutputStreamWriter osw = new OutputStreamWriter(os)) {
         try (final BufferedWriter bw = new BufferedWriter(osw)) {
           sum = new StableSum();
-          size = this.data.m();
-          for (index = 0; index < size; index++) {
-            bw.write(Double.toString(x = this.data.getDouble(index, 0)));
+          for (final double[] point : dataArray) {
+            bw.write(Double.toString(point[0]));
             bw.write('\t');
-            bw.write(Double.toString(y = this.data.getDouble(index, 1)));
+            bw.write(Double.toString(point[1]));
             bw.write('\t');
-            bw.write(Double.toString(calc = model.value(x, fitting)));
-            calc = Math.abs(calc - y);
-            y = Math.abs(y);
-            if (y > 0d) {
-              calc /= y;
-            }
-            sum.append(calc);
+            bw.write(Double.toString(point[2]));
+            bw.write('\t');
+            bw.write(Double.toString(point[3]));
             bw.newLine();
+            sum.append(point[3]);
           }
+          dataArray = null;
 
           bw.write('#');
           bw.newLine();
@@ -119,5 +151,34 @@ public class MultiFittingExampleDataset
   @Override
   public final int compareTo(final MultiFittingExampleDataset o) {
     return ((o == this) ? 0 : (this.name.compareTo(o.name)));
+  }
+
+  /** the internal comparator */
+  private static final class __DblComparator
+      implements Comparator<double[]> {
+    /** create */
+    __DblComparator() {
+      super();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public final int compare(final double[] o1, final double[] o2) {
+      int res;
+
+      res = Double.compare(o1[0], o2[0]);
+      if (res != 0) {
+        return res;
+      }
+      res = Double.compare(o1[1], o2[1]);
+      if (res != 0) {
+        return res;
+      }
+      res = Double.compare(o1[2], o2[2]);
+      if (res != 0) {
+        return res;
+      }
+      return Double.compare(o1[3], o2[3]);
+    }
   }
 }

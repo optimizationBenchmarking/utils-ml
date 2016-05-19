@@ -10,14 +10,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.optimizationBenchmarking.utils.io.paths.PathUtils;
-import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
 import org.optimizationBenchmarking.utils.math.statistics.aggregate.ArithmeticMeanAggregate;
 import org.optimizationBenchmarking.utils.math.statistics.aggregate.QuantileAggregate;
 import org.optimizationBenchmarking.utils.ml.fitting.multi.MultiFunctionFitter;
 import org.optimizationBenchmarking.utils.ml.fitting.quality.WeightedRootMeanSquareError;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IFittingResult;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IFunctionFitter;
-import org.optimizationBenchmarking.utils.ml.fitting.spec.ParametricUnaryFunction;
 import org.optimizationBenchmarking.utils.text.textOutput.AbstractTextOutput;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
@@ -72,15 +70,12 @@ final class _SingleFittingJob implements Callable<SingleFittingOutcome> {
     final String example, fitter;
     final QuantileAggregate median;
     final ArithmeticMeanAggregate mean;
-    final IMatrix data;
-    final ParametricUnaryFunction model;
     final double[] parameters;
-    final int m;
     final SingleFittingOutcome outcome;
     final Errors errors;
+    double[][] plot;
     long runtime;
-    int i;
-    double x, y, z, error;
+    double error;
     Path dest;
 
     example = this.m_example.name;
@@ -151,26 +146,28 @@ final class _SingleFittingJob implements Callable<SingleFittingOutcome> {
           text.append("# X\texpectedY\tmodelY");//$NON-NLS-1$
           text.appendLineBreak();
 
-          data = this.m_example.data;
-          m = data.m();
+          plot = this.m_example._plot(result.getFittedFunction(),
+              parameters);
+
           median = new QuantileAggregate(0.5d);
           mean = new ArithmeticMeanAggregate();
-          model = result.getFittedFunction();
-          for (i = 0; i < m; i++) {
-            x = data.getDouble(i, 0);
-            y = data.getDouble(i, 1);
-            z = model.value(x, parameters);
-            text.append(x);
+
+          for (final double[] point : plot) {
+            text.append(point[0]);
             text.append('\t');
-            text.append(y);
+            text.append(point[1]);
             text.append('\t');
-            text.append(z);
+            text.append(point[2]);
+            text.append('\t');
+            text.append(point[3]);
             text.appendLineBreak();
 
-            error = Math.abs(y - z);
+            error = Math.abs(point[2] - point[1]);
             median.append(error);
             mean.append(error * error);
           }
+
+          plot = null;
 
           text.append('#');
           text.appendLineBreak();
