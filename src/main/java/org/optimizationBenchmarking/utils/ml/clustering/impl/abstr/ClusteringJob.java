@@ -84,17 +84,21 @@ public abstract class ClusteringJob extends ToolJob
       textOut.append(" matrix an arbitrary number of");//$NON-NLS-1$
     }
     textOut.append(" classes with method ");//$NON-NLS-1$
-    textOut.append(this.getClass().getSimpleName());
-    textOut.append(this.getClass().getSimpleName());
+    textOut.append(this.toString());
     if (this instanceof DataClusteringJob) {
       textOut.append(" (a raw data clustering method)");//$NON-NLS-1$
     } else {
-      textOut.append(this.getClass().getSimpleName());
       if (this instanceof DistanceClusteringJob) {
         textOut.append(" (a distance-based clustering method)");//$NON-NLS-1$
       }
     }
     return textOut;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public String toString() {
+    return this.getClass().getSimpleName();
   }
 
   /** {@inheritDoc} */

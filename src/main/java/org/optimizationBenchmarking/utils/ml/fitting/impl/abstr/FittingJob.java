@@ -99,9 +99,9 @@ public class FittingJob extends ToolJob implements IFittingJob {
     textOut.append(" data points with method ");//$NON-NLS-1$
     textOut.append(this);
     textOut.append(" using quality measure ");//$NON-NLS-1$
-    textOut.append(this.m_measure.getClass().getSimpleName());
+    textOut.append(this.m_measure.toString());
     textOut.append(" with method ");//$NON-NLS-1$
-    textOut.append(this.getClass().getSimpleName());
+    textOut.append(this.toString());
     return textOut;
   }
 
@@ -172,5 +172,11 @@ public class FittingJob extends ToolJob implements IFittingJob {
       throw new IllegalArgumentException(message, error);
     }
     throw new IllegalArgumentException(message);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public String toString() {
+    return this.getClass().getSimpleName();
   }
 }

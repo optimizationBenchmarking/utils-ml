@@ -64,4 +64,10 @@ final class _RBasedDataClusteringJob extends DataClusteringJob {
 
     return solution;
   }
+
+  /** {@inheritDoc} */
+  @Override
+  public final String toString() {
+    return RBasedDataClusterer.METHOD;
+  }
 }

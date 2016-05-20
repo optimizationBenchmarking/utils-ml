@@ -69,20 +69,20 @@ public class MultiFittingExampleDataset
     final int size;
     double[][] dataArray;
     int index;
-    double x, y, calc;
+    double x, y, computedY;
 
     size = this.data.m();
     dataArray = new double[size][4];
     for (index = 0; index < size; index++) {
       dataArray[index][0] = x = this.data.getDouble(index, 0);
       dataArray[index][1] = y = this.data.getDouble(index, 1);
-      dataArray[index][2] = calc = model.value(x, fitting);
-      calc = Math.abs(calc - y);
+      dataArray[index][2] = computedY = model.value(x, fitting);
+      computedY = Math.abs(computedY - y);
       y = Math.abs(y);
       if (y > 0d) {
-        calc /= y;
+        computedY /= y;
       }
-      dataArray[index][3] = calc;
+      dataArray[index][3] = computedY;
     }
     Arrays.sort(dataArray, new __DblComparator());
     return dataArray;

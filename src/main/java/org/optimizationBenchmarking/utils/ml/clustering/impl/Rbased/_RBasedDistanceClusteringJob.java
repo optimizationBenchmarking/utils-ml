@@ -71,4 +71,10 @@ final class _RBasedDistanceClusteringJob extends DistanceClusteringJob {
 
     return solution;
   }
+
+  /** {@inheritDoc} */
+  @Override
+  public final String toString() {
+    return RBasedDistanceClusterer.METHOD;
+  }
 }

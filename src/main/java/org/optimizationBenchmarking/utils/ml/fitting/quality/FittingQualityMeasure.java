@@ -44,4 +44,10 @@ public abstract class FittingQualityMeasure
               + points.n());
     }
   }
+
+  /** {@inheritDoc} */
+  @Override
+  public String toString() {
+    return this.getClass().getSimpleName();
+  }
 }

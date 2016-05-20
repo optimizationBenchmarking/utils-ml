@@ -498,4 +498,10 @@ final class _LSSimplexFittingJob extends FittingJob
     this.m_maxIter = null;
     this.m_startVectorData = null;
   }
+
+  /** {@inheritDoc} */
+  @Override
+  public final String toString() {
+    return LSSimplexFitter.METHOD;
+  }
 }

@@ -8,14 +8,15 @@ import org.optimizationBenchmarking.utils.ml.fitting.spec.ParametricUnaryFunctio
 
 /**
  * A quality measure which attempts to give each point the same influence
- * on the fitting outcome. This is achieved by weighting residuals by the
- * inverse of the expected output values. Basically, we consider the
- * absolute values of {@code y}-coordinates of points as their inverse
- * weight. This way, if the estimate for a point with {@code y}-value
- * {@code 10} is {@code 11}, this has the same impact as if the estimate of
- * a point with {@code y}-value {@code -1e-10} is {@code -1.1e-10}. Of
- * course, we need to cater for points with {@code y}-value {@code 0},
- * which will then have this inverse weight here.
+ * on the fitting outcome. This is achieved by weighting each residuals by
+ * the inverse of the corresponding absolute value of the expected output
+ * values. Basically, we consider the absolute values of {@code y}
+ * -coordinates of points as their inverse weight. This way, if the
+ * estimate for a point with {@code y}-value {@code 10} is {@code 11}, this
+ * has the same impact as if the estimate of a point with {@code y}-value
+ * {@code -1e-10} is {@code -1.1e-10}. Of course, we need to cater for
+ * points with {@code y}-value {@code 0}, for which we choose a reasonable
+ * minimum weight limit.
  */
 public final class WeightedRootMeanSquareError
     extends FittingQualityMeasure {
@@ -43,73 +44,108 @@ public final class WeightedRootMeanSquareError
   public WeightedRootMeanSquareError(final IMatrix data) {
     super(data);
 
+    double currentY, minY1, minY2, minY3;
     int index;
-    double currentY, minY, minY2;
+
+    this.m_sum = new StableSum();
 
     // find the two smallest non-zero absolute y values
-    minY = minY2 = Double.POSITIVE_INFINITY;
+    minY1 = minY2 = minY3 = Double.POSITIVE_INFINITY;
     for (index = data.m(); (--index) >= 0;) {
       currentY = Math.abs(data.getDouble(index, 1));
-      if (WeightedRootMeanSquareError.__checkInverseWeight(currentY)) {
+      if (currentY < minY3) {
         if (currentY < minY2) {
-          if (currentY < minY) {
-            minY = currentY;
-          } else {
-            if (currentY > minY) {
-              minY2 = currentY;
-            }
+          if (currentY == minY1) {
+            continue;
           }
+          minY3 = minY2;
+          if (currentY < minY1) {
+            minY2 = minY1;
+            minY1 = currentY;
+            continue;
+          }
+          minY2 = currentY;
+          continue;
         }
+        if (currentY == minY2) {
+          continue;
+        }
+        minY3 = currentY;
       }
     }
 
+    if (minY3 >= Double.POSITIVE_INFINITY) {
+      if (minY2 >= Double.POSITIVE_INFINITY) {
+        minY2 = minY1;
+      }
+      minY3 = minY2;
+    }
+
     // define the weight of points with "0" y-coordinate
-    findInverseWeight: {
-      if (WeightedRootMeanSquareError.__checkInverseWeight(minY)) {
+    findMinInverseWeight: {
+      if (WeightedRootMeanSquareError.__checkInverseWeight(minY1)) {
+        currentY = minY1;
+        break findMinInverseWeight;
+      }
 
-        if (WeightedRootMeanSquareError.__checkInverseWeight(minY2)) {
-          // Ideally, the inverse weight of the point with 0 y-value
-          // behaves to the weight of the point with next-larger (i.e.,
-          // smallest non-zero) absolute y value like this point's weight
-          // to the one with second-smallest non-zero absolute y value.
-          currentY = (minY * (minY / minY2));
-          if (WeightedRootMeanSquareError.__checkInverseWeight(currentY)) {
-            break findInverseWeight;
+      if (WeightedRootMeanSquareError.__checkInverseWeight(minY2)) {
+        // Ideally, the inverse weight of the point with 0 y-value
+        // behaves to the weight of the point with next-larger (i.e.,
+        // smallest non-zero) absolute y value like this point's weight
+        // to the one with second-smallest non-zero absolute y value.
+        currentY = (minY2 * (minY2 / minY3));
+        if (WeightedRootMeanSquareError.__checkInverseWeight(currentY)) {
+          minY3 = (currentY * 0.5d);
+          if (WeightedRootMeanSquareError.__checkInverseWeight(minY3)) {
+            currentY = minY3;
           }
+          break findMinInverseWeight;
         }
+      }
 
-        // If that is not possible, we say it should just be ten percent
-        // smaller.
-        currentY = (minY * 0.9d);
-        if (WeightedRootMeanSquareError.__checkInverseWeight(currentY)) {
-          break findInverseWeight;
+      for (final double y : new double[] { minY2, minY3 }) {
+        if (WeightedRootMeanSquareError.__checkInverseWeight(y)) {
+
+          // If that is not possible, we say it should just be 50 percent
+          // smaller.
+          currentY = (y * 0.5d);
+          if (WeightedRootMeanSquareError.__checkInverseWeight(currentY)) {
+            break findMinInverseWeight;
+          }
+
+          // If that is not possible, we say it should just be ten percent
+          // smaller.
+          currentY = (y * 0.9d);
+          if (WeightedRootMeanSquareError.__checkInverseWeight(currentY)) {
+            break findMinInverseWeight;
+          }
+
+          // If that is not possible, we say it should just be one percent
+          // smaller.
+          currentY = (y * 0.99d);
+          if (WeightedRootMeanSquareError.__checkInverseWeight(currentY)) {
+            break findMinInverseWeight;
+          }
+
+          // If that is not possible, we say it should just be 0.1 percent
+          // smaller.
+          currentY = (y * 0.999d);
+          if (WeightedRootMeanSquareError.__checkInverseWeight(currentY)) {
+            break findMinInverseWeight;
+          }
+
+          // If that is not possible, we say it should just be the tiniest
+          // bit smaller.
+          currentY = Math.nextAfter(y, Double.NEGATIVE_INFINITY);
+          if (WeightedRootMeanSquareError.__checkInverseWeight(currentY)) {
+            break findMinInverseWeight;
+          }
+
+          // If that is not possible (second smallest y-coordinate is
+          // |Double.MIN_NORMAL|?), we say it should just be the same.
+          currentY = y;
+          break findMinInverseWeight;
         }
-
-        // If that is not possible, we say it should just be one percent
-        // smaller.
-        currentY = (minY * 0.99d);
-        if (WeightedRootMeanSquareError.__checkInverseWeight(currentY)) {
-          break findInverseWeight;
-        }
-
-        // If that is not possible, we say it should just be 0.1 percent
-        // smaller.
-        currentY = (minY * 0.999d);
-        if (WeightedRootMeanSquareError.__checkInverseWeight(currentY)) {
-          break findInverseWeight;
-        }
-
-        // If that is not possible, we say it should just be the tiniest
-        // bit smaller.
-        currentY = Math.nextAfter(minY, Double.NEGATIVE_INFINITY);
-        if (WeightedRootMeanSquareError.__checkInverseWeight(currentY)) {
-          break findInverseWeight;
-        }
-
-        // If that is not possible (smallest y-coordinate is
-        // |Double.MIN_NORMAL|?), we say it should just be the same.
-        currentY = minY;
-        break findInverseWeight;
       }
 
       // If that is not possible (all weights are <=Double.MIN_NORMAL????),
@@ -118,7 +154,6 @@ public final class WeightedRootMeanSquareError
     }
 
     this.m_minInverseWeight = currentY;
-    this.m_sum = new StableSum();
   }
 
   /**
@@ -139,7 +174,7 @@ public final class WeightedRootMeanSquareError
     final StableSum sum;
     final double minInverseWeight;
     final int length;
-    double y, res;
+    double expectedY, computedY, residual;
     int index;
 
     sum = this.m_sum;
@@ -148,15 +183,19 @@ public final class WeightedRootMeanSquareError
     minInverseWeight = this.m_minInverseWeight;
     length = this.m_data.m();
     for (index = length; (--index) >= 0;) {
-      y = this.m_data.getDouble(index, 1);
-      res = (model.value(this.m_data.getDouble(index, 0), params) - y);
-      y = Math.abs(y);
-      res /= ((y < minInverseWeight) ? minInverseWeight : y);
-      sum.append(res * res);
+      expectedY = this.m_data.getDouble(index, 1);
+      computedY = model.value(this.m_data.getDouble(index, 0), params);
+      residual = (expectedY - computedY);
+      if (residual != 0d) {
+        residual /= ((expectedY < minInverseWeight) ? minInverseWeight
+            : expectedY);
+      }
+      sum.append(residual * residual);
     }
 
-    res = Math.sqrt(sum.doubleValue() / length);
-    return (MathUtils.isFinite(res) ? res : Double.POSITIVE_INFINITY);
+    residual = Math.sqrt(sum.doubleValue() / length);
+    return (MathUtils.isFinite(residual) ? residual
+        : Double.POSITIVE_INFINITY);
   }
 
   /** {@inheritDoc} */
@@ -170,8 +209,9 @@ public final class WeightedRootMeanSquareError
     final double minInverseWeight;
     final StableSum sum;
     double[] jacobianRow;
-    double x, expectedY, inverseWeight, residual, squareErrorSum;
-    int i, j;
+    double x, expectedY, computedY, residual, inverseWeight,
+        squareErrorSum;
+    int index, j;
 
     data = this.m_data;
     minInverseWeight = this.m_minInverseWeight;
@@ -192,20 +232,21 @@ public final class WeightedRootMeanSquareError
     sum = this.m_sum;
 
     sum.reset();
-    for (i = numSamples; (--i) >= 0;) {
-      x = data.getDouble(i, 0);
-      expectedY = data.getDouble(i, 1);
-
-      inverseWeight = Math.abs(expectedY);
-      if (inverseWeight < minInverseWeight) {
+    for (index = numSamples; (--index) >= 0;) {
+      x = data.getDouble(index, 0);
+      expectedY = this.m_data.getDouble(index, 1);
+      computedY = model.value(x, parameters);
+      if (expectedY < minInverseWeight) {
         inverseWeight = minInverseWeight;
+      } else {
+        inverseWeight = expectedY;
       }
+      residual = ((expectedY - computedY) / inverseWeight);
 
-      residuals[i] = residual = ((expectedY - model.value(x, parameters))
-          / inverseWeight);
+      residuals[index] = residual;
       sum.append(residual * residual);
 
-      jacobianRow = jacobian[i];
+      jacobianRow = jacobian[index];
       model.gradient(x, parameters, jacobianRow);
       for (j = numParams; (--j) >= 0;) {
         jacobianRow[j] /= inverseWeight;
@@ -220,5 +261,11 @@ public final class WeightedRootMeanSquareError
     } else {
       dest.rmsError = dest.rsError = dest.quality = Double.POSITIVE_INFINITY;
     }
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public final String toString() {
+    return "Weighted Root-Mean-Squared Error"; //$NON-NLS-1$
   }
 }

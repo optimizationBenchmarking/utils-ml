@@ -11,6 +11,9 @@ import org.optimizationBenchmarking.utils.reflection.ReflectionUtils;
  */
 public final class LSSimplexFitter extends FunctionFitter {
 
+  /** the method name */
+  static final String METHOD = "Least-Squares + Simpled Fitter"; //$NON-NLS-1$
+
   /** the error */
   private final Throwable m_error;
 
@@ -85,7 +88,7 @@ public final class LSSimplexFitter extends FunctionFitter {
   /** {@inheritDoc} */
   @Override
   public final String toString() {
-    return "Least-Squares + Simpled Fitter"; //$NON-NLS-1$
+    return LSSimplexFitter.METHOD;
   }
 
   /** the instance holder */

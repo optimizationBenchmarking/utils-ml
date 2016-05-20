@@ -8,6 +8,9 @@ import org.optimizationBenchmarking.utils.ml.clustering.impl.abstr.DataClusterin
 /** The {@code R}-based data clustering engine. */
 public final class RBasedDataClusterer extends DataClusterer {
 
+  /** the method name */
+  static final String METHOD = "R-based Data Clusterer"; //$NON-NLS-1$
+
   /** create */
   RBasedDataClusterer() {
     super();
@@ -36,7 +39,7 @@ public final class RBasedDataClusterer extends DataClusterer {
   /** {@inheritDoc} */
   @Override
   public final String toString() {
-    return "R-based Data Clusterer"; //$NON-NLS-1$
+    return RBasedDataClusterer.METHOD;
   }
 
   /**

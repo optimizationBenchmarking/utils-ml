@@ -8,6 +8,9 @@ import org.optimizationBenchmarking.utils.ml.clustering.impl.abstr.DistanceClust
 /** The {@code R}-based distance distance clustering engine. */
 public final class RBasedDistanceClusterer extends DistanceClusterer {
 
+  /** the method name */
+  static final String METHOD = "R-based Distance Clusterer"; //$NON-NLS-1$
+
   /** create */
   RBasedDistanceClusterer() {
     super();
@@ -36,7 +39,7 @@ public final class RBasedDistanceClusterer extends DistanceClusterer {
   /** {@inheritDoc} */
   @Override
   public final String toString() {
-    return "R-based Distance Clusterer"; //$NON-NLS-1$
+    return RBasedDistanceClusterer.METHOD;
   }
 
   /**
