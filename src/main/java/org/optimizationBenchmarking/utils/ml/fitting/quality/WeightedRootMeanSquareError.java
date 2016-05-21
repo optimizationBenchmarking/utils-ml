@@ -95,24 +95,12 @@ public final class WeightedRootMeanSquareError
         // to the one with second-smallest non-zero absolute y value.
         currentY = (minY2 * (minY2 / minY3));
         if (WeightedRootMeanSquareError.__checkInverseWeight(currentY)) {
-          minY3 = (currentY * 0.5d);
-          if (WeightedRootMeanSquareError.__checkInverseWeight(minY3)) {
-            currentY = minY3;
-          }
           break findMinInverseWeight;
         }
       }
 
       for (final double y : new double[] { minY2, minY3 }) {
         if (WeightedRootMeanSquareError.__checkInverseWeight(y)) {
-
-          // If that is not possible, we say it should just be 50 percent
-          // smaller.
-          currentY = (y * 0.5d);
-          if (WeightedRootMeanSquareError.__checkInverseWeight(currentY)) {
-            break findMinInverseWeight;
-          }
-
           // If that is not possible, we say it should just be ten percent
           // smaller.
           currentY = (y * 0.9d);
