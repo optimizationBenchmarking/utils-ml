@@ -250,7 +250,7 @@ for(number in cluster.n) {
   }
 #
 # Finally, we try hierarchical clustering.
-  if(hasPackageStats && exists("hclustList")) {
+  if(hasPackageStats && exists("hclustList") && (number < m)) {
     for(hierarchicalClustering in hclustList) {#
       safeExec( {
         currentClustering            <- NULL;

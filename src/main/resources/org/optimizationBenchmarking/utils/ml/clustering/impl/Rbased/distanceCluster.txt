@@ -31,17 +31,15 @@ if((m != 1) && ((dimDist[1]==1) || (dimDist[2]==1))) {
 }# / distance matrix building
 #
 ## 2. Clustering Step
-## 2.1. set up range of validclusters
-clusterRange <- minClusters:maxClusters;
 #
-## 2.2. Use Partitioning Around Medoids
-if(nCluster > 0) {#
+## 2.1. Use Partitioning Around Medoids
+if(minClusters >= maxClusters) {#
   if(safeUsePackage("cluster")) {
-    safeExec(pamResult<-pam(x=distance, k=nCluster, diss=TRUE));
+    safeExec(pamResult<-pam(x=distance, k=minClusters, diss=TRUE));
   }
 } else {
   if(safeUsePackage("fpc")) {
-    safeExec(pamResult<-pamk(data=distance, krange=clusterRange, diss=TRUE)$pamobject);  
+    safeExec(pamResult<-pamk(data=distance, krange=minClusters:min(m-1,maxClusters), diss=TRUE)$pamobject);  
   }
 }
 if(exists("pamResult")) {
@@ -49,7 +47,7 @@ if(exists("pamResult")) {
   quality <-as.double(pamResult$silinfo$avg.width);#
 }
 #
-## 2.3. Use Hierarchical Clustering
+## 2.2. Use Hierarchical Clustering
 if(safeUsePackage("stats")) {
   safeExec({#
     hclustList <- list(#
@@ -62,7 +60,7 @@ if(safeUsePackage("stats")) {
       hclust(distance, method="mcquitty"),#
       hclust(distance, method="median"));#
     #
-      for(i in clusterRange) {#
+      for(i in minClusters:min(m-1,maxClusters)) {#
         for(hres in hclustList) {#
           hclustering <- as.vector(cutree(hres, k=i));#
           if(max(hclustering) > 1) {
