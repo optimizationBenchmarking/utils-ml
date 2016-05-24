@@ -53,22 +53,30 @@ if(exists("pamResult")) {
 if(safeUsePackage("stats")) {
   safeExec({#
     hclustList <- list(#
-      hclust(distances, method="centroid"),#
-      hclust(distances, method="ward.D"),#
-      hclust(distances, method="ward.D2"),#
-      hclust(distances, method="single"),#
-      hclust(distances, method="complete"),#
-      hclust(distances, method="average"),#
-      hclust(distances, method="mcquitty"),#
-      hclust(distances, method="median"));#
+      hclust(distance, method="centroid"),#
+      hclust(distance, method="ward.D"),#
+      hclust(distance, method="ward.D2"),#
+      hclust(distance, method="single"),#
+      hclust(distance, method="complete"),#
+      hclust(distance, method="average"),#
+      hclust(distance, method="mcquitty"),#
+      hclust(distance, method="median"));#
     #
       for(i in clusterRange) {#
         for(hres in hclustList) {#
           hclustering <- as.vector(cutree(hres, k=i));#
-          hquality    <- as.double(cluster.stats(d=distances, clustering=hclustering)$avg.silwidth);#
+          if(max(hclustering) > 1) {
+            hquality <- as.double(cluster.stats(d=distance, clustering=hclustering)$avg.silwidth);#
+          } else {#
+            hquality <- -1;
+          }#
           if((!(exists("clusters"))) ||
              (!(exists("quality")))  || (hquality > quality)) {#
-            quality   <- hquality;#
+            if(hquality<0) {#
+              quality <- (-Inf);
+            } else {#
+              quality <- hquality;#
+            }#
             clusters  <- hclustering;#
           }#
         }#

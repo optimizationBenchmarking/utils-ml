@@ -173,7 +173,6 @@ cluster.n<-sort(unique(cluster.n))
 bestClustering            <- NULL;
 bestClustering$clustering <- NULL;
 bestClustering$silhouette <- -Inf;
-bestClustering$n          <- Inf;
 #
 if(hasPackageStats) {
   safeExec( distances <- dist(data) );
@@ -197,10 +196,16 @@ for(number in cluster.n) {
     safeExec( {
       currentClustering            <- NULL;
       currentClustering$clustering <- as.vector(kmeans(data, number)$cluster);
-      currentClustering$silhouette <- cluster.stats(distances, currentClustering$clustering)$avg.silwidth;
-      if(currentClustering$silhouette > bestClustering$silhouette) {
-          bestClustering <- currentClustering;
-      }  
+      if(max(currentClustering$clustering) > 1) {
+        currentClustering$silhouette <- cluster.stats(distances, currentClustering$clustering)$avg.silwidth;
+        if(currentClustering$silhouette > bestClustering$silhouette) {
+            bestClustering <- currentClustering;
+        }  
+      } else {
+        if(bestClustering$silhouette <= -Inf) {
+          bestClustering$clustering <- currentClustering$clustering;
+        }
+      }
       rm(currentClustering);
     });
   }
@@ -210,9 +215,15 @@ for(number in cluster.n) {
     safeExec( {
       currentClustering            <- NULL;
       currentClustering$clustering <- as.vector(pam(data, number)$cluster);
-      currentClustering$silhouette <- cluster.stats(distances, currentClustering$clustering)$avg.silwidth; 
-      if(currentClustering$silhouette > bestClustering$silhouette) {
-          bestClustering <- currentClustering;
+      if(max(currentClustering$clustering) > 1) {
+        currentClustering$silhouette <- cluster.stats(distances, currentClustering$clustering)$avg.silwidth;
+        if(currentClustering$silhouette > bestClustering$silhouette) {
+            bestClustering <- currentClustering;
+        }  
+      } else {
+        if(bestClustering$silhouette <= -Inf) {
+          bestClustering$clustering <- currentClustering$clustering;
+        }
       }
       rm(currentClustering);
     });
@@ -224,9 +235,15 @@ for(number in cluster.n) {
       currentClustering            <- NULL;
       currentClustering$clustering <- as.vector(Mclust(data, G=c(number),
                                         warn=FALSE)$classification);
-      currentClustering$silhouette <- cluster.stats(distances, currentClustering$clustering)$avg.silwidth; 
-      if(currentClustering$silhouette > bestClustering$silhouette) {
-          bestClustering <- currentClustering;
+      if(max(currentClustering$clustering) > 1) {
+        currentClustering$silhouette <- cluster.stats(distances, currentClustering$clustering)$avg.silwidth;
+        if(currentClustering$silhouette > bestClustering$silhouette) {
+            bestClustering <- currentClustering;
+        }  
+      } else {
+        if(bestClustering$silhouette <= -Inf) {
+          bestClustering$clustering <- currentClustering$clustering;
+        }
       }
       rm(currentClustering);
     });
@@ -238,9 +255,15 @@ for(number in cluster.n) {
       safeExec( {
         currentClustering            <- NULL;
         currentClustering$clustering <- as.vector(cutree(hierarchicalClustering, k=number));
-        currentClustering$silhouette <- cluster.stats(distances, currentClustering$clustering)$avg.silwidth; 
-        if(currentClustering$silhouette > bestClustering$silhouette) {
-            bestClustering <- currentClustering;
+        if(max(currentClustering$clustering) > 1) {
+          currentClustering$silhouette <- cluster.stats(distances, currentClustering$clustering)$avg.silwidth;
+          if(currentClustering$silhouette > bestClustering$silhouette) {
+              bestClustering <- currentClustering;
+          }  
+        } else {
+          if(bestClustering$silhouette <= -Inf) {
+            bestClustering$clustering <- currentClustering$clustering;
+          }
         }
         rm(currentClustering); 
       });

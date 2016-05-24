@@ -89,10 +89,7 @@ public abstract class ClusteringJob extends ToolJob
    * @return the suggested minimum of clusters
    */
   protected int computeMinClusters(final int maxClusters, final int m) {
-    if ((m <= 1) || (maxClusters <= 1)) {
-      return 1;
-    }
-    return 2;
+    return 1;
   }
 
   /**
