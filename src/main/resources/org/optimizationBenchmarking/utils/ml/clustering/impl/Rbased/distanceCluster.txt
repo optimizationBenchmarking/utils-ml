@@ -3,15 +3,15 @@
 #
 # input : "distance": either a full m*m distance matrix or the upper
 #                     triangular matrix of m*(m-1)/2 elements
-#         "nCluster": the desired number of clusters, -1 means that we
-#                     should find this number by ourselves
+#         "minClusters": the minimum desired number of clusters
+#         "maxClusters": the minimum desired number of clusters
 #         "m"       : the number of elements to cluster
 #
 # output: "clusters": the assignment of instances to clusters 
 #         "quality" : the quality measure
 #
 safeExec({#
-if( (m > 2) && (nCluster < m) ) {
+if( (m > 1) && (minClusters < m) ) {#
 #
 # 1. Building Distance Matrix
 dimDist<-dim(distance);
@@ -32,11 +32,7 @@ if((m != 1) && ((dimDist[1]==1) || (dimDist[2]==1))) {
 #
 ## 2. Clustering Step
 ## 2.1. set up range of validclusters
-if(nCluster > 0) {#
-  clusterRange <- nCluster:nCluster;
-} else {
-  clusterRange <- 2:(min(m-1, 12));
-}
+clusterRange <- minClusters:maxClusters;
 #
 ## 2.2. Use Partitioning Around Medoids
 if(nCluster > 0) {#

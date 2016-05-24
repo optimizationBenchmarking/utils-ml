@@ -41,26 +41,25 @@ final class _RBasedDistanceClusteringJob extends DistanceClusteringJob {
               : this.m_matrix);
       engine.setLong("m", this.m_matrix.m()); //$NON-NLS-1$
       this.m_matrix = null;
-      engine.setLong("nCluster", this.m_classes);//$NON-NLS-1$
-      try {
-        try (final StreamLineIterator iterator = new StreamLineIterator(//
-            _RBasedDistanceClusteringJob.class, "distanceCluster.txt")) {//$NON-NLS-1$
-          engine.execute(iterator);
-        }
+      engine.setLong("minClusters", this.m_minClusters);//$NON-NLS-1$
+      engine.setLong("maxClusters", this.m_maxClusters);//$NON-NLS-1$
+
+      try (final StreamLineIterator iterator = new StreamLineIterator(//
+          _RBasedDistanceClusteringJob.class, "distanceCluster.txt")) {//$NON-NLS-1$
+        engine.execute(iterator);
       } catch (final Throwable error) {
         throw new IllegalStateException(//
             "Error while communicating REngine. Maybe the distance matrix is just too odd, or some required packages are missing and cannot be installed.", //$NON-NLS-1$
             error);
       }
 
+      this.m_matrix = null;
       result = engine.getMatrix("clusters"); //$NON-NLS-1$
       quality = engine.getDouble("quality"); //$NON-NLS-1$
     } catch (final IOException ioe) {
       throw new IllegalStateException(//
           "Error while starting REngine. Maybe R is not installed properly?", //$NON-NLS-1$
           ioe);
-    } finally {
-      this.m_matrix = null;
     }
 
     n = result.n();

@@ -27,14 +27,6 @@ public final class DistanceClusteringJobBuilder
 
   /** {@inheritDoc} */
   @Override
-  protected void validate() {
-    super.validate();
-    ClusteringJobBuilder.checkMatrix(this.m_matrix,
-        this.m_matrixIsDistanceMatrix);
-  }
-
-  /** {@inheritDoc} */
-  @Override
   public final DistanceClusteringJobBuilder setDistanceMatrix(
       final IMatrix matrix) {
     this.setMatrix(matrix, true);

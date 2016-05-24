@@ -6,8 +6,8 @@
 #
 # input : "data"    : a matrix whose rows correspond to the instances,
 #                     columns to features
-#         "nCluster": the desired number of clusters, -1 means that we
-#                     should find this number by ourselves
+#         "minClusters": the minimum desired number of clusters
+#         "maxClusters": the minimum desired number of clusters
 #
 # output: "clusters": the assignment of instances to clusters 
 #         "quality" : the quality measure
@@ -15,7 +15,7 @@
 safeExec({#
 m<-dim(data)[1];#
 #
-if( (m > 2) && (nCluster < m) ) {#
+if( (m > 1) && (minClusters < m) ) {#
 #
 # 0. load packages
 hasPackageStats<-safeUsePackage("stats");
@@ -39,8 +39,8 @@ if(hasPackageStats) {
 }
 #
 ## If the number of clusters has been specified, then use it as-is
-if(nCluster > 0) {
-  cluster.n <- c(nCluster);
+if(minClusters >= maxClusters) {
+  cluster.n <- c(minClusters);
 } else {
 ## ...otherwise
 ##
@@ -50,40 +50,68 @@ if(nCluster > 0) {
 ## different suggestions about the preferred cluster number. We
 ## compute the median of these numbers and go with it.
 #
-## Having more than ten clusters makes no sense, as understanding
-## the data will become very hard.
-maxClusters <- max(1, min(12, m));
 cluster.n   <- integer(0);
 #
 # Determine the ideal number of clusters with the pamk function of the
 # fpc package
 if(hasPackageFpc) {
-  safeExec(cluster.n <- c(cluster.n, as.integer(pamk(data)$nc)));
+  safeExec( {
+    suggested <- as.integer(pamk(data, minClusters:min(m-1,maxClusters))$nc);
+    if((suggested >= minClusters) && (suggested <= maxClusters)) {
+      cluster.n <- c(cluster.n, suggested);
+    }
+  } )
 }
 #
 # Determine the optimal number of clusters according to the Bayesian
 # Information Criterion for expectation-maximization, initialized by
 # hierarchical clustering for parameterized Gaussian mixture models.
 if(hasPackageMclust) {
-  safeExec(cluster.n <- c(cluster.n, as.integer(dim(
-                          Mclust(data, G=1:maxClusters)$z)[2])));
+  safeExec( {
+    suggested <- as.integer(dim(Mclust(data, G=minClusters:maxClusters)$z)[2]);
+    if((suggested >= minClusters) && (suggested <= maxClusters)) {
+      cluster.n <- c(cluster.n, suggested);
+    }
+  } )
 }
 #
 # Determine the ideal number of clusters by using Affinity propagation
 # (AP) clustering, see http://dx.doi.org/10.1126/science.1136800.
 if(hasPackageApcluster) {
-  safeExec(cluster.n <- c(cluster.n, as.integer(length(apcluster(
-                              negDistMat(r=2), data)@clusters))));
+  safeExec( {
+    suggested <- as.integer(length(apcluster(negDistMat(r=2), data)@clusters));
+    if((suggested >= minClusters) && (suggested <= maxClusters)) {
+      cluster.n <- c(cluster.n, suggested);
+    }
+  } )
 }
 #
 # using gap analysis
 if(hasPackageCluster) {
   safeExec( {
-    findCluster <- clusGap(data, kmeans, maxClusters, B=500, verbose=FALSE);
-    cluster.n <- c(cluster.n, as.integer(maxSE(findCluster$Tab[, "gap"],
-                      findCluster$Tab[, "SE.sim"], method="Tibs2001SEmax")));
+    findCluster <- clusGap(data, kmeans, min(m-1,maxClusters), B=500, verbose=FALSE);
+    suggested <- as.integer(maxSE(findCluster$Tab[, "gap"], findCluster$Tab[, "SE.sim"], method="Tibs2001SEmax"));
+    if((suggested >= minClusters) && (suggested <= maxClusters)) {
+      cluster.n <- c(cluster.n, suggested);
+    }
+    suggested <- as.integer(maxSE(findCluster$Tab[, "gap"], findCluster$Tab[, "SE.sim"], method="firstSEmax"));
+    if((suggested >= minClusters) && (suggested <= maxClusters)) {
+      cluster.n <- c(cluster.n, suggested);
+    }
+    suggested <- as.integer(maxSE(findCluster$Tab[, "gap"], findCluster$Tab[, "SE.sim"], method="globalSEmax"));
+    if((suggested >= minClusters) && (suggested <= maxClusters)) {
+      cluster.n <- c(cluster.n, suggested);
+    }
+    suggested <- as.integer(maxSE(findCluster$Tab[, "gap"], findCluster$Tab[, "SE.sim"], method="firstmax"));
+    if((suggested >= minClusters) && (suggested <= maxClusters)) {
+      cluster.n <- c(cluster.n, suggested);
+    }
+    suggested <- as.integer(maxSE(findCluster$Tab[, "gap"], findCluster$Tab[, "SE.sim"], method="globalmax"));
+    if((suggested >= minClusters) && (suggested <= maxClusters)) {
+      cluster.n <- c(cluster.n, suggested);
+    }
     rm(findCluster);
-  } );
+  } )
 }
 #
 if(hasPackageNbClust) {
@@ -93,11 +121,11 @@ if(hasPackageNbClust) {
   par <- function(...) { }
   safeExec( {
     cluster.nbEuc <- NbClust(data, diss=NULL,
-                         distance = "euclidean", min.nc=2, max.nc=maxClusters,
-                         method = "kmeans", index="alllong")$Best.nc[1,];
+                         distance="euclidean", min.nc=max(2, minClusters), max.nc=min(maxClusters, m-1),
+                         method="kmeans", index="alllong")$Best.nc[1,];
     cluster.nbEuc <- unique(as.integer(cluster.nbEuc[
-                which((cluster.nbEuc>1)&(cluster.nbEuc<maxClusters))]));
-    cluster.n <- c(cluster.n, as.integer(round(median(cluster.nbEuc))));
+                which((cluster.nbEuc>=minClusters)&(cluster.nbEuc<=maxClusters))]));
+    cluster.n <- c(cluster.n, min(maxClusters, max(minClusters, as.integer(round(median(cluster.nbEuc))))));
   } );
   plot <- oldPlot;
   rm(plot);
@@ -107,11 +135,11 @@ if(hasPackageNbClust) {
 ## Compute the cluster numbers to check: All unique suggestions, plus
 ## the (median-1)..(median+1) range.
 if(length(cluster.n)>0) {
-  cluster.n   <- as.integer(cluster.n[which((cluster.n>1)&(cluster.n<maxClusters))]); 
-  cluster.med <- as.integer(round(median(cluster.n)));
-  cluster.n   <- c(cluster.n, max(2, min(maxClusters, cluster.med-1)),
-                              max(2, min(maxClusters, cluster.med)),
-                              max(2, min(maxClusters, cluster.med+1)));     
+  cluster.n   <- min(maxClusters, max(minClusters, as.integer(cluster.n[which((cluster.n>=minClusters)&(cluster.n<=maxClusters))]))); 
+  cluster.med <- min(maxClusters, max(minClusters, as.integer(round(median(cluster.n)))));
+  cluster.n   <- c(cluster.n, max(minClusters, min(maxClusters, cluster.med-1)),
+                              max(minClusters, min(maxClusters, cluster.med)),
+                              max(minClusters, min(maxClusters, cluster.med+1)));     
   rm(cluster.med);
 } 
 if(exists("cluster.nbEuc")) {
@@ -121,9 +149,19 @@ if(exists("cluster.nbEuc")) {
 if(length(cluster.n) > 0) {
   cluster.n <- as.integer(sort(unique(cluster.n)));
 } else {
-  cluster.n <- c(2, 3, 4, 5);
+  cluster.n <- c(minClusters, minClusters+1);
+  if(minClusters < (maxClusters-1)) {
+    cluster.n <- c(cluster.n, minClusters+2);
+    if(minClusters < (maxClusters-2)) {
+      cluster.n <- c(cluster.n, minClusters+3);
+      if(minClusters < (maxClusters-3)) {
+        cluster.n <- c(cluster.n, minClusters+4);
+      }
+    }
+  }
 }        
 }
+cluster.n<-sort(unique(cluster.n))
 }# / get number of clusters
 #
 #
@@ -224,10 +262,14 @@ safeExec( rm(bestClustering) );
 # fallback
 if( (!(exists("clusters"))) || (!(exists("quality"))) ||
     (!(is.vector(clusters))) || (!(is.double(quality)))) {
-  if((nCluster > 0) && (nCluster < m)) {
-    clusters <- c(rep(1, m-nCluster), 1:nCluster);
+  if((minClusters > 0) && (minClusters < m)) {
+    clusters <- c(rep(1, m-minClusters), 1:minClusters);    
   } else {
-    clusters <- 1:m;
+    if((maxClusters > 0) && (maxClusters < m)) {
+      clusters <- c(rep(1, m-maxClusters), 1:maxClusters);    
+    } else {
+      clusters <- 1:m;
+    }
   }
   quality  <- as.double(1);
 }

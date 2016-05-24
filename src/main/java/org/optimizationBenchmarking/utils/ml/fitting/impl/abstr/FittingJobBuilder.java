@@ -118,17 +118,7 @@ public class FittingJobBuilder
 
   /** {@inheritDoc} */
   @Override
-  protected void validate() {
-    super.validate();
-    FittingQualityMeasure.validateData(this.m_points);
-    FittingJobBuilder.validateFunction(this.m_function);
-    FittingJobBuilder.validateMeasure(this.m_measure);
-  }
-
-  /** {@inheritDoc} */
-  @Override
   public final FittingJob create() {
-    this.validate();
     return this.m_tool.create(this);
   }
 }

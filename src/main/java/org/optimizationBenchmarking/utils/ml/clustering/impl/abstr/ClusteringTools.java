@@ -1,6 +1,8 @@
 package org.optimizationBenchmarking.utils.ml.clustering.impl.abstr;
 
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.optimizationBenchmarking.utils.error.ErrorUtils;
 import org.optimizationBenchmarking.utils.math.MathUtils;
@@ -157,50 +159,79 @@ public final class ClusteringTools {
    * Check whether there is a simple, default solution for the clustering
    * problem
    *
+   * @param logger
+   *          the logger to use
    * @param matrix
-   *          the data matrix or dissimilarity matrix
-   * @param numClasses
-   *          the number of classes we want
+   *          the data or dissimilarity matrix
+   * @param minClusters
+   *          the minimum number of classes we want
+   * @param maxClusters
+   *          the maximum number of classes we want
    * @return the default solution, or {@code null} if there is none
    * @throws IllegalArgumentException
    *           if the clustering job cannot be done
    */
   public static final ClusteringSolution canClusterTrivially(
-      final IMatrix matrix, final int numClasses) {
-    return ClusteringTools._canClusterTrivially(matrix, numClasses);
+      final Logger logger, final IMatrix matrix, final int minClusters,
+      final int maxClusters) {
+    return ClusteringTools._canClusterTrivially(logger, matrix,
+        minClusters, maxClusters);
   }
 
   /**
    * Check whether there is a simple, default solution for the clustering
    * problem
    *
+   * @param logger
+   *          the logger to use
    * @param matrix
    *          the data or dissimilarity matrix
-   * @param numClasses
-   *          the number of classes we want
+   * @param minClusters
+   *          the minimum number of classes we want
+   * @param maxClusters
+   *          the maximum number of classes we want
    * @return the default solution, or {@code null} if there is none
    * @throws IllegalArgumentException
    *           if the clustering job cannot be done
    */
-  static final _DirectResult _canClusterTrivially(final IMatrix matrix,
-      final int numClasses) {
+  static final _DirectResult _canClusterTrivially(final Logger logger,
+      final IMatrix matrix, final int minClusters, final int maxClusters) {
     final int m;
 
     m = matrix.m();
-    if (numClasses > m) {
+    if (minClusters > m) {
       throw new IllegalArgumentException(
           m + " data samples cannot be divided into " //$NON-NLS-1$
-              + numClasses + //
+              + minClusters + //
               " clusters."); //$NON-NLS-1$
     }
-    if (m <= numClasses) {
+
+    if (m <= minClusters) {
+      if ((logger != null) && (logger.isLoggable(Level.FINER))) {
+        logger.fine("The minimum number of clusters to use is " //$NON-NLS-1$
+            + minClusters + " and there are " + m + //$NON-NLS-1$
+            " data elements to cluster, so we put each in one cluster."); //$NON-NLS-1$
+
+      }
       return new _DirectResult(CanonicalPermutation.createCanonicalZero(m),
           0d);
     }
 
-    if ((m == 1) || //
-        ((numClasses >= 0) && (numClasses <= 1)) || //
-        ((numClasses <= 0) && (m <= 2))) {
+    if (m == 1) {
+      if ((logger != null) && (logger.isLoggable(Level.FINER))) {
+        logger.fine(//
+            "There is only one element to cluster, so we put it into its own, single cluster."); //$NON-NLS-1$
+
+      }
+      return new _DirectResult(new int[1], 0d);
+    }
+
+    if ((maxClusters >= 0) && (maxClusters <= 1)) {
+      if ((logger != null) && (logger.isLoggable(Level.FINER))) {
+        logger.fine(//
+            "The maximum number of clusters is one, so we put all elements into a single cluster."); //$NON-NLS-1$
+
+      }
       return new _DirectResult(new int[m], 0d);
     }
 

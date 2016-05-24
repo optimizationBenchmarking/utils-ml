@@ -18,8 +18,10 @@ public class ClusteringJobBuilder<R extends ClusteringJobBuilder<R>>
   /** the owning clusterer */
   private final Clusterer<?> m_clusterer;
 
-  /** the number of classes, {@code -1} if unspecified */
-  int m_classes;
+  /** the minimum number of clusters, {@code -1} if unspecified */
+  int m_minClusters;
+  /** the maximum number of clusters, {@code -1} if unspecified */
+  int m_maxClusters;
 
   /** the matrix */
   IMatrix m_matrix;
@@ -32,7 +34,8 @@ public class ClusteringJobBuilder<R extends ClusteringJobBuilder<R>>
    */
   protected ClusteringJobBuilder(final Clusterer<?> clusterer) {
     super();
-    this.m_classes = (-1);
+    this.m_minClusters = (-1);
+    this.m_maxClusters = (-1);
     this.m_clusterer = clusterer;
   }
 
@@ -106,9 +109,32 @@ public class ClusteringJobBuilder<R extends ClusteringJobBuilder<R>>
   /** {@inheritDoc} */
   @SuppressWarnings("unchecked")
   @Override
-  public final R setClusterNumber(final int number) {
-    ClusteringJobBuilder._checkClusterNumber(number, false);
-    this.m_classes = number;
+  public final R setMinClusters(final int minClusters) {
+    ClusteringJobBuilder._checkClusterNumber(minClusters, false);
+    if ((this.m_maxClusters > 0) && (this.m_maxClusters < minClusters)) {
+      throw new IllegalArgumentException(((((//
+      "Minimum number of clusters (" //$NON-NLS-1$
+          + minClusters)
+          + ") cannot be larger than already-specified maximum number of clusters (") //$NON-NLS-1$
+          + this.m_maxClusters) + ')') + '.');
+    }
+    this.m_minClusters = minClusters;
+    return ((R) this);
+  }
+
+  /** {@inheritDoc} */
+  @SuppressWarnings("unchecked")
+  @Override
+  public final R setMaxClusters(final int maxClusters) {
+    ClusteringJobBuilder._checkClusterNumber(maxClusters, false);
+    if ((this.m_minClusters > 0) && (this.m_minClusters > maxClusters)) {
+      throw new IllegalArgumentException(((((//
+      "Maximum number of clusters (" //$NON-NLS-1$
+          + maxClusters)
+          + ") cannot be smaller than already-specified minimum number of clusters (") //$NON-NLS-1$
+          + this.m_minClusters) + ')') + '.');
+    }
+    this.m_maxClusters = maxClusters;
     return ((R) this);
   }
 
@@ -121,26 +147,27 @@ public class ClusteringJobBuilder<R extends ClusteringJobBuilder<R>>
     return this.m_matrix;
   }
 
-  /** {@inheritDoc} */
-  @Override
-  protected void validate() {
-    super.validate();
-    ClusteringJobBuilder._checkClusterNumber(this.m_classes, true);
+  /**
+   * Get the minimum number of classes or clusters we want.
+   *
+   * @return the minimum number of clusters, or {@code -1} if unspecified
+   */
+  public final int getMinClusters() {
+    return this.m_minClusters;
   }
 
   /**
-   * Get the number of classes or clusters we want.
+   * Get the maximum number of classes or clusters we want.
    *
-   * @return the number of clusters, or {@code -1} if unspecified
+   * @return the maximum number of clusters, or {@code -1} if unspecified
    */
-  public final int getClusterNumber() {
-    return this.m_classes;
+  public final int getMaxClusters() {
+    return this.m_maxClusters;
   }
 
   /** {@inheritDoc} */
   @Override
   public final IClusteringJob create() {
-    this.validate();
     return this.m_clusterer._create(this);
   }
 }

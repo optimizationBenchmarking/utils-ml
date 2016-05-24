@@ -38,8 +38,9 @@ public abstract class Clusterer<R extends ClusteringJobBuilder<?>>
   final IClusteringJob _create(final ClusteringJobBuilder<?> builder) {
     _DirectResult job;
 
-    job = ClusteringTools._canClusterTrivially(builder.m_matrix,
-        builder.m_classes);
+    job = ClusteringTools._canClusterTrivially(builder.getLogger(), //
+        builder.m_matrix, //
+        builder.m_minClusters, builder.m_maxClusters);
     if (job != null) {
       return job;
     }

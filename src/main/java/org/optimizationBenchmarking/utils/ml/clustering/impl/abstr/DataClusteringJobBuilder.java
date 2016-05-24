@@ -20,13 +20,6 @@ public final class DataClusteringJobBuilder
 
   /** {@inheritDoc} */
   @Override
-  protected void validate() {
-    super.validate();
-    ClusteringJobBuilder.checkMatrix(this.m_matrix, false);
-  }
-
-  /** {@inheritDoc} */
-  @Override
   public final DataClusteringJobBuilder setData(final IMatrix matrix) {
     return this.setMatrix(matrix, false);
   }

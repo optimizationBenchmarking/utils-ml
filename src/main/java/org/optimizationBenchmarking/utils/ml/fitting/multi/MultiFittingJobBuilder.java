@@ -198,16 +198,6 @@ public final class MultiFittingJobBuilder
 
   /** {@inheritDoc} */
   @Override
-  protected void validate() {
-    super.validate();
-    FittingQualityMeasure.validateData(this.m_points);
-    MultiFittingJobBuilder._validateFunctions(this.m_functions);
-    MultiFittingJobBuilder._validateFitters(this.m_fitters);
-    FittingJobBuilder.validateMeasure(this.m_measure);
-  }
-
-  /** {@inheritDoc} */
-  @Override
   public final MultiFittingJob create() {
     final ArrayListView<IFunctionFitter> fitters;
     if (this.m_fitters == null) {
@@ -216,7 +206,6 @@ public final class MultiFittingJobBuilder
         this.setFitters(fitters);
       }
     }
-    this.validate();
     return this.m_tool._create(this);
   }
 

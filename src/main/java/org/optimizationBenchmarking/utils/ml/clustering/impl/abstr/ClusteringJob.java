@@ -14,8 +14,15 @@ import org.optimizationBenchmarking.utils.tools.impl.abstr.ToolJob;
 public abstract class ClusteringJob extends ToolJob
     implements IClusteringJob {
 
-  /** the number of classes, {@code -1} if unspecified */
-  protected final int m_classes;
+  /** the minimum number of clusters */
+  protected final int m_minClusters;
+  /** the maximum number of clusters */
+  protected final int m_maxClusters;
+
+  /** the number of rows */
+  private final int m_m;
+  /** the number of columns */
+  private final int m_n;
 
   /** the matrix representing the data to be clustered */
   protected IMatrix m_matrix;
@@ -32,10 +39,73 @@ public abstract class ClusteringJob extends ToolJob
       final boolean isMatrixDistance) {
     super(builder);
 
+    int minClusters, maxClusters;
+
     ClusteringJobBuilder._checkClusterNumber(//
-        this.m_classes = builder.m_classes, true);
+        minClusters = builder.m_minClusters, true);
+    ClusteringJobBuilder._checkClusterNumber(//
+        maxClusters = builder.m_maxClusters, true);
+
+    if ((minClusters > 0) && (maxClusters > 0)
+        && (minClusters > maxClusters)) {
+      throw new IllegalArgumentException(//
+          "The minimum number of clusters (" //$NON-NLS-1$
+              + minClusters + //
+              ") cannot be bigger than the maximum number of clusters ("//$NON-NLS-1$
+              + maxClusters + "), but is."); //$NON-NLS-1$
+    }
+
     ClusteringJobBuilder.checkMatrix(this.m_matrix = builder.m_matrix,
         isMatrixDistance);
+
+    this.m_m = this.m_matrix.m();
+    this.m_n = this.m_matrix.n();
+    this.m_minClusters = ((minClusters > 0) ? minClusters//
+        : this.computeMinClusters(maxClusters, this.m_m));
+    this.m_maxClusters = ((maxClusters > 0) ? maxClusters//
+        : this.computeMaxClusters(this.m_minClusters, this.m_m));
+
+    if ((this.m_minClusters > this.m_maxClusters)) {
+      throw new IllegalArgumentException((((((((((//
+      "The minimum number of clusters (" //$NON-NLS-1$
+          + this.m_minClusters) + //
+          ") cannot be bigger than the maximum number of clusters (")//$NON-NLS-1$
+          + this.m_maxClusters)
+          + "), but based on your suggested minimum ") //$NON-NLS-1$
+          + minClusters) + " and maximum ")//$NON-NLS-1$
+          + maxClusters) + " and number of elements ")//$NON-NLS-1$
+          + this.m_m) + ", we arrived there.");//$NON-NLS-1$
+    }
+  }
+
+  /**
+   * Compute the minimum number of clusters if it was not suggested
+   *
+   * @param maxClusters
+   *          the suggested maximum number of clusters, or {@code -1} if
+   *          unspecified
+   * @param m
+   *          the number of elements
+   * @return the suggested minimum of clusters
+   */
+  protected int computeMinClusters(final int maxClusters, final int m) {
+    if ((m <= 1) || (maxClusters <= 1)) {
+      return 1;
+    }
+    return 2;
+  }
+
+  /**
+   * Compute the maximum number of clusters if it was not suggested
+   *
+   * @param minClusters
+   *          the suggested minimum number of clusters
+   * @param m
+   *          the number of elements
+   * @return the suggested maximum of clusters
+   */
+  protected int computeMaxClusters(final int minClusters, final int m) {
+    return Math.min(12, Math.max(minClusters, m));
   }
 
   /**
@@ -74,12 +144,24 @@ public abstract class ClusteringJob extends ToolJob
     textOut.append(' ');
     textOut.append('a');
     textOut.append(' ');
-    textOut.append(this.m_matrix.m());
+    textOut.append(this.m_m);
     textOut.append('x');
-    textOut.append(this.m_matrix.n());
-    if (this.m_classes > 0) {
+    textOut.append(this.m_n);
+    if ((this.m_minClusters > 0) || (this.m_maxClusters > 0)) {
       textOut.append(" matrix into ");//$NON-NLS-1$
-      textOut.append(this.m_classes);
+      if (this.m_minClusters >= this.m_maxClusters) {
+        textOut.append(this.m_minClusters);
+      } else {
+        textOut.append('[');
+        if (this.m_minClusters > 0) {
+          textOut.append(this.m_minClusters);
+        }
+        textOut.append(',');
+        if (this.m_maxClusters > 0) {
+          textOut.append(this.m_maxClusters);
+        }
+        textOut.append(']');
+      }
     } else {
       textOut.append(" matrix an arbitrary number of");//$NON-NLS-1$
     }
@@ -116,64 +198,66 @@ public abstract class ClusteringJob extends ToolJob
     textOut = null;
     message = null;
     error = null;
-
-    logger = this.getLogger();
-    if ((logger != null) && (logger.isLoggable(Level.FINER))) {
-      textOut = this.__createMessageBody();
-      message = textOut.toString();
-      logger.finer("Beginning to cluster" + message);//$NON-NLS-1$
-    }
-
     try {
-      solution = this._cluster();
-
-      isFinite = MathUtils.isFinite(solution.quality);
-      if (isFinite) {
-        ClusteringTools.normalizeClusters(solution.assignment);
+      logger = this.getLogger();
+      if ((logger != null) && (logger.isLoggable(Level.FINER))) {
+        textOut = this.__createMessageBody();
+        message = textOut.toString();
+        logger.finer("Beginning to cluster" + message);//$NON-NLS-1$
       }
 
-      canLog = (logger != null) && (logger.isLoggable(Level.FINER));
+      try {
+        solution = this._cluster();
 
-      if (canLog || (!isFinite)) {
-        if (textOut == null) {
-          textOut = this.__createMessageBody();
+        isFinite = MathUtils.isFinite(solution.quality);
+        if (isFinite) {
+          ClusteringTools.normalizeClusters(solution.assignment);
         }
-        textOut.append(", obtained assignment ");//$NON-NLS-1$
-        separator = '[';
-        for (final int assignment : solution.assignment) {
-          textOut.append(separator);
-          separator = ',';
-          textOut.append(assignment);
-        }
-        textOut.append("] with quality ");//$NON-NLS-1$
-        textOut.append(solution.quality);
-        message = null;
-      }
 
-      if (isFinite) {
-        if (canLog) {
-          textOut.append('.');
-          logger.finer("Finished clustering" + //$NON-NLS-1$
-              textOut.toString());
+        canLog = (logger != null) && (logger.isLoggable(Level.FINER));
+
+        if (canLog || (!isFinite)) {
+          if (textOut == null) {
+            textOut = this.__createMessageBody();
+          }
+          textOut.append(", obtained assignment ");//$NON-NLS-1$
+          separator = '[';
+          for (final int assignment : solution.assignment) {
+            textOut.append(separator);
+            separator = ',';
+            textOut.append(assignment);
+          }
+          textOut.append("] with quality ");//$NON-NLS-1$
+          textOut.append(solution.quality);
+          message = null;
         }
-        return solution;
+
+        if (isFinite) {
+          if (canLog) {
+            textOut.append('.');
+            logger.finer("Finished clustering" + //$NON-NLS-1$
+                textOut.toString());
+          }
+          return solution;
+        }
+      } catch (final Throwable cause) {
+        error = cause;
       }
-    } catch (final Throwable cause) {
-      error = cause;
+      this.m_matrix = null;
+
+      if (textOut == null) {
+        textOut = this.__createMessageBody();
+      }
+      if (message == null) {
+        message = textOut.toString();
+      }
+      message = ("Error while trying to cluster" + message + '.'); //$NON-NLS-1$
+      if (error != null) {
+        throw new IllegalArgumentException(message, error);
+      }
+      throw new IllegalArgumentException(message);
     } finally {
       this.m_matrix = null;
     }
-
-    if (textOut == null) {
-      textOut = this.__createMessageBody();
-    }
-    if (message == null) {
-      message = textOut.toString();
-    }
-    message = ("Error while trying to cluster" + message + '.'); //$NON-NLS-1$
-    if (error != null) {
-      throw new IllegalArgumentException(message, error);
-    }
-    throw new IllegalArgumentException(message);
   }
 }

@@ -34,19 +34,18 @@ final class _RBasedDataClusteringJob extends DataClusteringJob {
         .setLogger(this.getLogger()).create()) {
       engine.setMatrix("data", this.m_matrix);//$NON-NLS-1$
       this.m_matrix = null;
-      engine.setLong("nCluster", this.m_classes);//$NON-NLS-1$
-      try {
-        try (final StreamLineIterator iterator = new StreamLineIterator(//
-            _RBasedDataClusteringJob.class, "dataCluster.txt")) {//$NON-NLS-1$
-          engine.execute(iterator);
-        }
+      engine.setLong("minClusters", this.m_minClusters);//$NON-NLS-1$
+      engine.setLong("maxClusters", this.m_maxClusters);//$NON-NLS-1$
+
+      try (final StreamLineIterator iterator = new StreamLineIterator(//
+          _RBasedDataClusteringJob.class, "dataCluster.txt")) {//$NON-NLS-1$
+        engine.execute(iterator);
       } catch (final Throwable error) {
         throw new IllegalStateException(//
             "Error while communicating REngine. Maybe the data is just too odd, or some required packages are missing and cannot be installed.", //$NON-NLS-1$
             error);
-      } finally {
-        this.m_matrix = null;
       }
+      this.m_matrix = null;
 
       result = engine.getMatrix("clusters"); //$NON-NLS-1$
       quality = engine.getDouble("quality"); //$NON-NLS-1$
