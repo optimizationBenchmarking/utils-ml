@@ -45,6 +45,10 @@ if(minClusters >= maxClusters) {#
 if(exists("pamResult")) {
   clusters<-as.vector(pamResult$clustering);#
   quality <-as.double(pamResult$silinfo$avg.width);#
+  if(length(quality) <= 0) {
+    quality <- as.double(0);
+  }
+  safeExec( { rm(pamResult) } );
 }
 #
 ## 2.2. Use Hierarchical Clustering
@@ -59,7 +63,7 @@ if(safeUsePackage("stats")) {
       hclust(distance, method="average"),#
       hclust(distance, method="mcquitty"),#
       hclust(distance, method="median"));#
-    #
+#
       for(i in minClusters:min(m-1,maxClusters)) {#
         for(hres in hclustList) {#
           hclustering <- as.vector(cutree(hres, k=i));#
@@ -88,13 +92,14 @@ if(safeUsePackage("stats")) {
 #
 })# / safe exec wrapper
 # fallback
-if( (!(exists("clusters"))) || (!(exists("quality"))) ||
-    (!(is.vector(clusters))) || (!(is.double(quality)))) {
+if( (!(exists("clusters"))) || (!(is.vector(clusters))) ) {
   if((nCluster > 0) && (nCluster < m)) {
     clusters <- c(rep(1, m-nCluster), 1:nCluster);
   } else {
     clusters <- 1:m;
   }
+}
+if( (!(exists("quality"))) || (!(is.double(quality)))) {
   quality  <- as.double(1);
 } else {
   quality  <- (1.0-quality);
