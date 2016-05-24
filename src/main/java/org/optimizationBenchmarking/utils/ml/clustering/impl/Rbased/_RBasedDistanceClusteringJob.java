@@ -34,13 +34,15 @@ final class _RBasedDistanceClusteringJob extends DistanceClusteringJob {
 
     try (final REngine engine = R.getInstance().use()
         .setLogger(this.getLogger()).create()) {
-
-      engine.setMatrix("distance", //$NON-NLS-1$
-          (this.m_matrix instanceof DoubleDistanceMatrix1D)//
-              ? ((DoubleDistanceMatrix1D) (this.m_matrix)).asRowVector()//
-              : this.m_matrix);
-      engine.setLong("m", this.m_matrix.m()); //$NON-NLS-1$
-      this.m_matrix = null;
+      try {
+        engine.setMatrix("distance", //$NON-NLS-1$
+            (this.m_matrix instanceof DoubleDistanceMatrix1D)//
+                ? ((DoubleDistanceMatrix1D) (this.m_matrix)).asRowVector()//
+                : this.m_matrix);
+      } finally {
+        this.m_matrix = null;
+      }
+      engine.setLong("m", this.m_m); //$NON-NLS-1$
       engine.setLong("minClusters", this.m_minClusters);//$NON-NLS-1$
       engine.setLong("maxClusters", this.m_maxClusters);//$NON-NLS-1$
 
@@ -53,7 +55,6 @@ final class _RBasedDistanceClusteringJob extends DistanceClusteringJob {
             error);
       }
 
-      this.m_matrix = null;
       result = engine.getMatrix("clusters"); //$NON-NLS-1$
       quality = engine.getDouble("quality"); //$NON-NLS-1$
     } catch (final IOException ioe) {

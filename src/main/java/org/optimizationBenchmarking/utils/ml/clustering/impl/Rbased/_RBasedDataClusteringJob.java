@@ -32,8 +32,11 @@ final class _RBasedDataClusteringJob extends DataClusteringJob {
 
     try (final REngine engine = R.getInstance().use()
         .setLogger(this.getLogger()).create()) {
-      engine.setMatrix("data", this.m_matrix);//$NON-NLS-1$
-      this.m_matrix = null;
+      try {
+        engine.setMatrix("data", this.m_matrix);//$NON-NLS-1$
+      } finally {
+        this.m_matrix = null;
+      }
       engine.setLong("minClusters", this.m_minClusters);//$NON-NLS-1$
       engine.setLong("maxClusters", this.m_maxClusters);//$NON-NLS-1$
 
@@ -45,7 +48,6 @@ final class _RBasedDataClusteringJob extends DataClusteringJob {
             "Error while communicating REngine. Maybe the data is just too odd, or some required packages are missing and cannot be installed.", //$NON-NLS-1$
             error);
       }
-      this.m_matrix = null;
 
       result = engine.getMatrix("clusters"); //$NON-NLS-1$
       quality = engine.getDouble("quality"); //$NON-NLS-1$

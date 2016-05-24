@@ -19,10 +19,13 @@ public abstract class ClusteringJob extends ToolJob
   /** the maximum number of clusters */
   protected final int m_maxClusters;
 
-  /** the number of rows */
-  private final int m_m;
+  /**
+   * the number of rows of the matrix, i.e., the number of elements to
+   * cluster
+   */
+  protected final int m_m;
   /** the number of columns */
-  private final int m_n;
+  protected final int m_n;
 
   /** the matrix representing the data to be clustered */
   protected IMatrix m_matrix;
@@ -60,10 +63,18 @@ public abstract class ClusteringJob extends ToolJob
 
     this.m_m = this.m_matrix.m();
     this.m_n = this.m_matrix.n();
-    this.m_minClusters = ((minClusters > 0) ? minClusters//
-        : this.computeMinClusters(maxClusters, this.m_m));
-    this.m_maxClusters = ((maxClusters > 0) ? maxClusters//
-        : this.computeMaxClusters(this.m_minClusters, this.m_m));
+
+    if (minClusters <= 0) {
+      minClusters = this.computeMinClusters(maxClusters, this.m_m);
+      ClusteringJobBuilder._checkClusterNumber(minClusters, false);
+    }
+    this.m_minClusters = minClusters;
+
+    if (maxClusters <= 0) {
+      maxClusters = this.computeMaxClusters(this.m_minClusters, this.m_m);
+      ClusteringJobBuilder._checkClusterNumber(maxClusters, false);
+    }
+    this.m_maxClusters = maxClusters;
 
     if ((this.m_minClusters > this.m_maxClusters)) {
       throw new IllegalArgumentException((((((((((//
@@ -144,25 +155,17 @@ public abstract class ClusteringJob extends ToolJob
     textOut.append(this.m_m);
     textOut.append('x');
     textOut.append(this.m_n);
-    if ((this.m_minClusters > 0) || (this.m_maxClusters > 0)) {
-      textOut.append(" matrix into ");//$NON-NLS-1$
-      if (this.m_minClusters >= this.m_maxClusters) {
-        textOut.append(this.m_minClusters);
-      } else {
-        textOut.append('[');
-        if (this.m_minClusters > 0) {
-          textOut.append(this.m_minClusters);
-        }
-        textOut.append(',');
-        if (this.m_maxClusters > 0) {
-          textOut.append(this.m_maxClusters);
-        }
-        textOut.append(']');
-      }
+    textOut.append(" matrix into ");//$NON-NLS-1$
+    if (this.m_minClusters >= this.m_maxClusters) {
+      textOut.append(this.m_minClusters);
     } else {
-      textOut.append(" matrix an arbitrary number of");//$NON-NLS-1$
+      textOut.append('[');
+      textOut.append(this.m_minClusters);
+      textOut.append(',');
+      textOut.append(this.m_maxClusters);
+      textOut.append(']');
     }
-    textOut.append(" classes with method ");//$NON-NLS-1$
+    textOut.append(" clusters with method ");//$NON-NLS-1$
     textOut.append(this.toString());
     if (this instanceof DataClusteringJob) {
       textOut.append(" (a raw data clustering method)");//$NON-NLS-1$
@@ -239,8 +242,9 @@ public abstract class ClusteringJob extends ToolJob
         }
       } catch (final Throwable cause) {
         error = cause;
+      } finally {
+        this.m_matrix = null;
       }
-      this.m_matrix = null;
 
       if (textOut == null) {
         textOut = this.__createMessageBody();
