@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 
 import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
+import org.optimizationBenchmarking.utils.ml.fitting.impl.FittingUtils;
 import org.optimizationBenchmarking.utils.ml.fitting.quality.FittingQualityMeasure;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IFittingJob;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IFittingQualityMeasure;
@@ -92,9 +93,9 @@ public class FittingJob extends ToolJob implements IFittingJob {
     final MemoryTextOutput textOut;
 
     textOut = new MemoryTextOutput(512);
-    textOut.append(" function '"); //$NON-NLS-1$
-    textOut.append(this.m_function);
-    textOut.append("' on ");//$NON-NLS-1$
+    textOut.append(" function "); //$NON-NLS-1$
+    FittingUtils.renderFunctionToFit(this.m_function, textOut);
+    textOut.append(" on ");//$NON-NLS-1$
     textOut.append(this.m_data.m());
     textOut.append(" data points with method ");//$NON-NLS-1$
     textOut.append(this);
@@ -113,7 +114,6 @@ public class FittingJob extends ToolJob implements IFittingJob {
     MemoryTextOutput textOut;
     Throwable error;
     String message;
-    char separator;
     boolean canLog, isFinite;
 
     logger = this.getLogger();
@@ -138,14 +138,8 @@ public class FittingJob extends ToolJob implements IFittingJob {
           textOut = this.__createMessageBody();
         }
         textOut.append(", obtained result ");//$NON-NLS-1$
-        separator = '[';
-        for (final double value : this.m_result.solution) {
-          textOut.append(separator);
-          separator = ',';
-          textOut.append(value);
-        }
-        textOut.append("] with quality ");//$NON-NLS-1$
-        textOut.append(this.m_result.quality);
+        FittingUtils.renderFittingResult(this.m_result.solution,
+            this.m_result.quality, textOut);
         message = null;
       }
 

@@ -8,6 +8,9 @@ import org.optimizationBenchmarking.utils.tools.impl.abstr.Tool;
  */
 public final class MultiFunctionFitter extends Tool {
 
+  /** The fitting method name */
+  static final String METHOD = "Multi-Function Fitter"; //$NON-NLS-1$
+
   /** create */
   MultiFunctionFitter() {
     super();
@@ -22,7 +25,7 @@ public final class MultiFunctionFitter extends Tool {
   /** {@inheritDoc} */
   @Override
   public final String toString() {
-    return "Multi-Function Fitter"; //$NON-NLS-1$
+    return MultiFunctionFitter.METHOD;
   }
 
   /** {@inheritDoc} */
