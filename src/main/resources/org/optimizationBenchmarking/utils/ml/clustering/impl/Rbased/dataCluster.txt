@@ -20,7 +20,8 @@ if( (m > 1) && (minClusters < m) ) {#
 # 0. load packages
 hasPackageStats<-safeUsePackage("stats");
 hasPackageFpc<-safeUsePackage("fpc");
-hasPackageMclust<-safeUsePackage("mclust");
+if(m < 10) { hasPackageMclust<-safeUsePackage("mclust"); }
+else { hasPackageMclust<-FALSE; }
 hasPackageApcluster<-safeUsePackage("apcluster");
 hasPackageCluster<-safeUsePackage("cluster");
 hasPackageNbClust<-safeUsePackage("NbClust");
