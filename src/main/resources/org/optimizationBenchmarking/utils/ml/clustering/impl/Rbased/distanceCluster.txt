@@ -46,20 +46,19 @@ if(minClusters >= maxClusters) {#
   }
 }
 if(exists("pamResult")) {
-  clusters<-as.vector(pamResult$clustering);#
-  safeExec( { rm(pamResult) } );
-  if(max(clusters) > 1) {
-    safeExec({ quality <- cluster.stats(d=distance, clustering=clusters)$avg.silwidth; })
-  }
-  if(exists("quality")) {
-    if(length(quality) <= 0) {
-      quality <- as.double(0);    
+  clusters<-as.vector(pamResult$clustering);
+  if(exists("clusters")) {
+    quality<-pamResult$silinfo$avg.width;
+    rm(pamResult);
+    if( exists("quality") && ( (length(quality) <= 0) || (quality < -1) || (quality > 1) ) ) {
+      rm(quality);
     }
-    if(quality > 1) {
-      quality <- as.double(0.01);
+    if( (!(exists("quality"))) && (max(clusters) > 1) ) {
+      safeExec({ quality <- cluster.stats(d=distance, clustering=clusters)$avg.silwidth; })
     }
-  } else {
-    quality <- as.double(0);    
+    if( (!(exists("quality"))) || (length(quality) <= 0) || (quality < -1) || (quality > 1) ) {
+      quality <- as.double(-1);
+    }
   }
 }
 #
@@ -78,19 +77,20 @@ if(hasPackageStats) {
 #
       for(i in minClusters:min(m-1,maxClusters)) {#
         for(hres in hclustList) {#
-          hclustering <- as.vector(cutree(hres, k=i));#
-          if(max(hclustering) > 1) {
-            hquality <- as.double(cluster.stats(d=distance, clustering=hclustering)$avg.silwidth);#
-          } else {#
-            hquality <- as.double(0);
-          }#
-          if(hquality > 1) {
-            hquality <- as.double(0.01);
-          }
-          if((!(exists("clusters"))) ||
-             (!(exists("quality")))  || (hquality > quality)) {#
-            quality <- hquality;#
-            clusters  <- hclustering;#
+          safeExec({ hclustering <- as.vector(cutree(hres, k=i)); })
+          if(exists("hclustering")) {            
+            if(max(hclustering) > 1) {
+              hquality <- safeExec({ cluster.stats(d=distance, clustering=hclustering)$avg.silwidth; })#
+            }
+            if( (!(exists("hquality"))) || (length(hquality) <= 0) || (hquality < -1) || (hquality > 1) ) {
+              hquality <- as.double(-1);
+            }
+            if( (!(exists("clusters"))) || (!(exists("quality")))  || (hquality > quality) ) {#
+              quality<-hquality;#
+              clusters<-hclustering;#
+            }            
+            rm(hquality);            
+            rm(hclustering);
           }#
         }#
       }#
