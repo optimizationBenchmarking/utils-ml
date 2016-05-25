@@ -12,8 +12,8 @@
 # output: "clusters": the assignment of instances to clusters 
 #         "quality" : the quality measure
 #
-safeExec({#
 m<-dim(data)[1];#
+safeExec({#
 #
 if( (m > 1) && (minClusters < m) ) {#
 #
@@ -168,9 +168,6 @@ cluster.n<-sort(unique(cluster.n))
 ## Step 3: Perform the actual clustering. We do that for each unique
 ## suggested cluster number. From the results, we keep the best clustering,
 ## where we define "best" as the one with the largest silhouette.
-bestClustering            <- NULL;
-bestClustering$clustering <- NULL;
-bestClustering$silhouette <- -Inf;
 #
 if(hasPackageStats) {
   safeExec( distances <- dist(data) );
@@ -192,58 +189,63 @@ for(number in cluster.n) {
 # First we try kmeans.
   if(hasPackageStats) {
     safeExec( {
-      currentClustering            <- NULL;
-      currentClustering$clustering <- as.vector(kmeans(data, number)$cluster);
-      if(max(currentClustering$clustering) > 1) {
-        currentClustering$silhouette <- cluster.stats(distances, currentClustering$clustering)$avg.silwidth;
-        if(currentClustering$silhouette > bestClustering$silhouette) {
-            bestClustering <- currentClustering;
-        }  
-      } else {
-        if(bestClustering$silhouette <= -Inf) {
-          bestClustering$clustering <- currentClustering$clustering;
+      currentClusters<-as.vector(kmeans(data, number)$cluster);
+      if(exists("currentClusters")) {
+        if(max(currentClusters) > 1) {
+          currentQuality<-as.double(cluster.stats(distances, currentClusters)$avg.silwidth);         
         }
+        if( (!(exists("currentQuality"))) || (length(currentQuality) <= 0) || (currentQuality < -1) || (currentQuality > 1) ) {
+          currentQuality <- as.double(-1);
+        }
+        if( (!(exists("clusters"))) || (!(exists("quality")))  || (currentQuality > quality) ) {#
+          quality<-currentQuality;#
+          clusters<-currentClusters;#
+        }
+        rm(currentQuality);
+        rm(currentClusters);        
       }
-      rm(currentClustering);
     });
   }
 #
 # Then we try pam.
   if(hasPackageCluster) {
     safeExec( {
-      currentClustering            <- NULL;
-      currentClustering$clustering <- as.vector(pam(data, number)$cluster);
-      if(max(currentClustering$clustering) > 1) {
-        currentClustering$silhouette <- cluster.stats(distances, currentClustering$clustering)$avg.silwidth;
-        if(currentClustering$silhouette > bestClustering$silhouette) {
-            bestClustering <- currentClustering;
-        }  
-      } else {
-        if(bestClustering$silhouette <= -Inf) {
-          bestClustering$clustering <- currentClustering$clustering;
+      currentClusters<-as.vector(pam(data, number)$cluster);
+      if(exists("currentClusters")) {
+        if(max(currentClusters) > 1) {
+          currentQuality<-as.double(cluster.stats(distances, currentClusters)$avg.silwidth);         
         }
+        if( (!(exists("currentQuality"))) || (length(currentQuality) <= 0) || (currentQuality < -1) || (currentQuality > 1) ) {
+          currentQuality <- as.double(-1);
+        }
+        if( (!(exists("clusters"))) || (!(exists("quality")))  || (currentQuality > quality) ) {#
+          quality<-currentQuality;#
+          clusters<-currentClusters;#
+        }
+        rm(currentQuality);
+        rm(currentClusters);        
       }
-      rm(currentClustering);
     });
   }
 #    
 # Then we try model-based clustering.  
   if(hasPackageMclust) {
     safeExec( {
-      currentClustering            <- NULL;
-      currentClustering$clustering <- as.vector(Mclust(data, G=c(number),
-                                        warn=FALSE)$classification);
-      if(max(currentClustering$clustering) > 1) {
-        currentClustering$silhouette <- cluster.stats(distances, currentClustering$clustering)$avg.silwidth;
-        if(currentClustering$silhouette > bestClustering$silhouette) {
-            bestClustering <- currentClustering;
-        }  
-      } else {
-        if(bestClustering$silhouette <= -Inf) {
-          bestClustering$clustering <- currentClustering$clustering;
+      currentClusters<-as.vector(Mclust(data, G=c(number), warn=FALSE)$classification);
+      if(exists("currentClusters")) {
+        if(max(currentClusters) > 1) {
+          currentQuality<-as.double(cluster.stats(distances, currentClusters)$avg.silwidth);         
         }
+        if( (!(exists("currentQuality"))) || (length(currentQuality) <= 0) || (currentQuality < -1) || (currentQuality > 1) ) {
+          currentQuality <- as.double(-1);
+        }
+        if( (!(exists("clusters"))) || (!(exists("quality")))  || (currentQuality > quality) ) {#
+          quality<-currentQuality;#
+          clusters<-currentClusters;#
+        }
+        rm(currentQuality);
+        rm(currentClusters);        
       }
-      rm(currentClustering);
     });
   }
 #
@@ -251,19 +253,21 @@ for(number in cluster.n) {
   if(hasPackageStats && exists("hclustList") && (number < m)) {
     for(hierarchicalClustering in hclustList) {#
       safeExec( {
-        currentClustering            <- NULL;
-        currentClustering$clustering <- as.vector(cutree(hierarchicalClustering, k=number));
-        if(max(currentClustering$clustering) > 1) {
-          currentClustering$silhouette <- cluster.stats(distances, currentClustering$clustering)$avg.silwidth;
-          if(currentClustering$silhouette > bestClustering$silhouette) {
-              bestClustering <- currentClustering;
-          }  
-        } else {
-          if(bestClustering$silhouette <= -Inf) {
-            bestClustering$clustering <- currentClustering$clustering;
+        currentClusters <- as.vector(cutree(hierarchicalClustering, k=number));
+        if(exists("currentClusters")) {
+          if(max(currentClusters) > 1) {
+            currentQuality<-as.double(cluster.stats(distances, currentClusters)$avg.silwidth);         
           }
+          if( (!(exists("currentQuality"))) || (length(currentQuality) <= 0) || (currentQuality < -1) || (currentQuality > 1) ) {
+            currentQuality <- as.double(-1);
+          }
+          if( (!(exists("clusters"))) || (!(exists("quality")))  || (currentQuality > quality) ) {#
+            quality<-currentQuality;#
+            clusters<-currentClusters;#
+          }
+          rm(currentQuality);
+          rm(currentClusters);        
         }
-        rm(currentClustering); 
       });
     }
   }  
@@ -273,29 +277,20 @@ safeExec( rm(distances) );
 safeExec( rm(data) );
 safeExec( rm(cluster.n) );
 safeExec( rm(hclustList) );
-clusters <- bestClustering$clustering;
-quality  <- bestClustering$silhouette;
-safeExec( rm(bestClustering) );
 #
 }# / clusterable data
 #
 })# / safe exec wrapper
-# fallback
-if( (!(exists("clusters"))) || (!(is.vector(clusters))) ) {
-  if((minClusters > 0) && (minClusters < m)) {
-    clusters <- c(rep(1, m-minClusters), 1:minClusters);    
+# 
+# fallback and error correction
+if( (!(exists("clusters"))) || (!(is.vector(clusters))) || (length(clusters) != m) ) {
+  useClusters = as.integer(0.5*(minClusters+maxClusters));
+  clusters<-c(rep(1, m-useClusters), 1:useClusters);
+  quality<-as.double(1);
+} else {
+  if( (!(exists("quality"))) || (length(quality) <= 0) || (quality < -1) || (quality > 1) ) {
+    quality<-as.double(1);
   } else {
-    if((maxClusters > 0) && (maxClusters < m)) {
-      clusters <- c(rep(1, m-maxClusters), 1:maxClusters);    
-    } else {
-      clusters <- 1:m;
-    }
+    quality<-as.double(max(0, min(1, (0.5-(0.5*quality)))));
   }
 }
-if( (!(exists("quality"))) || (!(is.double(quality)))) {
-  quality  <- as.double(1);
-} else {
-  quality  <- as.double(max(0, min(1, (1.0-quality))));
-}
-
-

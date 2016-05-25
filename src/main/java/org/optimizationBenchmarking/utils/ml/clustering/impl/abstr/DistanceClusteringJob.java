@@ -1,5 +1,7 @@
 package org.optimizationBenchmarking.utils.ml.clustering.impl.abstr;
 
+import java.util.logging.Logger;
+
 import org.optimizationBenchmarking.utils.ml.clustering.impl.dist.EuclideanDistance;
 import org.optimizationBenchmarking.utils.ml.clustering.impl.dist.MeasureBasedDistanceMatrixBuilder;
 import org.optimizationBenchmarking.utils.ml.clustering.spec.IDistanceMeasure;
@@ -37,6 +39,22 @@ public abstract class DistanceClusteringJob extends ClusteringJob {
   /** {@inheritDoc} */
   @Override
   final ClusteringSolution _cluster() throws Exception {
+    final Logger logger;
+    final ClusteringSolution result;
+
+    if (this.m_m == 2) {
+      logger = this.getLogger();
+      if (this.m_matrixIsDistanceMatrix) {
+        result = ClusteringTools.clusterTwoDataElements(logger,
+            this.m_matrix);
+      } else {
+        result = ClusteringTools.clusterTwoDistanceElements(logger,
+            this.m_matrix);
+      }
+      this.m_matrix = null;
+      return result;
+    }
+
     if (!(this.m_matrixIsDistanceMatrix)) {
       this.m_matrix = new MeasureBasedDistanceMatrixBuilder(this.m_matrix,
           this.createDistanceMeasure()).call();

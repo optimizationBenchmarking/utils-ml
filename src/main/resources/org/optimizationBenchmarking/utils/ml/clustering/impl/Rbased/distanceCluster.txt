@@ -102,20 +102,16 @@ if(hasPackageStats) {
 }# / clusterable data
 #
 })# / safe exec wrapper
-# fallback
-if( (!(exists("clusters"))) || (!(is.vector(clusters))) ) {
-  if((minClusters > 0) && (minClusters < m)) {
-    clusters <- c(rep(1, m-minClusters), 1:minClusters);    
-  } else {
-    if((maxClusters > 0) && (maxClusters < m)) {
-      clusters <- c(rep(1, m-maxClusters), 1:maxClusters);    
-    } else {
-      clusters <- 1:m;
-    }
-  }
-}
-if( (!(exists("quality"))) || (!(is.double(quality)))) {
-  quality  <- as.double(1);
+# 
+# fallback and error correction
+if( (!(exists("clusters"))) || (!(is.vector(clusters))) || (length(clusters) != m) ) {
+  useClusters = as.integer(0.5*(minClusters+maxClusters));
+  clusters<-c(rep(1, m-useClusters), 1:useClusters);
+  quality<-as.double(1);
 } else {
-  quality  <- as.double(max(0, min(1, (1.0-quality))));
+  if( (!(exists("quality"))) || (length(quality) <= 0) || (quality < -1) || (quality > 1) ) {
+    quality<-as.double(1);
+  } else {
+    quality<-as.double(max(0, min(1, (0.5-(0.5*quality)))));
+  }
 }

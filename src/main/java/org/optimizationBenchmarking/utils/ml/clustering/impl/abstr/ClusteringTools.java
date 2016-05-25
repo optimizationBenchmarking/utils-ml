@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.optimizationBenchmarking.utils.comparison.Compare;
 import org.optimizationBenchmarking.utils.error.ErrorUtils;
 import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.math.combinatorics.CanonicalPermutation;
@@ -236,6 +237,90 @@ public final class ClusteringTools {
     }
 
     return null;
+  }
+
+  /**
+   * Cluster two data elements: If we have two
+   *
+   * @param logger
+   *          the logger to use
+   * @param matrix
+   *          the data or dissimilarity matrix
+   * @return the default solution, or {@code null} if there is none
+   */
+  public static final ClusteringSolution clusterTwoDataElements(
+      final Logger logger, final IMatrix matrix) {
+    final _DirectResult result;
+    final String message;
+    int index;
+
+    isTwoClusters: {
+      isSingleCluster: {
+        if (matrix.isIntegerMatrix()) {
+          for (index = matrix.n(); (--index) >= 0;) {
+            if (matrix.getLong(0, index) != matrix.getLong(1, index)) {
+              break isSingleCluster;
+            }
+          }
+        } else {
+          for (index = matrix.n(); (--index) >= 0;) {
+            if (!(Compare.equals(matrix.getDouble(0, index),
+                matrix.getDouble(1, index)))) {
+              break isSingleCluster;
+            }
+          }
+        }
+        result = new _DirectResult(new int[2], 0d);
+        message = "The data set contains exactly two identical data samples. We will put them into one single cluster.";//$NON-NLS-1$
+        break isTwoClusters;
+      }
+      result = new _DirectResult(new int[] { 0, 1 }, 0d);
+      message = "The data set contains exactly two different data samples. We will put each one into a different cluster, i.e., get two clusters."; //$NON-NLS-1$
+    }
+
+    if ((logger != null) && (logger.isLoggable(Level.FINER))) {
+      logger.finer(message);
+    }
+    return result;
+  }
+
+  /**
+   * Cluster two distance elements: If we have two
+   *
+   * @param logger
+   *          the logger to use
+   * @param matrix
+   *          the data or dissimilarity matrix
+   * @return the default solution, or {@code null} if there is none
+   */
+  public static final ClusteringSolution clusterTwoDistanceElements(
+      final Logger logger, final IMatrix matrix) {
+    final _DirectResult result;
+    final String message;
+
+    isTwoClusters: {
+      isSingleCluster: {
+        if (matrix.isIntegerMatrix()) {
+          if (matrix.getLong(0, 1) != 0L) {
+            break isSingleCluster;
+          }
+        } else {
+          if (matrix.getDouble(0, 1) != 0d) {
+            break isSingleCluster;
+          }
+        }
+        result = new _DirectResult(new int[2], 0d);
+        message = "The data set contains exactly two samples with distance 0, i.e., two identical samples. We will put them into one single cluster.";//$NON-NLS-1$
+        break isTwoClusters;
+      }
+      result = new _DirectResult(new int[] { 0, 1 }, 0d);
+      message = "The data set contains exactly two data samples with non-zero distance, i.e., two different samples. We will put each one into a different cluster, i.e., get two clusters."; //$NON-NLS-1$
+    }
+
+    if ((logger != null) && (logger.isLoggable(Level.FINER))) {
+      logger.finer(message);
+    }
+    return result;
   }
 
   /**
