@@ -48,13 +48,13 @@ if(minClusters >= maxClusters) {#
 if(exists("pamResult")) {
   clusters<-as.vector(pamResult$clustering);
   if(exists("clusters")) {
-    quality<-pamResult$silinfo$avg.width;
+    safeExec(quality<-as.double(pamResult$silinfo$avg.width));
     rm(pamResult);
     if( exists("quality") && ( (length(quality) <= 0) || (quality < -1) || (quality > 1) ) ) {
       rm(quality);
     }
     if( (!(exists("quality"))) && (max(clusters) > 1) ) {
-      safeExec({ quality <- cluster.stats(d=distance, clustering=clusters)$avg.silwidth; })
+      safeExec(quality<-as.double(cluster.stats(d=distance, clustering=clusters)$avg.silwidth))
     }
     if( (!(exists("quality"))) || (length(quality) <= 0) || (quality < -1) || (quality > 1) ) {
       quality <- as.double(-1);
@@ -80,7 +80,7 @@ if(hasPackageStats) {
           safeExec({ hclustering <- as.vector(cutree(hres, k=i)); })
           if(exists("hclustering")) {            
             if(max(hclustering) > 1) {
-              hquality <- safeExec({ cluster.stats(d=distance, clustering=hclustering)$avg.silwidth; })#
+              hquality <- safeExec({ as.double(cluster.stats(d=distance, clustering=hclustering)$avg.silwidth); })#
             }
             if( (!(exists("hquality"))) || (length(hquality) <= 0) || (hquality < -1) || (hquality > 1) ) {
               hquality <- as.double(-1);
@@ -104,10 +104,14 @@ if(hasPackageStats) {
 })# / safe exec wrapper
 # fallback
 if( (!(exists("clusters"))) || (!(is.vector(clusters))) ) {
-  if((nCluster > 0) && (nCluster < m)) {
-    clusters <- c(rep(1, m-nCluster), 1:nCluster);
+  if((minClusters > 0) && (minClusters < m)) {
+    clusters <- c(rep(1, m-minClusters), 1:minClusters);    
   } else {
-    clusters <- 1:m;
+    if((maxClusters > 0) && (maxClusters < m)) {
+      clusters <- c(rep(1, m-maxClusters), 1:maxClusters);    
+    } else {
+      clusters <- 1:m;
+    }
   }
 }
 if( (!(exists("quality"))) || (!(is.double(quality)))) {
