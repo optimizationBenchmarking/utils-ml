@@ -7,11 +7,10 @@
 #         "maxClusters": the minimum desired number of clusters
 #         "m"       : the number of elements to cluster
 #
-# output: "clusters": the assignment of instances to clusters 
+# output: "clusters": the assignment of instances to clusters
 #         "quality" : the quality measure
 #
 safeExec({#
-if( (m > 1) && (minClusters < m) ) {#
 #
 # 0. load packages
 hasPackageStats<-safeUsePackage("stats");
@@ -42,24 +41,27 @@ if(minClusters >= maxClusters) {#
   }
 } else {
   if(safeUsePackage("fpc")) {
-    safeExec(pamResult<-pamk(data=distance, krange=minClusters:min(m-1,maxClusters), diss=TRUE)$pamobject);  
+    safeExec(pamResult<-pamk(data=distance, krange=minClusters:min(m-1,maxClusters), diss=TRUE)$pamobject);
   }
 }
 if(exists("pamResult")) {
   clusters<-as.vector(pamResult$clustering);
   if(exists("clusters")) {
-    safeExec(quality<-as.double(pamResult$silinfo$avg.width));
-    rm(pamResult);
-    if( exists("quality") && ( (length(quality) <= 0) || (quality < -1) || (quality > 1) ) ) {
-      rm(quality);
-    }
-    if( (!(exists("quality"))) && (max(clusters) > 1) ) {
-      safeExec(quality<-as.double(cluster.stats(d=distance, clustering=clusters)$avg.silwidth))
-    }
-    if( (!(exists("quality"))) || (length(quality) <= 0) || (quality < -1) || (quality > 1) ) {
-      quality <- as.double(-1);
-    }
-  }
+    clusterN<-max(clusters);
+    if( (clusterN >= minClusters) && (clusterN <= maxClusters) ) {
+      safeExec(quality<-as.double(pamResult$silinfo$avg.width));
+      rm(pamResult);
+      if( exists("quality") && ( (length(quality) <= 0) || (quality < -1) || (quality > 1) ) ) {
+        rm(quality);
+      }
+      if( ((!(exists("quality"))) || (length(quality) <= 0) || (quality < -1) || (quality > 1)) && (clusterN > 1) ) {
+        safeExec(quality<-as.double(cluster.stats(d=distance, clustering=clusters)$avg.silwidth))
+      }
+      if( (!(exists("quality"))) || (length(quality) <= 0) || (quality < -1) || (quality > 1) ) {
+        quality <- as.double(-1);
+      }
+    } else { rm(pamResult); rm(clusters); }
+  } else { rm(pamResult); }
 }
 #
 ## 2.2. Use Hierarchical Clustering
@@ -78,34 +80,35 @@ if(hasPackageStats) {
       for(i in minClusters:min(m-1,maxClusters)) {#
         for(hres in hclustList) {#
           safeExec({ hclustering <- as.vector(cutree(hres, k=i)); })
-          if(exists("hclustering")) {            
-            if(max(hclustering) > 1) {
-              hquality <- safeExec({ as.double(cluster.stats(d=distance, clustering=hclustering)$avg.silwidth); })#
+          if(exists("hclustering")) {
+            clusterN<-max(hclustering);
+            if( (clusterN >= minClusters) && (clusterN <= maxClusters) ) {
+              if(clusterN > 1) {
+                hquality <- safeExec({ as.double(cluster.stats(d=distance, clustering=hclustering)$avg.silwidth); })#
+              }
+              if( (!(exists("hquality"))) || (length(hquality) <= 0) || (hquality < -1) || (hquality > 1) ) {
+                hquality <- as.double(-1);
+              }
+              if( (!(exists("clusters"))) || (!(exists("quality")))  || (hquality > quality) ) {#
+                quality<-hquality;#
+                clusters<-hclustering;#
+              }
+              rm(hquality);
             }
-            if( (!(exists("hquality"))) || (length(hquality) <= 0) || (hquality < -1) || (hquality > 1) ) {
-              hquality <- as.double(-1);
-            }
-            if( (!(exists("clusters"))) || (!(exists("quality")))  || (hquality > quality) ) {#
-              quality<-hquality;#
-              clusters<-hclustering;#
-            }            
-            rm(hquality);            
             rm(hclustering);
           }#
         }#
       }#
     });
-#
   safeExec( { rm(hclustering); rm(hquality); } )
 }
 #
-}# / clusterable data
 #
 })# / safe exec wrapper
-# 
+#
 # fallback and error correction
 if( (!(exists("clusters"))) || (!(is.vector(clusters))) || (length(clusters) != m) ) {
-  useClusters = as.integer(0.5*(minClusters+maxClusters));
+  useClusters = as.integer(0.5+(0.5*(minClusters+maxClusters)));
   clusters<-c(rep(1, m-useClusters), 1:useClusters);
   quality<-as.double(1);
 } else {

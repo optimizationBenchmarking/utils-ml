@@ -193,7 +193,8 @@ public abstract class ClusteringJob extends ToolJob
     Throwable error;
     String message;
     char separator;
-    boolean canLog, isFinite;
+    boolean canLog, isFinite, wrongNumber;
+    int clusterCount;
 
     textOut = null;
     message = null;
@@ -211,12 +212,18 @@ public abstract class ClusteringJob extends ToolJob
 
         isFinite = MathUtils.isFinite(solution.quality);
         if (isFinite) {
-          ClusteringTools.normalizeClusters(solution.assignment);
+          clusterCount = ClusteringTools
+              .normalizeClusters(solution.assignment);
+          wrongNumber = ((clusterCount > this.m_maxClusters)
+              || (clusterCount < this.m_minClusters));
+        } else {
+          clusterCount = (-1);
+          wrongNumber = true;
         }
 
         canLog = (logger != null) && (logger.isLoggable(Level.FINER));
 
-        if (canLog || (!isFinite)) {
+        if (canLog || (!isFinite) || wrongNumber) {
           if (textOut == null) {
             textOut = this.__createMessageBody();
           }
@@ -229,10 +236,15 @@ public abstract class ClusteringJob extends ToolJob
           }
           textOut.append("] with quality ");//$NON-NLS-1$
           textOut.append(solution.quality);
+          if (clusterCount >= 0) {
+            textOut.append(" corresponding to ");//$NON-NLS-1$
+            textOut.append(clusterCount);
+            textOut.append(" clusters");//$NON-NLS-1$
+          }
           message = null;
         }
 
-        if (isFinite) {
+        if (isFinite && (!wrongNumber)) {
           if (canLog) {
             textOut.append('.');
             logger.finer("Finished clustering" + //$NON-NLS-1$

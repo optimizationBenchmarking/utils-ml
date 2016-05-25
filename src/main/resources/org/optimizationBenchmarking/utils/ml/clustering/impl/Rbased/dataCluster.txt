@@ -9,7 +9,7 @@
 #         "minClusters": the minimum desired number of clusters
 #         "maxClusters": the minimum desired number of clusters
 #
-# output: "clusters": the assignment of instances to clusters 
+# output: "clusters": the assignment of instances to clusters
 #         "quality" : the quality measure
 #
 m<-dim(data)[1];#
@@ -135,13 +135,13 @@ if(hasPackageNbClust) {
 ## Compute the cluster numbers to check: All unique suggestions, plus
 ## the (median-1)..(median+1) range.
 if(length(cluster.n)>0) {
-  cluster.n   <- min(maxClusters, max(minClusters, as.integer(cluster.n[which((cluster.n>=minClusters)&(cluster.n<=maxClusters))]))); 
+  cluster.n   <- min(maxClusters, max(minClusters, as.integer(cluster.n[which((cluster.n>=minClusters)&(cluster.n<=maxClusters))])));
   cluster.med <- min(maxClusters, max(minClusters, as.integer(round(median(cluster.n)))));
   cluster.n   <- c(cluster.n, max(minClusters, min(maxClusters, cluster.med-1)),
                               max(minClusters, min(maxClusters, cluster.med)),
-                              max(minClusters, min(maxClusters, cluster.med+1)));     
+                              max(minClusters, min(maxClusters, cluster.med+1)));
   rm(cluster.med);
-} 
+}
 if(exists("cluster.nbEuc")) {
   cluster.n <- c(cluster.n, cluster.nbEuc);
   rm(cluster.nbEuc);
@@ -159,11 +159,11 @@ if(length(cluster.n) > 0) {
       }
     }
   }
-}        
+}
 }
 cluster.n<-sort(unique(cluster.n))
 }# / get number of clusters
-# 
+#
 ##
 ## Step 3: Perform the actual clustering. We do that for each unique
 ## suggested cluster number. From the results, we keep the best clustering,
@@ -191,18 +191,21 @@ for(number in cluster.n) {
     safeExec( {
       currentClusters<-as.vector(kmeans(data, number)$cluster);
       if(exists("currentClusters")) {
-        if(max(currentClusters) > 1) {
-          currentQuality<-as.double(cluster.stats(distances, currentClusters)$avg.silwidth);         
+        clusterN<-max(currentClusters);
+        if( (clusterN >= minClusters) && (clusterN <= maxClusters) ) {
+          if(clusterN > 1) {
+            currentQuality<-as.double(cluster.stats(distances, currentClusters)$avg.silwidth);
+          }
+          if( (!(exists("currentQuality"))) || (length(currentQuality) <= 0) || (currentQuality < -1) || (currentQuality > 1) ) {
+            currentQuality <- as.double(-1);
+          }
+          if( (!(exists("clusters"))) || (!(exists("quality")))  || (currentQuality > quality) ) {#
+            quality<-currentQuality;#
+            clusters<-currentClusters;#
+          }
+          rm(currentQuality);
         }
-        if( (!(exists("currentQuality"))) || (length(currentQuality) <= 0) || (currentQuality < -1) || (currentQuality > 1) ) {
-          currentQuality <- as.double(-1);
-        }
-        if( (!(exists("clusters"))) || (!(exists("quality")))  || (currentQuality > quality) ) {#
-          quality<-currentQuality;#
-          clusters<-currentClusters;#
-        }
-        rm(currentQuality);
-        rm(currentClusters);        
+        rm(currentClusters);
       }
     });
   }
@@ -212,39 +215,45 @@ for(number in cluster.n) {
     safeExec( {
       currentClusters<-as.vector(pam(data, number)$cluster);
       if(exists("currentClusters")) {
-        if(max(currentClusters) > 1) {
-          currentQuality<-as.double(cluster.stats(distances, currentClusters)$avg.silwidth);         
+        clusterN<-max(currentClusters);
+        if( (clusterN >= minClusters) && (clusterN <= maxClusters) ) {
+          if(clusterN > 1) {
+            currentQuality<-as.double(cluster.stats(distances, currentClusters)$avg.silwidth);
+          }
+          if( (!(exists("currentQuality"))) || (length(currentQuality) <= 0) || (currentQuality < -1) || (currentQuality > 1) ) {
+            currentQuality <- as.double(-1);
+          }
+          if( (!(exists("clusters"))) || (!(exists("quality")))  || (currentQuality > quality) ) {#
+            quality<-currentQuality;#
+            clusters<-currentClusters;#
+          }
+          rm(currentQuality);
         }
-        if( (!(exists("currentQuality"))) || (length(currentQuality) <= 0) || (currentQuality < -1) || (currentQuality > 1) ) {
-          currentQuality <- as.double(-1);
-        }
-        if( (!(exists("clusters"))) || (!(exists("quality")))  || (currentQuality > quality) ) {#
-          quality<-currentQuality;#
-          clusters<-currentClusters;#
-        }
-        rm(currentQuality);
-        rm(currentClusters);        
+        rm(currentClusters);
       }
     });
   }
-#    
-# Then we try model-based clustering.  
+#
+# Then we try model-based clustering.
   if(hasPackageMclust) {
     safeExec( {
       currentClusters<-as.vector(Mclust(data, G=c(number), warn=FALSE)$classification);
       if(exists("currentClusters")) {
-        if(max(currentClusters) > 1) {
-          currentQuality<-as.double(cluster.stats(distances, currentClusters)$avg.silwidth);         
+        clusterN<-max(currentClusters);
+        if( (clusterN >= minClusters) && (clusterN <= maxClusters) ) {
+          if(clusterN > 1) {
+            currentQuality<-as.double(cluster.stats(distances, currentClusters)$avg.silwidth);
+          }
+          if( (!(exists("currentQuality"))) || (length(currentQuality) <= 0) || (currentQuality < -1) || (currentQuality > 1) ) {
+            currentQuality <- as.double(-1);
+          }
+          if( (!(exists("clusters"))) || (!(exists("quality")))  || (currentQuality > quality) ) {#
+            quality<-currentQuality;#
+            clusters<-currentClusters;#
+          }
+          rm(currentQuality);
         }
-        if( (!(exists("currentQuality"))) || (length(currentQuality) <= 0) || (currentQuality < -1) || (currentQuality > 1) ) {
-          currentQuality <- as.double(-1);
-        }
-        if( (!(exists("clusters"))) || (!(exists("quality")))  || (currentQuality > quality) ) {#
-          quality<-currentQuality;#
-          clusters<-currentClusters;#
-        }
-        rm(currentQuality);
-        rm(currentClusters);        
+        rm(currentClusters);
       }
     });
   }
@@ -255,22 +264,25 @@ for(number in cluster.n) {
       safeExec( {
         currentClusters <- as.vector(cutree(hierarchicalClustering, k=number));
         if(exists("currentClusters")) {
-          if(max(currentClusters) > 1) {
-            currentQuality<-as.double(cluster.stats(distances, currentClusters)$avg.silwidth);         
+          clusterN<-max(currentClusters);
+          if( (clusterN >= minClusters) && (clusterN <= maxClusters) ) {
+            if(clusterN > 1) {
+              currentQuality<-as.double(cluster.stats(distances, currentClusters)$avg.silwidth);
+            }
+            if( (!(exists("currentQuality"))) || (length(currentQuality) <= 0) || (currentQuality < -1) || (currentQuality > 1) ) {
+              currentQuality <- as.double(-1);
+            }
+            if( (!(exists("clusters"))) || (!(exists("quality")))  || (currentQuality > quality) ) {#
+              quality<-currentQuality;#
+              clusters<-currentClusters;#
+            }
+            rm(currentQuality);
           }
-          if( (!(exists("currentQuality"))) || (length(currentQuality) <= 0) || (currentQuality < -1) || (currentQuality > 1) ) {
-            currentQuality <- as.double(-1);
-          }
-          if( (!(exists("clusters"))) || (!(exists("quality")))  || (currentQuality > quality) ) {#
-            quality<-currentQuality;#
-            clusters<-currentClusters;#
-          }
-          rm(currentQuality);
-          rm(currentClusters);        
+          rm(currentClusters);
         }
       });
     }
-  }  
+  }
 }# / for  all cluster counts
 #
 safeExec( rm(distances) );
@@ -281,7 +293,7 @@ safeExec( rm(hclustList) );
 }# / clusterable data
 #
 })# / safe exec wrapper
-# 
+#
 # fallback and error correction
 if( (!(exists("clusters"))) || (!(is.vector(clusters))) || (length(clusters) != m) ) {
   useClusters = as.integer(0.5*(minClusters+maxClusters));

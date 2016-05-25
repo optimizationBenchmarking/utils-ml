@@ -330,8 +330,9 @@ public final class ClusteringTools {
    *
    * @param clusters
    *          the cluster array to normalize
+   * @return the number of clusters
    */
-  public static final void normalizeClusters(final int[] clusters) {
+  public static final int normalizeClusters(final int[] clusters) {
     final __TempCluster[] alloc;
     __TempCluster[] sorted;
     __TempCluster cur;
@@ -351,7 +352,7 @@ public final class ClusteringTools {
 
     if (min >= max) {
       Arrays.fill(clusters, 0);
-      return;
+      return 1;
     }
 
     alloc = new __TempCluster[(max - min) + 1];
@@ -379,6 +380,8 @@ public final class ClusteringTools {
     for (final int a : clusters) {
       clusters[++i] = alloc[a - min].m_newID;
     }
+
+    return alloc.length;
   }
 
   /** a temporary cluster */
