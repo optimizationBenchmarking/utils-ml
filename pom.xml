@@ -4,7 +4,7 @@
 
 	<groupId>org.optimizationBenchmarking</groupId>
 	<artifactId>utils-ml</artifactId>
-	<version>0.8.6-SNAPSHOT</version>
+	<version>0.8.6</version>
 	<packaging>jar</packaging>
 	<name>Machine Learning Utilities</name>
 	<description>This project holds the machine learning utilities used in the projects of the Optimization Benchmarking Tool Suite.</description>
