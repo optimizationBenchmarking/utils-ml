@@ -269,6 +269,8 @@ for(number in cluster.n) {
           if( (clusterN >= minClusters) && (clusterN <= maxClusters) ) {
             if(clusterN > 1) {
               currentQuality<-as.double(cluster.stats(distances, currentClusters)$avg.silwidth);
+            } else {
+              currentQuality<-as.double(-1);
             }
             if( (!(exists("currentQuality"))) || (length(currentQuality) <= 0) || (currentQuality < -1) || (currentQuality > 1) ) {
               currentQuality <- as.double(-1);

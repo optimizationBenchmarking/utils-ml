@@ -84,7 +84,9 @@ if(hasPackageStats) {
             clusterN<-max(hclustering);
             if( (clusterN >= minClusters) && (clusterN <= maxClusters) ) {
               if(clusterN > 1) {
-                hquality <- safeExec({ as.double(cluster.stats(d=distance, clustering=hclustering)$avg.silwidth); })#
+                safeExec({hquality<-as.double(cluster.stats(d=distance, clustering=hclustering)$avg.silwidth); })#
+              } else {
+                hquality <- as.double(-1);
               }
               if( (!(exists("hquality"))) || (length(hquality) <= 0) || (hquality < -1) || (hquality > 1) ) {
                 hquality <- as.double(-1);
