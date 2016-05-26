@@ -12,7 +12,7 @@ import org.optimizationBenchmarking.utils.reflection.ReflectionUtils;
 public final class LSSimplexFitter extends FunctionFitter {
 
   /** the method name */
-  static final String METHOD = "Least-Squares + Simpled Fitter"; //$NON-NLS-1$
+  static final String METHOD = "Least-Squares + Simplex Fitter"; //$NON-NLS-1$
 
   /** the error */
   private final Throwable m_error;

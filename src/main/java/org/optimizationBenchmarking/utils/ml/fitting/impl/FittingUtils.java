@@ -1,7 +1,7 @@
 package org.optimizationBenchmarking.utils.ml.fitting.impl;
 
 import org.optimizationBenchmarking.utils.error.ErrorUtils;
-import org.optimizationBenchmarking.utils.math.text.DefaultParameterRenderer;
+import org.optimizationBenchmarking.utils.math.text.ABCParameterRenderer;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.ParametricUnaryFunction;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
@@ -26,7 +26,7 @@ public final class FittingUtils {
     textOut.append(function);
     textOut.append(' ');
     textOut.append('(');
-    function.mathRender(textOut, DefaultParameterRenderer.INSTANCE);
+    function.mathRender(textOut, ABCParameterRenderer.INSTANCE);
     textOut.append(')');
   }
 
