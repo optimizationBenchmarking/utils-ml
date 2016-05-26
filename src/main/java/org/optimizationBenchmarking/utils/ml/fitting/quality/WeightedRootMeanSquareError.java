@@ -44,104 +44,84 @@ public final class WeightedRootMeanSquareError
   public WeightedRootMeanSquareError(final IMatrix data) {
     super(data);
 
-    double currentY, minY1, minY2, minY3;
     int index;
+    double currentY, minY, minY2;
+
+    // find the two smallest non-zero absolute y values
+    minY = minY2 = Double.POSITIVE_INFINITY;
+    for (index = data.m(); (--index) >= 0;) {
+      currentY = Math.abs(data.getDouble(index, 1));
+      if (WeightedRootMeanSquareError.__checkInverseWeight(currentY)) {
+        if (currentY < minY2) {
+          if (currentY < minY) {
+            minY = currentY;
+          } else {
+            if (currentY > minY) {
+              minY2 = currentY;
+            }
+          }
+        }
+      }
+    }
 
     this.m_sum = new StableSum();
 
-    // find the two smallest non-zero absolute y values
-    minY1 = minY2 = minY3 = Double.POSITIVE_INFINITY;
-    for (index = data.m(); (--index) >= 0;) {
-      currentY = Math.abs(data.getDouble(index, 1));
-      if (currentY < minY3) {
-        if (currentY < minY2) {
-          if (currentY == minY1) {
-            continue;
-          }
-          minY3 = minY2;
-          if (currentY < minY1) {
-            minY2 = minY1;
-            minY1 = currentY;
-            continue;
-          }
-          minY2 = currentY;
-          continue;
-        }
-        if (currentY == minY2) {
-          continue;
-        }
-        minY3 = currentY;
-      }
-    }
-
-    if (minY3 >= Double.POSITIVE_INFINITY) {
-      if (minY2 >= Double.POSITIVE_INFINITY) {
-        minY2 = minY1;
-      }
-      minY3 = minY2;
-    }
-
     // define the weight of points with "0" y-coordinate
-    findMinInverseWeight: {
-      if (WeightedRootMeanSquareError.__checkInverseWeight(minY1)) {
-        currentY = minY1;
-        break findMinInverseWeight;
-      }
+    if (WeightedRootMeanSquareError.__checkInverseWeight(minY)) {
 
       if (WeightedRootMeanSquareError.__checkInverseWeight(minY2)) {
         // Ideally, the inverse weight of the point with 0 y-value
         // behaves to the weight of the point with next-larger (i.e.,
         // smallest non-zero) absolute y value like this point's weight
         // to the one with second-smallest non-zero absolute y value.
-        currentY = (minY2 * (minY2 / minY3));
+        currentY = (minY * (minY / minY2));
         if (WeightedRootMeanSquareError.__checkInverseWeight(currentY)) {
-          break findMinInverseWeight;
+          this.m_minInverseWeight = currentY;
+          return;
         }
       }
 
-      for (final double y : new double[] { minY2, minY3 }) {
-        if (WeightedRootMeanSquareError.__checkInverseWeight(y)) {
-          // If that is not possible, we say it should just be ten percent
-          // smaller.
-          currentY = (y * 0.9d);
-          if (WeightedRootMeanSquareError.__checkInverseWeight(currentY)) {
-            break findMinInverseWeight;
-          }
-
-          // If that is not possible, we say it should just be one percent
-          // smaller.
-          currentY = (y * 0.99d);
-          if (WeightedRootMeanSquareError.__checkInverseWeight(currentY)) {
-            break findMinInverseWeight;
-          }
-
-          // If that is not possible, we say it should just be 0.1 percent
-          // smaller.
-          currentY = (y * 0.999d);
-          if (WeightedRootMeanSquareError.__checkInverseWeight(currentY)) {
-            break findMinInverseWeight;
-          }
-
-          // If that is not possible, we say it should just be the tiniest
-          // bit smaller.
-          currentY = Math.nextAfter(y, Double.NEGATIVE_INFINITY);
-          if (WeightedRootMeanSquareError.__checkInverseWeight(currentY)) {
-            break findMinInverseWeight;
-          }
-
-          // If that is not possible (second smallest y-coordinate is
-          // |Double.MIN_NORMAL|?), we say it should just be the same.
-          currentY = y;
-          break findMinInverseWeight;
-        }
+      // If that is not possible, we say it should just be ten percent
+      // smaller.
+      currentY = (minY * 0.9d);
+      if (WeightedRootMeanSquareError.__checkInverseWeight(currentY)) {
+        this.m_minInverseWeight = currentY;
+        return;
       }
 
-      // If that is not possible (all weights are <=Double.MIN_NORMAL????),
-      // we say it should just be 1.
-      currentY = 1d;
+      // If that is not possible, we say it should just be one percent
+      // smaller.
+      currentY = (minY * 0.99d);
+      if (WeightedRootMeanSquareError.__checkInverseWeight(currentY)) {
+        this.m_minInverseWeight = currentY;
+        return;
+      }
+
+      // If that is not possible, we say it should just be 0.1 percent
+      // smaller.
+      currentY = (minY * 0.999d);
+      if (WeightedRootMeanSquareError.__checkInverseWeight(currentY)) {
+        this.m_minInverseWeight = currentY;
+        return;
+      }
+
+      // If that is not possible, we say it should just be the tiniest
+      // bit smaller.
+      currentY = Math.nextAfter(minY, Double.NEGATIVE_INFINITY);
+      if (WeightedRootMeanSquareError.__checkInverseWeight(currentY)) {
+        this.m_minInverseWeight = currentY;
+        return;
+      }
+
+      // If that is not possible (smallest y-coordinate is
+      // |Double.MIN_NORMAL|?), we say it should just be the same.
+      this.m_minInverseWeight = minY;
+      return;
     }
 
-    this.m_minInverseWeight = currentY;
+    // If that is not possible (all weights are <=Double.MIN_NORMAL????),
+    // we say it should just be 1.
+    this.m_minInverseWeight = 1d;
   }
 
   /**
