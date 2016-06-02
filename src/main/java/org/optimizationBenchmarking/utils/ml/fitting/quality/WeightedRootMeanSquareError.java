@@ -168,6 +168,34 @@ public final class WeightedRootMeanSquareError
 
   /** {@inheritDoc} */
   @Override
+  public final double evaluateAt(final ParametricUnaryFunction model,
+      final double[] params, final int... points) {
+    final StableSum sum;
+    final double minInverseWeight;
+    double expectedY, computedY, residual;
+
+    sum = this.m_sum;
+    sum.reset();
+
+    minInverseWeight = this.m_minInverseWeight;
+    for (final int index : points) {
+      expectedY = this.m_data.getDouble(index, 1);
+      computedY = model.value(this.m_data.getDouble(index, 0), params);
+      residual = (expectedY - computedY);
+      if (residual != 0d) {
+        residual /= ((expectedY < minInverseWeight) ? minInverseWeight
+            : expectedY);
+      }
+      sum.append(residual * residual);
+    }
+
+    residual = Math.sqrt(sum.doubleValue() / points.length);
+    return (MathUtils.isFinite(residual) ? residual
+        : Double.POSITIVE_INFINITY);
+  }
+
+  /** {@inheritDoc} */
+  @Override
   public final void evaluate(final ParametricUnaryFunction model,
       final double[] parameters, final FittingEvaluation dest) {
     double[][] jacobian;
@@ -201,6 +229,72 @@ public final class WeightedRootMeanSquareError
 
     sum.reset();
     for (index = numSamples; (--index) >= 0;) {
+      x = data.getDouble(index, 0);
+      expectedY = this.m_data.getDouble(index, 1);
+      computedY = model.value(x, parameters);
+      if (expectedY < minInverseWeight) {
+        inverseWeight = minInverseWeight;
+      } else {
+        inverseWeight = expectedY;
+      }
+      residual = ((expectedY - computedY) / inverseWeight);
+
+      residuals[index] = residual;
+      sum.append(residual * residual);
+
+      jacobianRow = jacobian[index];
+      model.gradient(x, parameters, jacobianRow);
+      for (j = numParams; (--j) >= 0;) {
+        jacobianRow[j] /= inverseWeight;
+      }
+    }
+
+    squareErrorSum = sum.doubleValue();
+    if (MathUtils.isFinite(squareErrorSum)) {
+      dest.rmsError = dest.quality = //
+      Math.sqrt(squareErrorSum / numSamples);
+      dest.rsError = Math.sqrt(squareErrorSum);
+    } else {
+      dest.rmsError = dest.rsError = dest.quality = Double.POSITIVE_INFINITY;
+    }
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public final void evaluateAt(final ParametricUnaryFunction model,
+      final double[] parameters, final FittingEvaluation dest,
+      final int... points) {
+    double[][] jacobian;
+    double[] residuals;
+    final int numSamples, numParams;
+    final IMatrix data;
+    final double minInverseWeight;
+    final StableSum sum;
+    double[] jacobianRow;
+    double x, expectedY, computedY, residual, inverseWeight,
+        squareErrorSum;
+    int j;
+
+    data = this.m_data;
+    minInverseWeight = this.m_minInverseWeight;
+
+    numSamples = points.length;
+
+    residuals = dest.residuals;
+    if ((residuals == null) || (residuals.length != numSamples)) {
+      dest.residuals = residuals = new double[numSamples];
+    }
+
+    numParams = parameters.length;// =model.getParameterCount();
+    jacobian = dest.jacobian;
+    if ((jacobian == null) || (jacobian.length != numSamples)
+        || (jacobian[0].length != numParams)) {
+      dest.jacobian = jacobian = new double[numSamples][numParams];
+    }
+    sum = this.m_sum;
+
+    sum.reset();
+    for (final int index : points) {
       x = data.getDouble(index, 0);
       expectedY = this.m_data.getDouble(index, 1);
       computedY = model.value(x, parameters);

@@ -50,4 +50,10 @@ public abstract class FittingQualityMeasure
   public String toString() {
     return this.getClass().getSimpleName();
   }
+
+  /** {@inheritDoc} */
+  @Override
+  public final int getPointCount() {
+    return this.m_data.m();
+  }
 }
