@@ -14,6 +14,7 @@ safeExec({#
 #
 # 0. load packages
 hasPackageStats<-safeUsePackage("stats");
+hasPackageCluster<-safeUsePackage("cluster");
 #
 # 1. Building Distance Matrix
 dimDist<-dim(distance);
@@ -36,7 +37,7 @@ if((m != 1) && ((dimDist[1]==1) || (dimDist[2]==1))) {
 #
 ## 2.1. Use Partitioning Around Medoids
 if(minClusters >= maxClusters) {#
-  if(safeUsePackage("cluster")) {
+  if(hasPackageCluster) {
     safeExec(pamResult<-pam(x=distance, k=minClusters, diss=TRUE));
   }
 } else {
@@ -77,34 +78,70 @@ if(hasPackageStats) {
       hclust(distance, method="mcquitty"),#
       hclust(distance, method="median"));#
 #
+      if(hasPackageCluster) {
+        safeExec( hclustList <- append(hclustList, list(as.hclust(diana(distance,diss=TRUE,keep.diss=FALSE)))));
+      }
+#
       for(i in minClusters:min(m-1,maxClusters)) {#
         for(hres in hclustList) {#
-          safeExec({ hclustering <- as.vector(cutree(hres, k=i)); })
-          if(exists("hclustering")) {
-            clusterN<-max(hclustering);
+          safeExec({ currentClusters <- as.vector(cutree(hres, k=i)); })
+          if(exists("currentClusters")) {
+            clusterN<-max(currentClusters);
             if( (clusterN >= minClusters) && (clusterN <= maxClusters) ) {
               if(clusterN > 1) {
-                safeExec({hquality<-as.double(cluster.stats(d=distance, clustering=hclustering)$avg.silwidth); })#
+                safeExec({currentQuality<-as.double(cluster.stats(d=distance, clustering=currentClusters)$avg.silwidth); })#
               } else {
-                hquality <- as.double(-1);
+                currentQuality <- as.double(-1);
               }
-              if( (!(exists("hquality"))) || (length(hquality) <= 0) || (hquality < -1) || (hquality > 1) ) {
-                hquality <- as.double(-1);
+              if( (!(exists("currentQuality"))) || (length(currentQuality) <= 0) || (currentQuality < -1) || (currentQuality > 1) ) {
+                currentQuality <- as.double(-1);
               }
-              if( (!(exists("clusters"))) || (!(exists("quality")))  || (hquality > quality) ) {#
-                quality<-hquality;#
-                clusters<-hclustering;#
+              if( (!(exists("clusters"))) || (!(exists("quality")))  || (currentQuality > quality) ) {#
+                quality<-currentQuality;#
+                clusters<-currentClusters;#
               }
-              rm(hquality);
+              rm(currentQuality);
             }
-            rm(hclustering);
+            rm(currentClusters);
           }#
         }#
       }#
     });
-  safeExec( { rm(hclustering); rm(hquality); } )
+  safeExec( { rm(currentClusters); rm(currentQuality); } )
 }
-#
+## 2.3. Trying with DBSCAN
+if(safeUsePackage("fpc")) {
+  minDist<-min(distance);
+  distWidth<-(max(distance)-minDist);
+  if(distWidth > 0) {
+    for(multiplier in 1:90) {
+      clusterN<-2;
+      safeExec({#
+        currentClusters <- as.vector(dbscan(data=distance, eps=(minDist+((multiplier*distWidth)/100)), MinPts=1, method="dist", seeds=FALSE, showplot=0)$cluster);
+        if(min(currentClusters) > 0) {
+          clusterN<-max(currentClusters);
+          if( (clusterN >= minClusters) && (clusterN <= maxClusters) ) {
+            if(clusterN > 1) {
+              safeExec({currentQuality<-as.double(cluster.stats(d=distance, clustering=currentClusters)$avg.silwidth); })#
+            } else {
+              currentQuality <- as.double(-1);
+            }
+            if( (!(exists("currentQuality"))) || (length(currentQuality) <= 0) || (currentQuality < -1) || (currentQuality > 1) ) {
+              currentQuality <- as.double(-1);
+            }
+            if( (!(exists("clusters"))) || (!(exists("quality")))  || (currentQuality > quality) ) {#
+              quality<-currentQuality;#
+              clusters<-currentClusters;#
+            }
+            rm(currentQuality);                
+          }
+        }
+        rm(currentClusters);
+      })
+      if(clusterN<=1) { break; }
+    }
+  }
+}
 #
 })# / safe exec wrapper
 #

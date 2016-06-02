@@ -98,11 +98,9 @@ public class FittingJob extends ToolJob implements IFittingJob {
     textOut.append(" on ");//$NON-NLS-1$
     textOut.append(this.m_data.m());
     textOut.append(" data points with method ");//$NON-NLS-1$
-    textOut.append(this);
+    textOut.append(this.toString());
     textOut.append(" using quality measure ");//$NON-NLS-1$
     textOut.append(this.m_measure.toString());
-    textOut.append(" with method ");//$NON-NLS-1$
-    textOut.append(this.toString());
     return textOut;
   }
 
