@@ -53,22 +53,14 @@ final class _LSSimplexFittingJob extends FittingJob
   /** the maximum number of iterations for the main loop */
   private static final int MAIN_LOOP_ITERATIONS = 10;
 
-  /** the minimum required weighted distance between starting points */
-  private static final double MIN_REQUIRED_DISTANCE = 1e-5d;
-
-  /** a solution was used as input to levenberg-marquardt */
-  private static final int PROCESSED_BY_LEVENBERG_MARQUARDT = 1;
-  /** a solution was used as input to gauss-newton */
-  private static final int PROCESSED_BY_GAUSS_NEWTON = //
-  (_LSSimplexFittingJob.PROCESSED_BY_LEVENBERG_MARQUARDT << 1);
-  /** a solution was used as input to nelder-mead */
-  private static final int PROCESSED_BY_NELDER_MEAD = //
-  (_LSSimplexFittingJob.PROCESSED_BY_GAUSS_NEWTON << 1);
-
-  /** the solution was used as input for any of least-squares solvers */
-  private static final int PROCESSED_BY_LEAST_SQUARES = //
-  (_LSSimplexFittingJob.PROCESSED_BY_LEVENBERG_MARQUARDT
-      | _LSSimplexFittingJob.PROCESSED_BY_GAUSS_NEWTON);
+  /** the solution was improved */
+  private static final int RET_IMPROVEMENT = 0;
+  /** the application of the optimization method has failed */
+  private static final int RET_FAILED = 1;
+  /** the solution was not improved */
+  private static final int RET_NO_IMPROVEMENT = 2;
+  /** a similar solution has already been detected */
+  private static final int RET_SAME = 3;
 
   /** the evaluation counter */
   private Incrementor m_evaluationCounter;
@@ -96,6 +88,9 @@ final class _LSSimplexFittingJob extends FittingJob
 
   /** the simplex optimizer */
   private SimplexOptimizer m_simplex;
+
+  /** the candidate manager */
+  private _CandidateManager m_manager;
 
   /**
    * create the fitting job
@@ -217,187 +212,241 @@ final class _LSSimplexFittingJob extends FittingJob
    * Refine the current {@link #m_startVector start point} with the
    * Levenberg-Marquardt method.
    *
-   * @param source
-   *          the source candidate solution
-   * @param dest
-   *          the destination candidate solution
-   * @return {@code true} on success, {@code false} on failure
+   * @param solution
+   *          the solution to refine
+   * @param steps
+   *          the number of steps required between at least two variables
+   * @return one of the {@code RET_} codes
    */
-  private final boolean __refineStartWithLevenbergMarquardt(
-      final _Candidate source, final _Candidate dest) {
-    final Optimum res;
-    final double quality;
+  private final int __refineStartWithLevenbergMarquardt(
+      final _Candidate solution, final long steps) {
+    try {
+      this.m_iterationCounter = new Incrementor(
+          _LSSimplexFittingJob.OPTIMIZER_MAX_ITERATIONS);
+      this.m_evaluationCounter = new Incrementor(
+          _LSSimplexFittingJob.OPTIMIZER_MAX_ITERATIONS
+              * _LSSimplexFittingJob.OPTIMIZER_MAX_ITERATIONS);
 
-    if ((source.m_processedBy
-        & _LSSimplexFittingJob.PROCESSED_BY_LEVENBERG_MARQUARDT) == 0) {
-      source.m_processedBy |= _LSSimplexFittingJob.PROCESSED_BY_LEVENBERG_MARQUARDT;
-      try {
-        this.m_iterationCounter = new Incrementor(
-            _LSSimplexFittingJob.OPTIMIZER_MAX_ITERATIONS);
-        this.m_evaluationCounter = new Incrementor(
-            _LSSimplexFittingJob.OPTIMIZER_MAX_ITERATIONS
-                * _LSSimplexFittingJob.OPTIMIZER_MAX_ITERATIONS);
-
-        if (this.m_levenbergMarquardt == null) {
-          this.m_levenbergMarquardt = new LevenbergMarquardtOptimizer();
-        }
-
-        res = this.m_levenbergMarquardt.optimize(this);
-        quality = res.getRMS();
-
-        if (MathUtils.isFinite(quality)) {
-          source.m_processedBy |= _LSSimplexFittingJob.PROCESSED_BY_LEAST_SQUARES;
-          if (quality < source.quality) {
-            dest.quality = quality;
-            System.arraycopy(
-                _LSSimplexFittingJob.__toArray(res.getPoint()), 0,
-                dest.solution, 0, dest.solution.length);
-            dest.m_processedBy = _LSSimplexFittingJob.PROCESSED_BY_LEAST_SQUARES;
-            return true;
-          }
-        }
-      } catch (@SuppressWarnings("unused") final Throwable error) {
-        // ignore
-      } finally {
-        this.m_evaluationCounter = null;
-        this.m_iterationCounter = null;
+      if (this.m_levenbergMarquardt == null) {
+        this.m_levenbergMarquardt = new LevenbergMarquardtOptimizer();
       }
+
+      return this.__checkOptimum(this.m_levenbergMarquardt.optimize(this),
+          solution, steps);
+    } catch (@SuppressWarnings("unused") final Throwable error) {
+      return _LSSimplexFittingJob.RET_FAILED;
+    } finally {
+      this.m_evaluationCounter = null;
+      this.m_iterationCounter = null;
     }
-    return false;
+  }
+
+  /**
+   * Check an optimum
+   *
+   * @param optimum
+   *          the discovered optimum
+   * @param solution
+   *          the solution to refine
+   * @param steps
+   *          the number of steps required between at least two variables
+   * @return one of the {@code RET_} codes
+   */
+  private final int __checkOptimum(final Optimum optimum,
+      final _Candidate solution, final long steps) {
+    final double quality;
+    quality = optimum.getRMS();
+
+    if ((quality < solution.quality) && MathUtils.isFinite(quality)) {
+      solution._assign(_LSSimplexFittingJob.__toArray(optimum.getPoint()),
+          solution.quality);
+      this.register(solution.quality, solution.solution);
+      if (this.m_manager._isUniqueEnough(solution, steps)) {
+        this.m_manager._add(solution);
+        return _LSSimplexFittingJob.RET_IMPROVEMENT;
+      }
+      return _LSSimplexFittingJob.RET_SAME;
+    }
+    return _LSSimplexFittingJob.RET_NO_IMPROVEMENT;
   }
 
   /**
    * refine the current {@link #m_startVector start point} with the
    * Gauss-Newton method.
    *
-   * @param source
-   *          the source candidate solution
-   * @param dest
-   *          the destination candidate solution
-   * @return {@code true} on success, {@code false} on failure
+   * @param solution
+   *          the solution to refine
+   * @param steps
+   *          the number of steps required between at least two variables
+   * @return one of the {@code RET_} codes
    */
-  private final boolean __refineStartWithGaussNewton(
-      final _Candidate source, final _Candidate dest) {
-    final Optimum res;
-    final double quality;
+  private final int __refineStartWithGaussNewton(final _Candidate solution,
+      final long steps) {
+    try {
+      this.m_iterationCounter = new Incrementor(
+          _LSSimplexFittingJob.OPTIMIZER_MAX_ITERATIONS);
+      this.m_evaluationCounter = new Incrementor(
+          _LSSimplexFittingJob.OPTIMIZER_MAX_ITERATIONS
+              * _LSSimplexFittingJob.OPTIMIZER_MAX_ITERATIONS);
 
-    if ((source.m_processedBy
-        & _LSSimplexFittingJob.PROCESSED_BY_GAUSS_NEWTON) == 0) {
-      source.m_processedBy |= _LSSimplexFittingJob.PROCESSED_BY_GAUSS_NEWTON;
-      try {
-        this.m_iterationCounter = new Incrementor(
-            _LSSimplexFittingJob.OPTIMIZER_MAX_ITERATIONS);
-        this.m_evaluationCounter = new Incrementor(
-            _LSSimplexFittingJob.OPTIMIZER_MAX_ITERATIONS
-                * _LSSimplexFittingJob.OPTIMIZER_MAX_ITERATIONS);
-
-        if (this.m_gaussNewton == null) {
-          this.m_gaussNewton = new GaussNewtonOptimizer(
-              GaussNewtonOptimizer.Decomposition.SVD);
-        }
-
-        res = this.m_gaussNewton.optimize(this);
-        quality = res.getRMS();
-
-        if (MathUtils.isFinite(quality)) {
-          source.m_processedBy |= _LSSimplexFittingJob.PROCESSED_BY_LEAST_SQUARES;
-          if (quality < source.quality) {
-            dest.quality = quality;
-            System.arraycopy(
-                _LSSimplexFittingJob.__toArray(res.getPoint()), 0,
-                dest.solution, 0, dest.solution.length);
-            dest.m_processedBy = _LSSimplexFittingJob.PROCESSED_BY_LEAST_SQUARES;
-            return true;
-          }
-        }
-      } catch (@SuppressWarnings("unused") final Throwable error) {
-        // ignore
-      } finally {
-        this.m_evaluationCounter = null;
-        this.m_iterationCounter = null;
+      if (this.m_gaussNewton == null) {
+        this.m_gaussNewton = new GaussNewtonOptimizer(
+            GaussNewtonOptimizer.Decomposition.SVD);
       }
-    }
 
-    return false;
+      return this.__checkOptimum(this.m_gaussNewton.optimize(this),
+          solution, steps);
+    } catch (@SuppressWarnings("unused") final Throwable error) {
+      return _LSSimplexFittingJob.RET_FAILED;
+    } finally {
+      this.m_evaluationCounter = null;
+      this.m_iterationCounter = null;
+    }
   }
 
   /**
-   * Refine the current {@link #m_startVector start point} with a
-   * least-squares method
+   * Refine the given solution with a least-squares method
    *
-   * @param source
-   *          the source candidate solution
-   * @param dest
-   *          the destination candidate solution
-   * @return {@code true} on success, {@code false} on failure
+   * @param solution
+   *          the solution to refine
+   * @param steps
+   *          the number of steps required between at least two variables
+   * @return one of the {@code RET_} codes
    */
-  private final boolean __refineWithLeastSquares(final _Candidate source,
-      final _Candidate dest) {
-
-    System.arraycopy(source.solution, 0, this.m_startVectorData, 0,
+  private final int __refineWithLeastSquares(final _Candidate solution,
+      final long steps) {
+    System.arraycopy(solution.solution, 0, this.m_startVectorData, 0,
         this.m_startVectorData.length);
-    return (this.__refineStartWithLevenbergMarquardt(source, dest) || //
-        this.__refineStartWithGaussNewton(source, dest));
+
+    switch (this.__refineStartWithLevenbergMarquardt(solution, steps)) {
+      case RET_IMPROVEMENT: {
+        return _LSSimplexFittingJob.RET_IMPROVEMENT;
+      }
+      case RET_FAILED:
+      case RET_NO_IMPROVEMENT: {
+        return this.__refineStartWithGaussNewton(solution, steps);
+      }
+      default: {
+        return _LSSimplexFittingJob.RET_SAME;
+      }
+    }
   }
 
   /**
    * refine a given solution using Nelder-Mead
    *
-   * @param source
-   *          the source candidate solution
-   * @param dest
-   *          the destination candidate solution
-   * @return {@code true} on success, {@code false} on failure
+   * @param solution
+   *          the solution to refine
+   * @param steps
+   *          the number of steps required between at least two variables
+   * @return one of the {@code RET_} codes
    */
   @SuppressWarnings("unused")
-  private final boolean __refineWithNelderMead(final _Candidate source,
-      final _Candidate dest) {
+  private final int __refineWithNelderMead(final _Candidate solution,
+      final long steps) {
     final int dim;
-    PointValuePair res;
-    double quality;
 
-    if ((source.m_processedBy
-        & _LSSimplexFittingJob.PROCESSED_BY_NELDER_MEAD) == 0) {
-      source.m_processedBy |= _LSSimplexFittingJob.PROCESSED_BY_NELDER_MEAD;
-      try {
-        if (this.m_simplex == null) {
-          this.m_simplex = new SimplexOptimizer(1e-10d,
-              Double.NEGATIVE_INFINITY);
+    try {
+      if (this.m_simplex == null) {
+        this.m_simplex = new SimplexOptimizer(1e-10d,
+            Double.NEGATIVE_INFINITY);
+      }
+      if (this.m_objective == null) {
+        this.m_objective = new ObjectiveFunction(this);
+      }
+      dim = solution.solution.length;
+
+      if (this.m_maxEval == null) {
+        this.m_maxEval = new MaxEval(dim * dim * 300);
+      }
+      if (this.m_maxIter == null) {
+        this.m_maxIter = new MaxIter(this.m_maxEval.getMaxEval());
+      }
+
+      return this.__checkPointValuePair(this.m_simplex.optimize(//
+          new NelderMeadSimplex(solution.solution), //
+          new InitialGuess(solution.solution), //
+          this.m_objective, this.m_maxEval, this.m_maxIter,
+          GoalType.MINIMIZE), solution, steps);
+
+    } catch (final Throwable error) {
+      return _LSSimplexFittingJob.RET_FAILED;
+    }
+  }
+
+  /**
+   * Check an point-value pair optimum
+   *
+   * @param optimum
+   *          the discovered optimum
+   * @param solution
+   *          the solution to refine
+   * @param steps
+   *          the number of steps required between at least two variables
+   * @return one of the {@code RET_} codes
+   */
+  private final int __checkPointValuePair(final PointValuePair optimum,
+      final _Candidate solution, final long steps) {
+    final double quality;
+
+    quality = optimum.getValue().doubleValue();
+
+    if (MathUtils.isFinite(quality)) {
+      if (quality < solution.quality) {
+        solution._assign(optimum.getPoint(), solution.quality);
+        this.register(solution.quality, solution.solution);
+        if (this.m_manager._isUniqueEnough(solution, steps)) {
+          this.m_manager._add(solution);
+          return _LSSimplexFittingJob.RET_IMPROVEMENT;
         }
-        if (this.m_objective == null) {
-          this.m_objective = new ObjectiveFunction(this);
-        }
-        dim = source.solution.length;
-
-        if (this.m_maxEval == null) {
-          this.m_maxEval = new MaxEval(dim * dim * 300);
-        }
-        if (this.m_maxIter == null) {
-          this.m_maxIter = new MaxIter(this.m_maxEval.getMaxEval());
-        }
-
-        res = this.m_simplex.optimize(//
-            new NelderMeadSimplex(source.solution), //
-            new InitialGuess(source.solution), //
-            this.m_objective, this.m_maxEval, this.m_maxIter,
-            GoalType.MINIMIZE);
-
-        quality = res.getValue().doubleValue();
-
-        if (MathUtils.isFinite(quality) && (quality < source.quality)) {
-          dest.quality = quality;
-          System.arraycopy(res.getPoint(), 0, dest.solution, 0,
-              dest.solution.length);
-          dest.m_processedBy |= _LSSimplexFittingJob.PROCESSED_BY_NELDER_MEAD;
-          return true;
-        }
-
-      } catch (final Throwable error) {
-        // ignore
+        return _LSSimplexFittingJob.RET_SAME;
       }
     }
+    return _LSSimplexFittingJob.RET_NO_IMPROVEMENT;
+  }
 
-    return false;
+  /**
+   * refine a given solution using all available means
+   *
+   * @param solution
+   *          the solution to refine
+   * @param steps
+   *          the number of steps required between at least two variables
+   * @return one of the {@code RET_} codes
+   */
+  @SuppressWarnings("incomplete-switch")
+  private final int __refine(final _Candidate solution, final long steps) {
+    boolean doLocalSearch, hasImprovement;
+
+    doLocalSearch = true;
+    hasImprovement = false;
+    loop: for (;;) {
+      switch (this.__refineWithLeastSquares(solution, steps)) {
+        case RET_IMPROVEMENT: {
+          hasImprovement = doLocalSearch = true;
+          break;
+        }
+        case RET_SAME: {
+          return _LSSimplexFittingJob.RET_SAME;
+        }
+      }
+      if (doLocalSearch) {
+        switch (this.__refineWithNelderMead(solution, steps)) {
+          case RET_IMPROVEMENT: {
+            hasImprovement = true;
+            doLocalSearch = false;
+            continue loop;
+          }
+          case RET_SAME: {
+            return _LSSimplexFittingJob.RET_SAME;
+          }
+        }
+      }
+      if (hasImprovement) {
+        return _LSSimplexFittingJob.RET_IMPROVEMENT;
+      }
+      return _LSSimplexFittingJob.RET_NO_IMPROVEMENT;
+    }
   }
 
   //// END: optimization routines
@@ -406,26 +455,27 @@ final class _LSSimplexFittingJob extends FittingJob
   @Override
   protected void fit() {
     final int numParameters, maxStartPointSamples;
-    final _CandidateManager manager;
     final Random random;
-    final double[] tempStartGuess;
-    _Candidate currentSolution, nextSolution;
+    _Candidate bestSolution, tempSolution;
     IParameterGuesser guesser;
-    double currentQuality;
     int index, iterations;
+    boolean hasNoStart;
 
     // initialize and allocate all needed variables
 
     random = new Random();
     numParameters = this.m_function.getParameterCount();
 
-    manager = new _CandidateManager(
-        (_LSSimplexFittingJob.MAIN_LOOP_ITERATIONS * 4), numParameters);
+    this.m_manager = new _CandidateManager(numParameters,
+        (_LSSimplexFittingJob.MAIN_LOOP_ITERATIONS * 16));
 
     guesser = this.m_function.createParameterGuesser(this.m_data);
 
-    this.m_startVectorData = tempStartGuess = new double[numParameters];
-    this.m_startVector = new ArrayRealVector(tempStartGuess, false);
+    bestSolution = new _Candidate(numParameters);
+    tempSolution = new _Candidate(numParameters);
+    this.m_startVectorData = tempSolution.solution;
+    this.m_startVector = new ArrayRealVector(this.m_startVectorData,
+        false);
 
     maxStartPointSamples = Math.max(100,
         Math.min(10000, ((int) (Math.round(//
@@ -435,57 +485,34 @@ final class _LSSimplexFittingJob extends FittingJob
     // Inner loop: 1) generate initial guess, 2) use least-squares
     // approach to refine, 3) use direct black-box optimizer to refine,
     // 4) if that worked, try least-squares again
-    for (iterations = _LSSimplexFittingJob.MAIN_LOOP_ITERATIONS; (--iterations) >= 0;) {
-
-      currentSolution = manager._create();
+    for (iterations = 1; iterations <= _LSSimplexFittingJob.MAIN_LOOP_ITERATIONS; ++iterations) {
 
       // Find initial guess: we use the parameter guesser provided by the
       // model to create a few guesses and keep the best one
-      guesser.createRandomGuess(currentSolution.solution, random);
-      currentSolution.quality = this.evaluate(currentSolution.solution);
-
+      hasNoStart = true;
+      bestSolution.quality = Double.POSITIVE_INFINITY;
       for (index = maxStartPointSamples; (--index) >= 0;) {
-        guesser.createRandomGuess(tempStartGuess, random);
-        currentQuality = this.evaluate(tempStartGuess);
-        if (currentQuality < currentSolution.quality) {
+        guesser.createRandomGuess(tempSolution.solution, random);
+        tempSolution.quality = this.evaluate(tempSolution.solution);
+        if (MathUtils.isFinite(tempSolution.quality) && (hasNoStart
+            || (tempSolution.quality < bestSolution.quality))) {
           // Try to get starting points which are, sort of, different.
-          if (manager._isUnique(tempStartGuess,
-              _LSSimplexFittingJob.MIN_REQUIRED_DISTANCE)) {
-            System.arraycopy(tempStartGuess, 0, currentSolution.solution,
-                0, numParameters);
-            currentSolution.quality = currentQuality;
+          tempSolution._assign(tempSolution.solution,
+              tempSolution.quality);
+          if (this.m_manager._isUniqueEnough(tempSolution, 2048L)) {
+            bestSolution._assign(tempSolution);
+            hasNoStart = false;
           }
         }
       }
-
-      currentSolution = manager._tryCoalesce(currentSolution);
-      nextSolution = manager._create();
-
-      // Refine initial guess by using a least-squares solver for
-      // traditional function fitting.
-      if (this.__refineWithLeastSquares(currentSolution, nextSolution)) {
-        currentSolution = manager._tryCoalesce(nextSolution);
-        nextSolution = manager._create();
+      if (hasNoStart) {
+        guesser.createRandomGuess(bestSolution.solution, random);
+        bestSolution._assign(bestSolution.solution,
+            this.evaluate(tempSolution.solution));
       }
+      this.m_manager._add(bestSolution);
 
-      // The least-squares method may get trapped in a local optimum. We
-      // need to refine its results using a direct numerical method. We
-      // chose Nelder-Mead. In our tests, CMA-ES and BOBYQA did not provide
-      // significantly better results in this application but take longer
-      // to run.
-      if (this.__refineWithNelderMead(currentSolution, nextSolution)) {
-        currentSolution = manager._tryCoalesce(nextSolution);
-        nextSolution = manager._create();
-      }
-
-      // If we arrived here, we have successfully applied a
-      // least-squares method and refined its result with a direct,
-      // black-box optimizer.
-      if (this.__refineWithLeastSquares(currentSolution, nextSolution)) {
-        currentSolution = manager._tryCoalesce(nextSolution);
-      } else {
-        manager._dispose();
-      }
+      this.__refine(bestSolution, 32);
     }
 
     // Dispose all the variables.

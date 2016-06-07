@@ -1,15 +1,10 @@
 package org.optimizationBenchmarking.utils.ml.fitting.impl.lssimplex;
 
-import org.optimizationBenchmarking.utils.math.MathUtils;
-
 /** the class managing the solutions we have */
 final class _CandidateManager {
 
-  /** the candidates */
-  private final _Candidate[] m_candidates;
-
-  /** the number of parameters */
-  private final int m_numParameters;
+  /** the visited candidates */
+  private long[] m_done;
 
   /** the number of managed candidates */
   private int m_count;
@@ -19,119 +14,68 @@ final class _CandidateManager {
    *
    * @param numParameters
    *          the number of parameters
-   * @param maxCandidates
-   *          the maximum number of candidates
+   * @param initialCapacity
+   *          the initial capacity
    */
-  _CandidateManager(final int maxCandidates, final int numParameters) {
+  _CandidateManager(final int numParameters, final int initialCapacity) {
     super();
-
-    this.m_candidates = new _Candidate[maxCandidates];
-    this.m_numParameters = numParameters;
+    this.m_done = new long[numParameters * initialCapacity];
   }
 
   /**
-   * Obtain the next candidate record
-   *
-   * @return the next candidate record
-   */
-  final _Candidate _create() {
-    final int count;
-    final _Candidate res;
-
-    count = this.m_count;
-    this.m_count = (count + 1);
-    res = this.m_candidates[count];
-    if (res != null) {
-      res.m_processedBy = 0;
-      return res;
-    }
-
-    return (this.m_candidates[count] = new _Candidate(
-        this.m_numParameters));
-  }
-
-  /** dispose the last solution */
-  final void _dispose() {
-    --this.m_count;
-  }
-
-  /**
-   * Check if a given candidate solution has already been found.
+   * Add a given candidate to the managed list.
    *
    * @param candidate
-   *          the solution to check
-   * @return the candidate to be used from now on
+   *          the candidate
    */
-  final _Candidate _tryCoalesce(final _Candidate candidate) {
-    final int count;
-    int solutionIndex, valueIndex;
+  final void _add(final _Candidate candidate) {
+    final int numParams, start;
+    long[] temp;
 
-    count = (this.m_count - 1);
+    numParams = candidate.m_bits.length;
+    start = this.m_count * numParams;
 
-    if (candidate != this.m_candidates[count]) {
-      // otherwise, the solution has already been coalesced
-      return candidate;
+    if (start >= this.m_done.length) {
+      temp = new long[start * 2];
+      System.arraycopy(this.m_done, 0, temp, 0, start);
+      this.m_done = temp;
     }
-
-    solutionIndex = (-1);
-    outer: for (final _Candidate other : this.m_candidates) {
-      if ((++solutionIndex) >= count) {
-        return candidate;
-      }
-
-      valueIndex = (-1);
-      for (final double d : other.solution) {
-        if (MathUtils.numbersBetween(d,
-            candidate.solution[++valueIndex]) > 2) {
-          continue outer;
-        }
-      }
-
-      other.m_processedBy |= candidate.m_processedBy;
-      this.m_count = count;// discard last element
-      return other;
-    }
-    return candidate; // no same element found
+    System.arraycopy(candidate.m_bits, 0, this.m_done, start, numParams);
+    ++this.m_count;
   }
 
   /**
-   * check if a vector is sufficiently unique
+   * Check if a given candidate solution is sufficiently unique
    *
-   * @param element
-   *          the vector
-   * @param limit
-   *          the limit acceptable distance
-   * @return {@code true} if the vector is sufficiently unique,
-   *         {@code false} otherwise
+   * @param candidate
+   *          the candidate solution
+   * @param steps
+   *          the number of steps required between at least two variables
+   * @return {@code true} if there is no solution which has the same values
+   *         in the {@code 64-bits} MSBs in each dimension, {@code false}
+   *         otherwise
    */
-  final boolean _isUnique(final double[] element, final double limit) {
-    final int count;
-    double dist, bi;
-    int solutionIndex, valueIndex;
+  final boolean _isUniqueEnough(final _Candidate candidate,
+      final long steps) {
+    final int end, step;
+    final long[] done;
+    final long msteps;
+    int mainIndex, innerIndex;
 
-    solutionIndex = (-1);
-    count = this.m_count;
-    for (final _Candidate vector : this.m_candidates) {
-      if ((++solutionIndex) >= count) {
-        return true;
-      }
-
-      dist = 0d;
-      valueIndex = (-1);
-      for (final double ai : vector.solution) {
-        bi = element[++valueIndex];
-        if (ai != bi) {
-          bi = ((ai - bi) / Math.max(Double.MIN_NORMAL, //
-              Math.max(Math.abs(ai), Math.abs(bi))));
-          dist += (bi * bi);
+    step = candidate.m_bits.length;
+    end = (this.m_count * step) - 1;
+    done = this.m_done;
+    msteps = (-steps);
+    outer: for (mainIndex = (-1); mainIndex < end; mainIndex += step) {
+      innerIndex = mainIndex;
+      for (long value : candidate.m_bits) {
+        value = (value - done[++innerIndex]);
+        if ((value < msteps) || (value > steps)) {
+          continue outer;
         }
-      }
-
-      if (dist <= (valueIndex * limit)) {
         return false;
       }
     }
-
     return true;
   }
 }
