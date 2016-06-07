@@ -171,4 +171,14 @@ public class FittingJob extends ToolJob implements IFittingJob {
   public String toString() {
     return this.getClass().getSimpleName();
   }
+
+  /**
+   * Copy the current best solution into the given destination record
+   *
+   * @param dest
+   *          the destination record
+   */
+  protected final void getCopyOfBest(final FittingCandidateSolution dest) {
+    dest.assign(this.m_result.solution, this.m_result.quality);
+  }
 }

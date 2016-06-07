@@ -273,7 +273,7 @@ public final class WeightedRootMeanSquareError
     double[] jacobianRow;
     double x, expectedY, computedY, residual, inverseWeight,
         squareErrorSum;
-    int j;
+    int j, index;
 
     data = this.m_data;
     minInverseWeight = this.m_minInverseWeight;
@@ -294,9 +294,10 @@ public final class WeightedRootMeanSquareError
     sum = this.m_sum;
 
     sum.reset();
-    for (final int index : points) {
-      x = data.getDouble(index, 0);
-      expectedY = this.m_data.getDouble(index, 1);
+    index=(-1);
+    for (final int point : points) {
+      x = data.getDouble(point, 0);
+      expectedY = this.m_data.getDouble(point, 1);
       computedY = model.value(x, parameters);
       if (expectedY < minInverseWeight) {
         inverseWeight = minInverseWeight;
@@ -305,6 +306,7 @@ public final class WeightedRootMeanSquareError
       }
       residual = ((expectedY - computedY) / inverseWeight);
 
+      ++index;
       residuals[index] = residual;
       sum.append(residual * residual);
 

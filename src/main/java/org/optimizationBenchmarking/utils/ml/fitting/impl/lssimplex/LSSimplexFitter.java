@@ -39,8 +39,10 @@ public final class LSSimplexFitter extends FunctionFitter {
           "org.apache.commons.math3.optim.MaxEval", //$NON-NLS-1$
           "org.apache.commons.math3.optim.MaxIter", //$NON-NLS-1$
           "org.apache.commons.math3.optim.PointValuePair", //$NON-NLS-1$
+          "org.apache.commons.math3.optim.SimpleBounds", //$NON-NLS-1$
           "org.apache.commons.math3.optim.nonlinear.scalar.GoalType", //$NON-NLS-1$
           "org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction", //$NON-NLS-1$
+          "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer", //$NON-NLS-1$
           "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.NelderMeadSimplex", //$NON-NLS-1$
           "org.apache.commons.math3.optim.nonlinear.scalar.noderiv.SimplexOptimizer", //$NON-NLS-1$
           "org.apache.commons.math3.util.Incrementor" //$NON-NLS-1$

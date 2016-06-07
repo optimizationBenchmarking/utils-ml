@@ -107,14 +107,15 @@ public class FittingCandidateSolution extends Textable
   }
 
   /**
-   * Copy the contents of another candidate solution into this record
+   * Copy a combination of solution and solution quality into this record
    *
-   * @param other
-   *          the other solution
+   * @param _solution
+   *          the solution to copy
+   * @param _quality
+   *          the quality to copy
    */
-  public void copyFrom(final FittingCandidateSolution other) {
-    System.arraycopy(other.solution, 0, this.solution, 0,
-        this.solution.length);
-    this.quality = other.quality;
+  protected void assign(final double[] _solution, final double _quality) {
+    System.arraycopy(_solution, 0, this.solution, 0, this.solution.length);
+    this.quality = _quality;
   }
 }

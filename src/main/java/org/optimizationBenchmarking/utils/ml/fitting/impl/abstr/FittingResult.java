@@ -6,7 +6,7 @@ import org.optimizationBenchmarking.utils.ml.fitting.spec.IFittingResult;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.ParametricUnaryFunction;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
-/** a fitting result */
+/** A fitting result record. */
 public final class FittingResult extends FittingCandidateSolution
     implements IFittingResult {
 

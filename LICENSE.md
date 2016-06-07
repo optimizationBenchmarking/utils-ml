@@ -13,11 +13,11 @@ The text of the GNU General Public License Version 3 is provided in the file "[m
 The following libraries are needed by *the library*:
 
 
-* `commons-math3-3.5.jar`
-    - License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt) (see file "[meta/licenses/apache-2.0.txt](http://github.com/optimizationBenchmarking/utils-ml/tree/master/meta/licenses/apache-2.0.txt)")
-    - Version: 3.5
+* `commons-math3-3.6.1.jar`
+    - License: [The Apache Software License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt) (see file "[meta/licenses/apache-2.0.txt](http://github.com/optimizationBenchmarking/utils-math/tree/master/meta/licenses/apache-2.0.txt)")
+    - Version: 3.6.1
     - Status: freely available in the internet
-    - Source: [repo.maven.apache.org](http://repo.maven.apache.org/maven2/org/apache/commons/commons-math3/3.5/commons-math3-3.5.jar)
+    - Source: [repo.maven.apache.org](http://repo.maven.apache.org/maven2/org/apache/commons/commons-math3/3.6.1/commons-math3-3.6.1.jar)
     
 * `hamcrest-core-1.3.jar`
     - License: [New BSD License](http://www.opensource.org/licenses/bsd-license.php) (see file "[meta/licenses/bsd-license.txt](http://github.com/optimizationBenchmarking/utils-ml/tree/master/meta/licenses/bsd-license.txt)")

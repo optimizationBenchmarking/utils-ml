@@ -19,15 +19,10 @@ final class _Candidate extends FittingCandidateSolution {
     this.m_bits = new long[parameterCount];
   }
 
-  /**
-   * copy a given solution
-   *
-   * @param _solution
-   *          the solution
-   * @param _quality
-   *          the quality
-   */
-  final void _assign(final double[] _solution, final double _quality) {
+  /** {@inheritDoc} */
+  @Override
+  protected final void assign(final double[] _solution,
+      final double _quality) {
     final double[] dblDest;
     final long[] bitDest;
     int index;

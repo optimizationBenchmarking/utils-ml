@@ -3,6 +3,7 @@ package org.optimizationBenchmarking.utils.ml.fitting.impl.guessers;
 import java.util.Random;
 
 import org.optimizationBenchmarking.utils.comparison.Compare;
+import org.optimizationBenchmarking.utils.math.combinatorics.CanonicalPermutation;
 import org.optimizationBenchmarking.utils.math.functions.trigonometric.Hypot;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
 
@@ -77,6 +78,8 @@ public abstract class SampleBasedParameterGuesser
   private final double[] m_candidate;
   /** the chosen indexes */
   private final int[] m_indexes;
+  /** the distance measure choices */
+  private final int[] m_distanceMeasureChoices;
 
   /**
    * Create the sample-based guesser. Normally, the number of rows in the
@@ -180,6 +183,9 @@ public abstract class SampleBasedParameterGuesser
       this.m_logMinY = Math.log(minY);
       this.m_logScaleY = Math.log(maxY) - this.m_logMinY;
     }
+
+    this.m_distanceMeasureChoices = CanonicalPermutation
+        .createCanonicalZero(9);
   }
 
   /**
@@ -479,22 +485,30 @@ public abstract class SampleBasedParameterGuesser
       final Random random) {
     final IMatrix data;
     final double[] bestChoice, currentChoice;
-    final int[] indexes;
+    final int[] indexes, distanceMeasureChoices;
     boolean useX, useY, logScaleX, logScaleY;
     double bestQuality, currentQuality;
-    int distanceMeasureChoice, pointSetChoice, guessAttempts, pointChoice;
+    int distanceMeasureLoop, distanceMeasureChoice, distanceMeasure,
+        pointSetChoice, pointChoice;
 
     if ((data = this.m_data) != null) {
 
       bestChoice = this.m_selection;
       currentChoice = this.m_candidate;
       indexes = this.m_indexes;
+      distanceMeasureChoices = this.m_distanceMeasureChoices;
 
-      for (distanceMeasureChoice = 3; (--distanceMeasureChoice) >= 0;) {
+      for (distanceMeasureLoop = 9; (distanceMeasureLoop) > 0;) {
         // In the main loop, we first choose a distance measure, then
         // attempt to find points far away from each other under this
         // measure.
-        switch (random.nextInt(9)) {
+        distanceMeasureChoice = random.nextInt(distanceMeasureLoop);
+        distanceMeasure = distanceMeasureChoices[distanceMeasureChoice];
+        --distanceMeasureLoop;
+        distanceMeasureChoices[distanceMeasureChoice] = distanceMeasureChoices[distanceMeasureLoop];
+        distanceMeasureChoices[distanceMeasureLoop] = distanceMeasure;
+
+        switch (distanceMeasure) {
           case 0: {
             useX = useY = logScaleX = logScaleY = false;
             break;
@@ -540,14 +554,14 @@ public abstract class SampleBasedParameterGuesser
           }
         }
 
-        for (pointSetChoice = 20; (--pointSetChoice) >= 0;) {
+        for (pointSetChoice = 2; (--pointSetChoice) >= 0;) {
           // Draw a set of points.
           SampleBasedParameterGuesser.__drawCandidate(bestChoice, indexes,
               data, random, useX, useY);
           if (useX || useY) {// we do care about the distance
             bestQuality = this.__quality(bestChoice, useX, useY, logScaleX,
                 logScaleY);
-            for (pointChoice = 30; (--pointChoice) >= 0;) {
+            for (pointChoice = 10; (--pointChoice) >= 0;) {
               SampleBasedParameterGuesser.__drawCandidate(currentChoice,
                   indexes, data, random, useX, useY);
               currentQuality = this.__quality(currentChoice, useX, useY,
@@ -560,10 +574,8 @@ public abstract class SampleBasedParameterGuesser
             }
           }
 
-          for (guessAttempts = 3; (--guessAttempts) >= 0;) {
-            if (this.guess(bestChoice, parameters, random)) {
-              return;
-            }
+          if (this.guess(bestChoice, parameters, random)) {
+            return;
           }
         }
       }

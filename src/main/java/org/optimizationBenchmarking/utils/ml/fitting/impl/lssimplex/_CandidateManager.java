@@ -73,8 +73,8 @@ final class _CandidateManager {
         if ((value < msteps) || (value > steps)) {
           continue outer;
         }
-        return false;
       }
+      return false;
     }
     return true;
   }
