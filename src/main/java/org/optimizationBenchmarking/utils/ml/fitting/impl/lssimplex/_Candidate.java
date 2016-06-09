@@ -21,7 +21,7 @@ final class _Candidate extends FittingCandidateSolution {
 
   /** {@inheritDoc} */
   @Override
-  protected final void assign(final double[] _solution,
+  public final void assign(final double[] _solution,
       final double _quality) {
     final double[] dblDest;
     final long[] bitDest;

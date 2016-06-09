@@ -5,7 +5,8 @@ import java.nio.file.Path;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.ParametricUnaryFunction;
 
 /** The result of a fitting process. */
-public final class SingleFittingOutcome {
+public final class SingleFittingOutcome
+    implements Comparable<SingleFittingOutcome> {
 
   /** the result of the fitting process */
   public final double[] result;
@@ -35,5 +36,17 @@ public final class SingleFittingOutcome {
     this.file = _file;
     this.errors = _errors;
     this.model = _model;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public final int compareTo(final SingleFittingOutcome o) {
+    if (o == null) {
+      return (-1);
+    }
+    if (o == this) {
+      return 0;
+    }
+    return this.errors.compareTo(o.errors);
   }
 }

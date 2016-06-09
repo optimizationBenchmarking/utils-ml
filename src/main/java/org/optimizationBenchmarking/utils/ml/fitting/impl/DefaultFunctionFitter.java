@@ -1,7 +1,10 @@
 package org.optimizationBenchmarking.utils.ml.fitting.impl;
 
+import java.util.HashSet;
+
 import org.optimizationBenchmarking.utils.collections.lists.ArrayListView;
 import org.optimizationBenchmarking.utils.error.ErrorUtils;
+import org.optimizationBenchmarking.utils.ml.fitting.impl.dels.DELSFitter;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.lssimplex.LSSimplexFitter;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IFunctionFitter;
 
@@ -77,11 +80,25 @@ public final class DefaultFunctionFitter {
     static final ArrayListView<IFunctionFitter> INSTANCES;
 
     static {
+      HashSet<IFunctionFitter> fitters;
       IFunctionFitter fitter;
 
+      fitters = new HashSet<>();
       fitter = DefaultFunctionFitter.getInstance();
-      if (fitter != null) {
-        INSTANCES = new ArrayListView<>(new IFunctionFitter[] { fitter });
+      if ((fitter != null) && (fitter.canUse())) {
+        fitters.add(fitter);
+      }
+      fitter = LSSimplexFitter.getInstance();
+      if ((fitter != null) && (fitter.canUse())) {
+        fitters.add(fitter);
+      }
+      fitter = DELSFitter.getInstance();
+      if ((fitter != null) && (fitter.canUse())) {
+        fitters.add(fitter);
+      }
+
+      if (!(fitters.isEmpty())) {
+        INSTANCES = ArrayListView.collectionToView(fitters);
       } else {
         INSTANCES = null;
       }

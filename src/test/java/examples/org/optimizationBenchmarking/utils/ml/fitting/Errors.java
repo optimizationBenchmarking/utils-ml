@@ -1,7 +1,9 @@
 package examples.org.optimizationBenchmarking.utils.ml.fitting;
 
+import org.optimizationBenchmarking.utils.comparison.Compare;
+
 /** measured errors */
-public final class Errors {
+public final class Errors implements Comparable<Errors> {
 
   /** the fitting quality */
   public final double quality;
@@ -31,5 +33,35 @@ public final class Errors {
     this.rootMeanSquareError = _rootMeanSquareError;
     this.medianError = _medianError;
     this.runtime = _runtime;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public final int compareTo(final Errors o) {
+    int res;
+
+    if (o == null) {
+      return (-1);
+    }
+    if (o == this) {
+      return 0;
+    }
+
+    res = Compare.compare(this.quality, o.quality);
+    if (res != 0) {
+      return res;
+    }
+
+    res = Compare.compare(this.runtime, o.runtime);
+    if (res != 0) {
+      return res;
+    }
+
+    res = Compare.compare(this.rootMeanSquareError, o.rootMeanSquareError);
+    if (res != 0) {
+      return res;
+    }
+
+    return Compare.compare(this.medianError, o.medianError);
   }
 }

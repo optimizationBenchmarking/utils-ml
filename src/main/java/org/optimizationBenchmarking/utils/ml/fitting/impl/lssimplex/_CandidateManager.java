@@ -7,7 +7,7 @@ final class _CandidateManager {
   private long[] m_done;
 
   /** the number of managed candidates */
-  private int m_count;
+  int m_count;
 
   /**
    * create the candidate manager

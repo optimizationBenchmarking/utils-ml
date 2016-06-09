@@ -7,7 +7,7 @@ import org.optimizationBenchmarking.utils.math.statistics.aggregate.ArithmeticMe
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IFunctionFitter;
 
 /** the outcome of multiple fitting applications */
-public final class FitterOutcome {
+public final class FitterOutcome implements Comparable<FitterOutcome> {
 
   /** the function fitter */
   public final IFunctionFitter fitter;
@@ -104,5 +104,30 @@ public final class FitterOutcome {
 
     this.stddevErrors = new Errors(med[0].doubleValue(),
         med[1].doubleValue(), med[2].doubleValue(), med[3].doubleValue());
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public final int compareTo(final FitterOutcome o) {
+    int res;
+
+    if (o == null) {
+      return (-1);
+    }
+    if (o == this) {
+      return 0;
+    }
+
+    res = this.medianErrors.compareTo(o.medianErrors);
+    if (res != 0) {
+      return res;
+    }
+
+    res = this.maxErrors.compareTo(o.maxErrors);
+    if (res != 0) {
+      return res;
+    }
+
+    return this.minErrors.compareTo(o.minErrors);
   }
 }

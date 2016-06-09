@@ -1,13 +1,14 @@
 package examples.org.optimizationBenchmarking.utils.ml.fitting;
 
 import java.nio.file.Path;
+import java.util.Arrays;
 
 import org.optimizationBenchmarking.utils.collections.lists.ArrayListView;
 import org.optimizationBenchmarking.utils.math.statistics.aggregate.QuantileAggregate;
 import org.optimizationBenchmarking.utils.math.statistics.aggregate.StandardDeviationAggregate;
 
 /** the outcome of multiple fitting applications */
-public final class FittingOutcome {
+public final class FittingOutcome implements Comparable<FittingOutcome> {
 
   /** the example data set */
   public final MultiFittingExampleDataset example;
@@ -54,6 +55,8 @@ public final class FittingOutcome {
     super();
 
     int i;
+
+    Arrays.sort(results);
 
     final StandardDeviationAggregate[] _stddev;
     final QuantileAggregate[] med;
@@ -116,5 +119,30 @@ public final class FittingOutcome {
         _stddev[3].doubleValue());
     this.medianErrors = new Errors(med[0].doubleValue(),
         med[1].doubleValue(), med[2].doubleValue(), med[3].doubleValue());
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public final int compareTo(final FittingOutcome o) {
+    int res;
+
+    if (o == null) {
+      return (-1);
+    }
+    if (o == this) {
+      return 0;
+    }
+
+    res = this.medianErrors.compareTo(o.medianErrors);
+    if (res != 0) {
+      return res;
+    }
+
+    res = this.maxErrors.compareTo(o.maxErrors);
+    if (res != 0) {
+      return res;
+    }
+
+    return this.minErrors.compareTo(o.minErrors);
   }
 }

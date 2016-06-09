@@ -149,6 +149,12 @@ public class MultiFittingExampleDataset
 
   /** {@inheritDoc} */
   @Override
+  public final int hashCode() {
+    return this.name.hashCode();
+  }
+
+  /** {@inheritDoc} */
+  @Override
   public final int compareTo(final MultiFittingExampleDataset o) {
     return ((o == this) ? 0 : (this.name.compareTo(o.name)));
   }

@@ -114,7 +114,7 @@ public class FittingCandidateSolution extends Textable
    * @param _quality
    *          the quality to copy
    */
-  protected void assign(final double[] _solution, final double _quality) {
+  public void assign(final double[] _solution, final double _quality) {
     System.arraycopy(_solution, 0, this.solution, 0, this.solution.length);
     this.quality = _quality;
   }
