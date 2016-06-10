@@ -7,7 +7,7 @@ import org.optimizationBenchmarking.utils.ml.fitting.impl.abstr.OptimizationBase
 /**
  * <p>
  * This curve fitter uses a combination of least-squares solvers and
- * simplex search and BOBYQA to fit a function.</p
+ * simplex search and BOBYQA to fit a function.</p>
  * <p>
  * It tends to be slower than
  * {@link org.optimizationBenchmarking.utils.ml.fitting.impl.dels.DELSFitter}

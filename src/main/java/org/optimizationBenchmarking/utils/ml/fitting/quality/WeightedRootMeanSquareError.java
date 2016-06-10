@@ -46,10 +46,10 @@ public final class WeightedRootMeanSquareError
    * Compute the minimum inverse weight
    *
    * @param minY
-   *          the minimal feasbile Y value
+   *          the minimal feasible Y value
    * @param minY2
    *          the second smallest feasible Y value
-   * @return
+   * @return the minimum inverse weight
    */
   private static final double __getMinInverseWeight(final double minY,
       final double minY2) {

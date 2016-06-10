@@ -198,9 +198,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
     if (this.m_selected == this.m_measure) {
       this.register(eval.quality, vector);
     }
-
-    eval.m_jacobian = new Array2DRowRealMatrix(eval.jacobian, false);
-    eval.m_residuals = new ArrayRealVector(eval.residuals, false);
     return eval;
   }
 
@@ -640,9 +637,13 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
       implements Evaluation {
 
     /** the jacobian */
-    RealMatrix m_jacobian;
+    private transient RealMatrix m_jacobian;
     /** the residuals */
-    RealVector m_residuals;
+    private transient RealVector m_residuals;
+    /** the covariance */
+    private transient RealMatrix m_covariance;
+    /** the sigma */
+    private transient RealVector m_sigma;
     /** the point */
     private final RealVector m_point;
 
@@ -660,12 +661,18 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
     /** {@inheritDoc} */
     @Override
     public final RealMatrix getJacobian() {
+      if (this.m_jacobian == null) {
+        this.m_jacobian = new Array2DRowRealMatrix(this.jacobian, false);
+      }
       return this.m_jacobian;
     }
 
     /** {@inheritDoc} */
     @Override
     public final RealVector getResiduals() {
+      if (this.m_residuals == null) {
+        this.m_residuals = new ArrayRealVector(this.residuals, false);
+      }
       return this.m_residuals;
     }
 
@@ -680,10 +687,16 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
     public final RealMatrix getCovariances(final double threshold) {
       final RealMatrix j, jTj;
 
-      j = this.getJacobian();
-      jTj = j.transpose().multiply(j);
+      if (this.m_covariance == null) {
 
-      return new QRDecomposition(jTj, threshold).getSolver().getInverse();
+        j = this.getJacobian();
+        jTj = j.transpose().multiply(j);
+
+        this.m_covariance = new QRDecomposition(jTj, threshold).getSolver()
+            .getInverse();
+      }
+
+      return this.m_covariance;
     }
 
     /** {@inheritDoc} */
@@ -694,13 +707,15 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
       final RealVector sig;
       int i;
 
-      cov = this.getCovariances(covarianceSingularityThreshold);
-      i = cov.getColumnDimension();
-      sig = new ArrayRealVector(i);
-      for (; (--i) >= 0;) {
-        sig.setEntry(i, Math.sqrt(cov.getEntry(i, i)));
+      if (this.m_sigma == null) {
+        cov = this.getCovariances(covarianceSingularityThreshold);
+        i = cov.getColumnDimension();
+        this.m_sigma = sig = new ArrayRealVector(i);
+        for (; (--i) >= 0;) {
+          sig.setEntry(i, Math.sqrt(cov.getEntry(i, i)));
+        }
       }
-      return sig;
+      return this.m_sigma;
     }
 
     /** {@inheritDoc} */
