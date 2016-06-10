@@ -52,7 +52,6 @@ final class _DELSFittingJob
       final Random random) {
     final double[] parent1Doubles, parent2Doubles, parent3Doubles;
     final int chosen;
-    double factor;
     int index;
 
     parent1Doubles = parent1.solution;
@@ -65,20 +64,71 @@ final class _DELSFittingJob
       parent2Doubles = parent3.solution;
     }
 
-    // chosen = random.nextInt(parent1Doubles.length);
+    chosen = random.nextInt(parent1Doubles.length);
     index = (-1);
-    chosen = random.nextInt(dest.length);
-    for (final double original : parent1Doubles) {
+    for (double original : parent1Doubles) {
       ++index;
-      factor = ((0.5d * random.nextDouble())
-          + (0.1d * random.nextGaussian()));
-      if ((index != chosen) && (random.nextBoolean())) {
-        factor *= Math.exp(-random.nextInt(10) - 0.1d);
+      if ((index == chosen) || (random.nextInt(4) <= 0)) {
+        original += (original + (((0.5d * random.nextDouble())
+            + (0.1d * random.nextGaussian()))
+            * (parent2Doubles[index] - parent3Doubles[index])));
       }
-      dest[index] = (original
-          + (factor * (parent2Doubles[index] - parent3Doubles[index])));
+      dest[index] = original;
     }
   }
+
+  // /**
+  // * Create one offspring with arithmetic mean-based crossover
+  // *
+  // * @param parent1
+  // * the first parent
+  // * @param parent2
+  // * the second parent
+  // * @param parent3
+  // * the third parent
+  // * @param dest
+  // * the destination
+  // * @param random
+  // * the random number generator
+  // */
+  // private static final void __meanCrossover(
+  // final FittingCandidateSolution parent1,
+  // final FittingCandidateSolution parent2,
+  // final FittingCandidateSolution parent3, final double[] dest,
+  // final Random random) {
+  // final double[] parent1Doubles, parent2Doubles, parent3Doubles;
+  // double parent2Weight, parent3Weight, weightSum;
+  // int index;
+  //
+  // parent1Doubles = parent1.solution;
+  // parent2Doubles = parent2.solution;
+  // parent2Weight = ((parent2.quality > 0d) ? (1d / parent2.quality) :
+  // 1d);
+  // parent3Doubles = parent3.solution;
+  // parent3Weight = ((parent3.quality > 0d) ? (1d / parent3.quality) :
+  // 1d);
+  // weightSum = (0.4d / (parent2Weight + parent3Weight));
+  //
+  // parent2Weight *= weightSum;
+  // parent3Weight *= weightSum;
+  //
+  // if (!(MathUtils.isFinite(parent2Weight) && //
+  // MathUtils.isFinite(parent3Weight))) {
+  // parent2Weight = 0.2d;
+  // parent3Weight = 0.2d;
+  // }
+  //
+  // index = (-1);
+  // for (double original : parent1Doubles) {
+  // ++index;
+  //
+  // if (!(MathUtils.isFinite(dest[index] = ((original * 0.6d)
+  // + (parent2Doubles[index] * parent2Weight)
+  // + (parent3Doubles[index] * parent3Weight))))) {
+  // dest[index] = original;
+  // }
+  // }
+  // }
 
   /**
    * Create a random solution
@@ -104,42 +154,10 @@ final class _DELSFittingJob
     }
   }
 
-  /**
-   * Refine a solution for a random set of points
-   *
-   * @param solution
-   *          the destination solution record
-   * @param numPoints
-   *          the number of points
-   * @param random
-   *          the random number generator
-   */
-  private final void __randomRefinement(
-      final FittingCandidateSolution solution, final int numPoints,
-      final Random random) {
-    int[] selected;
-    int index;
-
-    index = solution.solution.length;
-    selected = new int[index];
-    for (; (--index) >= 0;) {
-      selected[index] = random.nextInt(numPoints);
-    }
-
-    solution.quality = this.m_measure.evaluateAt(this.m_function,
-        solution.solution, selected);
-    this.selectPoints(selected);
-    selected = null;
-
-    this.refineWithLevenbergMarquardt(solution);
-    this.selectPoints(null);
-    solution.quality = this.evaluate(solution.solution);
-  }
-
   /** {@inheritDoc} */
   @Override
   protected void doFit() {
-    final int numParameters, numPoints, populationSize;
+    final int numParameters, populationSize;
     final Random random;
     FittingCandidateSolution[] parents, offspring;
     FittingCandidateSolution current, parent1, parent2, parent3;
@@ -152,24 +170,22 @@ final class _DELSFittingJob
 
     guesser = this.m_function.createParameterGuesser(this.m_data);
 
-    numPoints = this.m_measure.getPointCount();
+    // numPoints = this.m_measure.getPointCount();
 
-    populationSize = (numParameters * 45);
+    populationSize = (numParameters * 6);
 
     parents = new FittingCandidateSolution[populationSize];
     offspring = new FittingCandidateSolution[populationSize];
+    generation = (7 * populationSize);
 
-    // initialize populations and generate first generation
     for (index = populationSize; (--index) >= 0;) {
       offspring[index] = new FittingCandidateSolution(numParameters);
       parents[index] = current = new FittingCandidateSolution(
           numParameters);
       this.__randomSolution(guesser, current, random);
-      this.__randomRefinement(current, numPoints, random);
     }
 
-    for (generation = (10 * populationSize); (--generation) >= 0;) {
-
+    for (; (--generation) >= 0;) {
       for (index = populationSize; (--index) >= 0;) {
         parent1 = parents[index];
 
@@ -179,8 +195,10 @@ final class _DELSFittingJob
         do {
           parent3 = parents[random.nextInt(populationSize)];
         } while ((parent3 == parent2) || (parent3 == parent1));
+        current = offspring[index];
         _DELSFittingJob.__deCrossover(parent1, parent2, parent3,
-            offspring[index].solution, random);
+            current.solution, random);
+        current.quality = this.value(current.solution);
       }
 
       for (index = populationSize; (--index) >= 0;) {

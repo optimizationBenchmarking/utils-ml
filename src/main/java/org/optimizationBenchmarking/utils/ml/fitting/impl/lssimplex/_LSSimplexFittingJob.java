@@ -87,12 +87,11 @@ final class _LSSimplexFittingJob
   /** {@inheritDoc} */
   @Override
   protected final void doFit() {
-    final int numParameters, numPoints, maxStartPointSamples;
+    final int numParameters, maxStartPointSamples;
     final Random random;
-    final int[] selected;
     final _Candidate bestSolution, tempSolution;
     IParameterGuesser guesser;
-    int startPointIterations, mainIterations, selectedIndex, initRetVal;
+    int startPointIterations, mainIterations, initRetVal;
     boolean hasNoStart;
 
     // initialize and allocate all needed variables
@@ -107,8 +106,6 @@ final class _LSSimplexFittingJob
 
     bestSolution = new _Candidate(numParameters);
     tempSolution = new _Candidate(numParameters);
-    selected = new int[numParameters];
-    numPoints = this.m_measure.getPointCount();
 
     maxStartPointSamples = Math.max(10, Math.min(100, ((int) (Math.round(//
         2d * Math.pow(3d, numParameters)))))) / 3;
@@ -125,17 +122,13 @@ final class _LSSimplexFittingJob
       startPointIterations = maxStartPointSamples;
       while (hasNoStart || ((--startPointIterations) >= 0)) {
         guesser.createRandomGuess(tempSolution.solution, random);
-        this.selectPoints(selected);
-        for (selectedIndex = selected.length; (--selectedIndex) >= 0;) {
-          selected[selectedIndex] = random.nextInt(numPoints);
-        }
-        tempSolution.quality = this.m_measure.evaluateAt(this.m_function,
-            tempSolution.solution, selected);
+        this.subselect(numParameters, random);
+        tempSolution.quality = this.value(tempSolution.solution);
         this.m_steps = 2048L;
         initRetVal = (random.nextBoolean() //
             ? this.refineWithLeastSquares(tempSolution)//
             : this.refineWithNelderMead(tempSolution));
-        this.selectPoints(null);
+        this.deselectPoints();
 
         if (initRetVal < _LSSimplexFittingJob.RET_SAME) {
           tempSolution.quality = this.evaluate(tempSolution.solution);

@@ -121,6 +121,40 @@ public final class FittingOutcome implements Comparable<FittingOutcome> {
         med[1].doubleValue(), med[2].doubleValue(), med[3].doubleValue());
   }
 
+  /**
+   * Get all the result qualities as array.
+   *
+   * @return the quality array
+   */
+  final double[] _getQualities() {
+    final double[] qualities;
+    int index;
+
+    index = this.outcomes.size();
+    qualities = new double[index];
+    for (; (--index) >= 0;) {
+      qualities[index] = this.outcomes.get(index).errors.quality;
+    }
+    return qualities;
+  }
+
+  /**
+   * Get all the result runtimes as array.
+   *
+   * @return the runtime array
+   */
+  final double[] _getRuntimes() {
+    final double[] runtime;
+    int index;
+
+    index = this.outcomes.size();
+    runtime = new double[index];
+    for (; (--index) >= 0;) {
+      runtime[index] = this.outcomes.get(index).errors.runtime;
+    }
+    return runtime;
+  }
+
   /** {@inheritDoc} */
   @Override
   public final int compareTo(final FittingOutcome o) {

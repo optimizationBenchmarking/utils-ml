@@ -5,20 +5,23 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
 import org.optimizationBenchmarking.utils.collections.lists.ArrayListView;
 import org.optimizationBenchmarking.utils.io.paths.PathUtils;
+import org.optimizationBenchmarking.utils.math.statistics.aggregate.ArithmeticMeanAggregate;
+import org.optimizationBenchmarking.utils.math.statistics.aggregate.QuantileAggregate;
+import org.optimizationBenchmarking.utils.math.statistics.ranking.ETieStrategy;
+import org.optimizationBenchmarking.utils.math.statistics.ranking.RankingStrategy;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.dels.DELSFitter;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.lssimplex.LSSimplexFitter;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IFunctionFitter;
 import org.optimizationBenchmarking.utils.parallel.Execute;
 import org.optimizationBenchmarking.utils.parsers.LoggerParser;
+import org.optimizationBenchmarking.utils.text.ETextCase;
+import org.optimizationBenchmarking.utils.text.numbers.SimpleNumberAppender;
 
 /** The examples for fitting. */
 public class FittingExamples {
@@ -80,75 +83,106 @@ public class FittingExamples {
   private static final void __print(final FitterOutcome[] outcomes,
       final ArrayListView<MultiFittingExampleDataset> data,
       final Path path) throws IOException {
-    HashMap<MultiFittingExampleDataset, ArrayListView<SingleFittingOutcome>>[] results;
-    long[] totalRanks;
-    int[] lastRanks;
-    ArrayListView<SingleFittingOutcome> current;
-    ArrayList<SingleFittingOutcome> list;
-    int index, nextRank, prevRank, counter;
-    double lastQuality;
+    final HashMap<MultiFittingExampleDataset, FittingOutcome>[] results;
+    final RankingStrategy ranking;
+    final ArithmeticMeanAggregate[] meanQualityRanks, meanRuntimeRanks;
+    final QuantileAggregate[] medianQualityRanks, medianRuntimeRanks;
+    final double[][] qualities, runtimes;
+    FittingOutcome current;
+    int index;
 
     index = outcomes.length;
-    totalRanks = new long[index];
-    lastRanks = new int[index];
+    meanQualityRanks = new ArithmeticMeanAggregate[index];
+    medianQualityRanks = new QuantileAggregate[index];
+    meanRuntimeRanks = new ArithmeticMeanAggregate[index];
+    medianRuntimeRanks = new QuantileAggregate[index];
     results = new HashMap[index];
+    qualities = new double[index][];
+    runtimes = new double[index][];
 
     for (; (--index) >= 0;) {
+      meanQualityRanks[index] = new ArithmeticMeanAggregate();
+      meanRuntimeRanks[index] = new ArithmeticMeanAggregate();
+      medianQualityRanks[index] = new QuantileAggregate(0.5d);
+      medianRuntimeRanks[index] = new QuantileAggregate(0.5d);
       results[index] = new HashMap<>();
       for (final FittingOutcome outcome : outcomes[index].outcomes) {
-        results[index].put(outcome.example, outcome.outcomes);
+        results[index].put(outcome.example, outcome);
       }
     }
 
-    list = new ArrayList<>();
+    ranking = new RankingStrategy(null, ETieStrategy.MINIMUM_TIGHT);
+
     outer: for (final MultiFittingExampleDataset dataSet : data) {
-      list.clear();
-      for (final HashMap<MultiFittingExampleDataset, ArrayListView<SingleFittingOutcome>> map : results) {
+      index = (-1);
+      for (final HashMap<MultiFittingExampleDataset, FittingOutcome> map : results) {
         current = map.get(dataSet);
         if (current == null) {
           continue outer;
         }
-        list.addAll(current);
+        ++index;
+        qualities[index] = current._getQualities();
+        runtimes[index] = current._getRuntimes();
       }
-      Collections.sort(list);
-      Arrays.fill(lastRanks, 0);
-      prevRank = (-1);
-      nextRank = counter = 0;
-      lastQuality = Double.NEGATIVE_INFINITY;
-      looper: for (final SingleFittingOutcome outcome : list) {
-        ++counter;
-        if (outcome.errors.quality > lastQuality) {
-          nextRank = counter;
-          lastQuality = outcome.errors.quality;
-        }
 
-        index = (-1);
-        for (final HashMap<MultiFittingExampleDataset, ArrayListView<SingleFittingOutcome>> map : results) {
-          ++index;
-          if (map.get(dataSet).contains(outcome)) {
-            if (lastRanks[index] < prevRank) {
-              totalRanks[index] += nextRank;
-            }
-            prevRank = nextRank;
-            lastRanks[index] = nextRank;
-            continue looper;
-          }
-        }
-        throw new IllegalStateException("huh?"); //$NON-NLS-1$
-      }
+      ranking.rank(qualities, meanQualityRanks);
+      ranking.rank(qualities, medianQualityRanks);
+      ranking.rank(runtimes, meanRuntimeRanks);
+      ranking.rank(runtimes, medianRuntimeRanks);
     }
 
     try (final OutputStream os = PathUtils.openOutputStream(
         PathUtils.createPathInside(path, "summary.txt"))) { //$NON-NLS-1$
       try (final OutputStreamWriter osw = new OutputStreamWriter(os)) {
         try (final BufferedWriter bw = new BufferedWriter(osw)) {
+          bw.write("Mean Quality Ranks");//$NON-NLS-1$
           for (index = 0; index < outcomes.length; index++) {
+            bw.newLine();
             bw.write(outcomes[index].fitter.getClass().getSimpleName());
             bw.write(':');
             bw.write('\t');
-            bw.write(Long.toString(totalRanks[index]));
-            bw.newLine();
+            bw.write(SimpleNumberAppender.INSTANCE.toString(
+                meanQualityRanks[index].doubleValue(),
+                ETextCase.AT_SENTENCE_START));
           }
+          bw.newLine();
+          bw.newLine();
+          bw.write("Median Quality Ranks");//$NON-NLS-1$
+          for (index = 0; index < outcomes.length; index++) {
+            bw.newLine();
+            bw.write(outcomes[index].fitter.getClass().getSimpleName());
+            bw.write(':');
+            bw.write('\t');
+            bw.write(SimpleNumberAppender.INSTANCE.toString(
+                medianQualityRanks[index].doubleValue(),
+                ETextCase.AT_SENTENCE_START));
+          }
+          bw.newLine();
+          bw.newLine();
+          bw.write("Mean Runtime Ranks");//$NON-NLS-1$
+          for (index = 0; index < outcomes.length; index++) {
+            bw.newLine();
+            bw.write(outcomes[index].fitter.getClass().getSimpleName());
+            bw.write(':');
+            bw.write('\t');
+            bw.write(SimpleNumberAppender.INSTANCE.toString(
+                meanRuntimeRanks[index].doubleValue(),
+                ETextCase.AT_SENTENCE_START));
+          }
+          bw.newLine();
+          bw.newLine();
+          bw.write("Median Runtime Ranks");//$NON-NLS-1$
+          for (index = 0; index < outcomes.length; index++) {
+            bw.newLine();
+            bw.write(outcomes[index].fitter.getClass().getSimpleName());
+            bw.write(':');
+            bw.write('\t');
+            bw.write(SimpleNumberAppender.INSTANCE.toString(
+                medianRuntimeRanks[index].doubleValue(),
+                ETextCase.AT_SENTENCE_START));
+          }
+          bw.newLine();
+          bw.newLine();
         }
       }
     }

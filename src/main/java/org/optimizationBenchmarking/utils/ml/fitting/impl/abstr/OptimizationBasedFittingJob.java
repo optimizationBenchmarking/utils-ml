@@ -1,6 +1,6 @@
 package org.optimizationBenchmarking.utils.ml.fitting.impl.abstr;
 
-import java.util.Arrays;
+import java.util.Random;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
@@ -29,6 +29,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.SimplexOptimizer;
 import org.apache.commons.math3.util.Incrementor;
 import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.FittingEvaluation;
+import org.optimizationBenchmarking.utils.ml.fitting.spec.IFittingQualityMeasure;
 
 /**
  * A function fitting job which has some basic provisions to utilize
@@ -83,7 +84,7 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
   /** the bobyqa optimizer */
   private __SafeBOBYQAOptimizer m_BOBYQA;
   /** the selected points */
-  private int[] m_selected;
+  private IFittingQualityMeasure m_selected;
 
   /** the maximum iterations granted to least squares methods */
   private int m_leastSquaresMaxIterations;
@@ -105,6 +106,7 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
 
     dim = this.m_function.getParameterCount();
     this.m_optimizerMaxIterations = (dim * dim * 300);
+    this.m_selected = this.m_measure;
   }
 
   /**
@@ -191,11 +193,9 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
 
     eval = new _InternalEvaluation(point);
     vector = OptimizationBasedFittingJob.__toArray(point);
-    if (this.m_selected != null) {
-      this.m_measure.evaluateAt(this.m_function, vector, eval,
-          this.m_selected);
-    } else {
-      this.m_measure.evaluate(this.m_function, vector, eval);
+
+    this.m_selected.evaluate(this.m_function, vector, eval);
+    if (this.m_selected == this.m_measure) {
       this.register(eval.quality, vector);
     }
 
@@ -205,16 +205,22 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
   }
 
   /**
-   * Select the specified points
+   * Choose a set of points
    *
-   * @param selected
-   *          the specified points
+   * @param npoints
+   *          the number of points to select
+   * @param random
+   *          the random number generator
    */
-  protected final void selectPoints(final int[] selected) {
-    if (selected != null) {
-      Arrays.sort(selected);
-    }
-    this.m_selected = selected;
+  protected final void subselect(final int npoints, final Random random) {
+    this.m_selected = this.m_measure.subselect(npoints, random);
+  }
+
+  /**
+   * Select the specified points
+   */
+  protected final void deselectPoints() {
+    this.m_selected = this.m_measure;
   }
 
   /** {@inheritDoc} */
@@ -222,12 +228,10 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
   public final double value(final double[] point) {
     final double res;
 
-    if (this.m_selected != null) {
-      return this.m_measure.evaluateAt(this.m_function, point,
-          this.m_selected);
+    res = this.m_selected.evaluate(this.m_function, point);
+    if (this.m_selected == this.m_measure) {
+      this.register(res, point);
     }
-    res = this.m_measure.evaluate(this.m_function, point);
-    this.register(res, point);
     return res;
   }
 
@@ -627,6 +631,7 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
       this.m_objective = null;
       this.m_maxEval = null;
       this.m_maxIter = null;
+      this.m_selected = null;
     }
   }
 

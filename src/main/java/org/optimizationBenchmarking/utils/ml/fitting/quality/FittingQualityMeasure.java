@@ -3,25 +3,13 @@ package org.optimizationBenchmarking.utils.ml.fitting.quality;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IFittingQualityMeasure;
 
-/** The fitting job */
+/** The base class for fitting quality measures */
 public abstract class FittingQualityMeasure
     implements IFittingQualityMeasure {
 
-  /** the matrix */
-  final IMatrix m_data;
-
-  /**
-   * create the fitting quality measure
-   *
-   * @param data
-   *          the data matrix
-   */
-  protected FittingQualityMeasure(final IMatrix data) {
+  /** create the fitting quality measure */
+  protected FittingQualityMeasure() {
     super();
-
-    FittingQualityMeasure.validateData(data);
-
-    this.m_data = data;
   }
 
   /**
@@ -49,11 +37,5 @@ public abstract class FittingQualityMeasure
   @Override
   public String toString() {
     return this.getClass().getSimpleName();
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public final int getPointCount() {
-    return this.m_data.m();
   }
 }
