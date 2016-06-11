@@ -164,7 +164,7 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
   /** {@inheritDoc} */
   @Override
   public final int getObservationSize() {
-    return this.m_data.m();
+    return this.m_selected.getSampleCount();
   }
 
   /** {@inheritDoc} */

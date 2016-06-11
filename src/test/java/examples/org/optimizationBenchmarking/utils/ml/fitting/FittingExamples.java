@@ -111,7 +111,7 @@ public class FittingExamples {
       }
     }
 
-    ranking = new RankingStrategy(null, ETieStrategy.MINIMUM_TIGHT);
+    ranking = new RankingStrategy(null, ETieStrategy.MINIMUM);
 
     outer: for (final MultiFittingExampleDataset dataSet : data) {
       index = (-1);
