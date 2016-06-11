@@ -16,9 +16,6 @@ import org.optimizationBenchmarking.utils.ml.fitting.spec.IParameterGuesser;
 final class _DELSFittingJob
     extends OptimizationBasedFittingJob<FittingCandidateSolution> {
 
-  /** the maximum number of iterations for least squares methods */
-  private static final int LEAST_SQUARES_MAX_ITERATIONS = 150;
-
   /**
    * create the fitting job
    *
@@ -27,8 +24,6 @@ final class _DELSFittingJob
    */
   protected _DELSFittingJob(final FittingJobBuilder builder) {
     super(builder);
-    this.setLeastSquaresMaxIterations(
-        _DELSFittingJob.LEAST_SQUARES_MAX_ITERATIONS);
   }
 
   /**
@@ -77,59 +72,6 @@ final class _DELSFittingJob
     }
   }
 
-  // /**
-  // * Create one offspring with arithmetic mean-based crossover
-  // *
-  // * @param parent1
-  // * the first parent
-  // * @param parent2
-  // * the second parent
-  // * @param parent3
-  // * the third parent
-  // * @param dest
-  // * the destination
-  // * @param random
-  // * the random number generator
-  // */
-  // private static final void __meanCrossover(
-  // final FittingCandidateSolution parent1,
-  // final FittingCandidateSolution parent2,
-  // final FittingCandidateSolution parent3, final double[] dest,
-  // final Random random) {
-  // final double[] parent1Doubles, parent2Doubles, parent3Doubles;
-  // double parent2Weight, parent3Weight, weightSum;
-  // int index;
-  //
-  // parent1Doubles = parent1.solution;
-  // parent2Doubles = parent2.solution;
-  // parent2Weight = ((parent2.quality > 0d) ? (1d / parent2.quality) :
-  // 1d);
-  // parent3Doubles = parent3.solution;
-  // parent3Weight = ((parent3.quality > 0d) ? (1d / parent3.quality) :
-  // 1d);
-  // weightSum = (0.4d / (parent2Weight + parent3Weight));
-  //
-  // parent2Weight *= weightSum;
-  // parent3Weight *= weightSum;
-  //
-  // if (!(MathUtils.isFinite(parent2Weight) && //
-  // MathUtils.isFinite(parent3Weight))) {
-  // parent2Weight = 0.2d;
-  // parent3Weight = 0.2d;
-  // }
-  //
-  // index = (-1);
-  // for (double original : parent1Doubles) {
-  // ++index;
-  //
-  // if (!(MathUtils.isFinite(dest[index] = ((original * 0.6d)
-  // + (parent2Doubles[index] * parent2Weight)
-  // + (parent3Doubles[index] * parent3Weight))))) {
-  // dest[index] = original;
-  // }
-  // }
-  // }
-
   /**
    * Create a random solution
    *
@@ -162,7 +104,7 @@ final class _DELSFittingJob
     FittingCandidateSolution[] parents, offspring;
     FittingCandidateSolution current, parent1, parent2, parent3;
     IParameterGuesser guesser;
-    int index, generation;
+    int index, generation, maxIterations;
 
     // initialize and allocate all needed variables
     random = new Random();
@@ -178,11 +120,15 @@ final class _DELSFittingJob
     offspring = new FittingCandidateSolution[populationSize];
     generation = (7 * populationSize);
 
+    maxIterations = this.getNumericalOptimizerMaxIterations();
+    this.setNumericalOptimizerMaxIterations(100);
+
     for (index = populationSize; (--index) >= 0;) {
       offspring[index] = new FittingCandidateSolution(numParameters);
       parents[index] = current = new FittingCandidateSolution(
           numParameters);
       this.__randomSolution(guesser, current, random);
+      this.refineWithNelderMead(current);
     }
 
     for (; (--generation) >= 0;) {
@@ -211,6 +157,7 @@ final class _DELSFittingJob
       }
     }
 
+    this.setNumericalOptimizerMaxIterations(maxIterations);
     current = offspring[0];
     offspring = parents = null;
 

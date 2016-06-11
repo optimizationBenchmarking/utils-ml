@@ -93,6 +93,12 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
   private int m_optimizerMaxIterations;
 
   /**
+   * the iterations performed by nelder mead, guard against
+   * https://issues.apache.org/jira/browse/MATH-1376
+   */
+  private int m_nelderMeadDoneIterations;
+
+  /**
    * create the fitting job
    *
    * @param builder
@@ -139,6 +145,8 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
    */
   protected final void setNumericalOptimizerMaxIterations(
       final int maxIterations) {
+    this.m_maxEval = null;
+    this.m_maxIter = null;
     this.m_optimizerMaxIterations = maxIterations;
   }
 
@@ -236,32 +244,60 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
   @Override
   public final boolean converged(final int iteration,
       final Evaluation previous, final Evaluation current) {
-    final RealVector pv, cv;
-    final double[] p, c;
-    double ci;
-    int i;
-
     if (iteration >= this.m_leastSquaresMaxIterations) {
       return true;
     }
+    return OptimizationBasedFittingJob.__check(
+        OptimizationBasedFittingJob.__toArray(previous.getPoint()), //
+        OptimizationBasedFittingJob.__toArray(current.getPoint()));
+  }
 
-    pv = previous.getPoint();
-    cv = current.getPoint();
+  /**
+   * check two double arrays for convergence
+   *
+   * @param previousData
+   *          the previous array
+   * @param currentData
+   *          the current array
+   * @return {@code true} on convergence, {@code false} otherwise
+   */
+  private static final boolean __check(final double[] previousData,
+      final double[] currentData) {
+    int index;
+    double currentValue;
 
-    p = OptimizationBasedFittingJob.__toArray(pv);
-    c = OptimizationBasedFittingJob.__toArray(cv);
-
-    i = (-1);
-    for (final double ppi : p) {
-      ci = c[++i];
-      if (Math.abs(ppi - ci) > //
+    index = (-1);
+    for (final double previousValue : previousData) {
+      currentValue = currentData[++index];
+      if (Math.abs(previousValue - currentValue) > //
       (OptimizationBasedFittingJob.OPTIMIZER_RELATIVE_THRESHOLD
-          * Math.max(Math.abs(ppi), Math.abs(ci)))) {
+          * Math.max(Math.abs(previousValue), Math.abs(currentValue)))) {
         return false;
       }
     }
 
     return true;
+  }
+
+  /**
+   * Check the convergence of a point value pair.
+   *
+   * @param iteration
+   *          the iteration
+   * @param previous
+   *          the previous point value pair
+   * @param current
+   *          the current point value pair
+   * @return {@code true} on convergence, {@code false} otherwise
+   */
+  public final boolean converged(final int iteration,
+      final PointValuePair previous, final PointValuePair current) {
+    if ((iteration >= this.m_optimizerMaxIterations)
+        || ((++this.m_nelderMeadDoneIterations) >= this.m_optimizerMaxIterations)) {
+      return true;
+    }
+    return OptimizationBasedFittingJob.__check(previous.getPointRef(),
+        current.getPointRef());
   }
 
   /** {@inheritDoc} */
@@ -419,6 +455,31 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
   }
 
   /**
+   * get the maximum evaluations: large enough for Nelder-Mead and BOBYQA
+   *
+   * @return the maximum evaluations fitting to the maximum iterations
+   */
+  private final MaxEval __getMaxEval() {
+    if (this.m_maxEval == null) {
+      this.m_maxEval = new MaxEval(1 + (this.m_optimizerMaxIterations
+          * (this.m_function.getParameterCount() << 1)));
+    }
+    return this.m_maxEval;
+  }
+
+  /**
+   * get the maximum iterations: large enough for Nelder-Mead and BOBYQA
+   *
+   * @return the maximum iterations fitting to the maximum iterations
+   */
+  private final MaxIter __getMaxIterations() {
+    if (this.m_maxIter == null) {
+      this.m_maxIter = new MaxIter(this.m_optimizerMaxIterations + 1);
+    }
+    return this.m_maxIter;
+  }
+
+  /**
    * refine a given solution using Nelder-Mead
    *
    * @param solution
@@ -426,28 +487,36 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
    * @return one of the {@code RET_} codes
    */
   protected final int refineWithNelderMead(final FCST solution) {
+    double[] bounds;
+    double value;
+    int index;
 
+    // https://issues.apache.org/jira/browse/MATH-1376
+    this.m_nelderMeadDoneIterations = 0;
     try {
       if (this.m_simplex == null) {
         this.m_simplex = new SimplexOptimizer(
-            OptimizationBasedFittingJob.OPTIMIZER_RELATIVE_THRESHOLD,
-            Double.NEGATIVE_INFINITY);
+            new __PointValuePairChecker());
       }
       if (this.m_objective == null) {
         this.m_objective = new ObjectiveFunction(this);
       }
 
-      if (this.m_maxEval == null) {
-        this.m_maxEval = new MaxEval(this.m_optimizerMaxIterations);
-      }
-      if (this.m_maxIter == null) {
-        this.m_maxIter = new MaxIter(this.m_optimizerMaxIterations);
+      bounds = solution.solution;
+      for (index = bounds.length; (--index) >= 0;) {
+        if (Math.abs(value = bounds[index]) < Double.MIN_NORMAL) {
+          if (bounds == solution.solution) {
+            bounds = bounds.clone();
+          }
+          bounds[index] = ((value < 0d) ? (-Double.MIN_NORMAL)
+              : Double.MIN_NORMAL);
+        }
       }
 
       return this.__checkPointValuePair(this.m_simplex.optimize(//
-          new NelderMeadSimplex(solution.solution), //
+          new NelderMeadSimplex(bounds), //
           new InitialGuess(solution.solution), //
-          this.m_objective, this.m_maxEval, this.m_maxIter,
+          this.m_objective, this.__getMaxEval(), this.__getMaxIterations(),
           GoalType.MINIMIZE), solution);
 
     } catch (@SuppressWarnings("unused") final Throwable error) {
@@ -479,6 +548,9 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
     double bound;
     int index;
 
+    // https://issues.apache.org/jira/browse/MATH-1376 does not apply
+    // here...
+    this.m_nelderMeadDoneIterations = Integer.MIN_VALUE;
     try {
       if (this.m_objective == null) {
         this.m_objective = new ObjectiveFunction(this);
@@ -487,13 +559,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
 
       if (this.m_BOBYQA == null) {
         this.m_BOBYQA = new __SafeBOBYQAOptimizer(dim << 1);
-      }
-
-      if (this.m_maxEval == null) {
-        this.m_maxEval = new MaxEval(this.m_optimizerMaxIterations);
-      }
-      if (this.m_maxIter == null) {
-        this.m_maxIter = new MaxIter(this.m_optimizerMaxIterations);
       }
 
       orig = solution.solution;
@@ -521,12 +586,13 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
         ++index;
       }
 
-      return this.__checkPointValuePair(//
-          this.m_BOBYQA.optimize(GoalType.MINIMIZE, //
-              this.m_objective, //
-              new InitialGuess(solution.solution), //
-              new SimpleBounds(lower, upper), //
-              this.m_maxEval, this.m_maxIter),
+      return this
+          .__checkPointValuePair(//
+              this.m_BOBYQA.optimize(GoalType.MINIMIZE, //
+                  this.m_objective, //
+                  new InitialGuess(solution.solution), //
+                  new SimpleBounds(lower, upper), //
+                  this.__getMaxEval(), this.__getMaxIterations()),
           solution);
 
     } catch (@SuppressWarnings("unused") final Throwable error) {
@@ -776,5 +842,24 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
       }
       return this.evaluations.getCount();
     }
+  }
+
+  /** the convergence checker */
+  private final class __PointValuePairChecker
+      implements ConvergenceChecker<PointValuePair> {
+
+    /** create the checker */
+    __PointValuePairChecker() {
+      super();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public final boolean converged(final int iteration,
+        final PointValuePair previous, final PointValuePair current) {
+      return OptimizationBasedFittingJob.this.converged(iteration,
+          previous, current);
+    }
+
   }
 }
