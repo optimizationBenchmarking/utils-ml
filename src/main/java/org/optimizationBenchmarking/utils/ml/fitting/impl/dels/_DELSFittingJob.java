@@ -45,7 +45,7 @@ final class _DELSFittingJob
       final FittingCandidateSolution parent3, final double[] dest,
       final Random random) {
     final double[] parent1Doubles, parent2Doubles, parent3Doubles;
-    final int chosen;
+    // final int chosen;
     int index;
 
     parent1Doubles = parent1.solution;
@@ -58,16 +58,64 @@ final class _DELSFittingJob
       parent2Doubles = parent3.solution;
     }
 
-    chosen = random.nextInt(parent1Doubles.length);
+    // chosen = random.nextInt(parent1Doubles.length);
     index = (-1);
-    for (double original : parent1Doubles) {
+    for (final double original : parent1Doubles) {
+      // ++index;
+      // if ((index == chosen) || (random.nextInt(4) <= 0)) {
+      // original = (original + (((0.5d * random.nextDouble())
+      // + (0.1d * random.nextGaussian()))
+      // * (parent2Doubles[index] - parent3Doubles[index])));
+      // }
       ++index;
-      if ((index == chosen) || (random.nextInt(4) <= 0)) {
-        original += (original + (((0.5d * random.nextDouble())
-            + (0.1d * random.nextGaussian()))
-            * (parent2Doubles[index] - parent3Doubles[index])));
-      }
-      dest[index] = original;
+      dest[index] = original
+          + (original + ((0.3d + (random.nextGaussian() * 0.1d))
+              * (parent2Doubles[index] - parent3Doubles[index])));
+    }
+  }
+
+  /**
+   * Create one offspring with center crossover
+   *
+   * @param parent1
+   *          the first parent
+   * @param parent2
+   *          the second parent
+   * @param parent3
+   *          the third parent
+   * @param dest
+   *          the destination
+   * @param random
+   *          the random number generator
+   */
+  private static final void __centerCrossover(
+      final FittingCandidateSolution parent1,
+      final FittingCandidateSolution parent2,
+      final FittingCandidateSolution parent3, final double[] dest,
+      final Random random) {
+    final double[] parent1Doubles, parent2Doubles, parent3Doubles;
+    int index;
+    double weight1, weight2, mul;
+
+    parent1Doubles = parent1.solution;
+
+    if (parent2.quality < parent3.quality) {
+      parent2Doubles = parent2.solution;
+      parent3Doubles = parent3.solution;
+    } else {
+      parent3Doubles = parent2.solution;
+      parent2Doubles = parent3.solution;
+    }
+
+    weight1 = (0.7d * random.nextDouble());
+    weight2 = (0.7d * weight1 * random.nextDouble());
+    mul = (1d / (weight1 + weight2 + 1d));
+
+    index = (-1);
+    for (final double original : parent1Doubles) {
+      ++index;
+      dest[index] = ((original + (weight1 * parent2Doubles[index])
+          + (weight2 * parent3Doubles[index])) * mul);
     }
   }
 
@@ -112,13 +160,14 @@ final class _DELSFittingJob
 
     guesser = this.m_function.createParameterGuesser(this.m_data);
 
-    populationSize = (numParameters * 6);
+    populationSize = ((numParameters * numParameters) * 3);
 
     parents = new FittingCandidateSolution[populationSize];
     offspring = new FittingCandidateSolution[populationSize];
 
     maxIterations = this.getNumericalOptimizerMaxIterations();
-    this.setNumericalOptimizerMaxIterations(100);
+    this.setNumericalOptimizerMaxIterations(
+        numParameters * numParameters * numParameters);
 
     for (index = populationSize; (--index) >= 0;) {
       offspring[index] = new FittingCandidateSolution(numParameters);
@@ -128,7 +177,8 @@ final class _DELSFittingJob
       this.refineWithNelderMead(current);
     }
 
-    for (generation = (7 * populationSize); (--generation) >= 0;) {
+    for (generation = (numParameters * numParameters
+        * populationSize); (--generation) >= 0;) {
       for (index = populationSize; (--index) >= 0;) {
         parent1 = parents[index];
 
@@ -139,8 +189,14 @@ final class _DELSFittingJob
           parent3 = parents[random.nextInt(populationSize)];
         } while ((parent3 == parent2) || (parent3 == parent1));
         current = offspring[index];
-        _DELSFittingJob.__deCrossover(parent1, parent2, parent3,
-            current.solution, random);
+
+        if (random.nextBoolean()) {
+          _DELSFittingJob.__deCrossover(parent1, parent2, parent3,
+              current.solution, random);
+        } else {
+          _DELSFittingJob.__centerCrossover(parent1, parent2, parent3,
+              current.solution, random);
+        }
         current.quality = this.value(current.solution);
       }
 

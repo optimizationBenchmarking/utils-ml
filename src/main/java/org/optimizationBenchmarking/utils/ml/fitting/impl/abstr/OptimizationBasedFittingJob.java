@@ -252,27 +252,18 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
   @Override
   public final boolean converged(final int iteration,
       final Evaluation previous, final Evaluation current) {
+    final double[] previousData, currentData;
+    int index;
+    double currentValue;
+
     if (iteration >= this.m_leastSquaresMaxIterations) {
       return true;
     }
-    return OptimizationBasedFittingJob.__check(
-        OptimizationBasedFittingJob.__toArray(previous.getPoint()), //
-        OptimizationBasedFittingJob.__toArray(current.getPoint()));
-  }
 
-  /**
-   * check two double arrays for convergence
-   *
-   * @param previousData
-   *          the previous array
-   * @param currentData
-   *          the current array
-   * @return {@code true} on convergence, {@code false} otherwise
-   */
-  private static final boolean __check(final double[] previousData,
-      final double[] currentData) {
-    int index;
-    double currentValue;
+    previousData = OptimizationBasedFittingJob
+        .__toArray(previous.getPoint());
+    currentData = OptimizationBasedFittingJob
+        .__toArray(current.getPoint());
 
     index = (-1);
     for (final double previousValue : previousData) {
@@ -285,26 +276,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
     }
 
     return true;
-  }
-
-  /**
-   * Check the convergence of a point value pair.
-   *
-   * @param iteration
-   *          the iteration
-   * @param previous
-   *          the previous point value pair
-   * @param current
-   *          the current point value pair
-   * @return {@code true} on convergence, {@code false} otherwise
-   */
-  public final boolean converged(final int iteration,
-      final PointValuePair previous, final PointValuePair current) {
-    if (iteration >= this.m_optimizerMaxIterations) {
-      return true;
-    }
-    return OptimizationBasedFittingJob.__check(previous.getPointRef(),
-        current.getPointRef());
   }
 
   /** {@inheritDoc} */
@@ -510,7 +481,9 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
     try {
       if (this.m_simplex == null) {
         this.m_simplex = new SimplexOptimizer(
-            new __PointValuePairChecker());
+            OptimizationBasedFittingJob.OPTIMIZER_RELATIVE_THRESHOLD,
+            Double.NEGATIVE_INFINITY);
+        // new __PointValuePairChecker());
       }
       if (this.m_objective == null) {
         this.m_objective = new ObjectiveFunction(this);
@@ -837,24 +810,5 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
       }
       return this.evaluations.getCount();
     }
-  }
-
-  /** the convergence checker */
-  private final class __PointValuePairChecker
-      implements ConvergenceChecker<PointValuePair> {
-
-    /** create the checker */
-    __PointValuePairChecker() {
-      super();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public final boolean converged(final int iteration,
-        final PointValuePair previous, final PointValuePair current) {
-      return OptimizationBasedFittingJob.this.converged(iteration,
-          previous, current);
-    }
-
   }
 }
