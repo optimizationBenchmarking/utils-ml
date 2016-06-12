@@ -4,7 +4,7 @@ import java.util.HashSet;
 
 import org.optimizationBenchmarking.utils.collections.lists.ArrayListView;
 import org.optimizationBenchmarking.utils.error.ErrorUtils;
-import org.optimizationBenchmarking.utils.ml.fitting.impl.dels.DELSFitter;
+import org.optimizationBenchmarking.utils.ml.fitting.impl.cmaesls.CMAESLSFitter;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.lssimplex.LSSimplexFitter;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IFunctionFitter;
 
@@ -92,7 +92,7 @@ public final class DefaultFunctionFitter {
       if ((fitter != null) && (fitter.canUse())) {
         fitters.add(fitter);
       }
-      fitter = DELSFitter.getInstance();
+      fitter = CMAESLSFitter.getInstance();
       if ((fitter != null) && (fitter.canUse())) {
         fitters.add(fitter);
       }

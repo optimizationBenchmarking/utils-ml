@@ -3,7 +3,6 @@ package org.optimizationBenchmarking.utils.ml.fitting.impl.abstr;
 import java.util.Random;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
-import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.fitting.leastsquares.GaussNewtonOptimizer;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem.Evaluation;
@@ -17,14 +16,15 @@ import org.apache.commons.math3.optim.ConvergenceChecker;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.MaxIter;
-import org.apache.commons.math3.optim.OptimizationData;
 import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
+import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.NelderMeadSimplex;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.SimplexOptimizer;
+import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.util.Incrementor;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.FittingEvaluation;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IFittingQualityMeasure;
@@ -56,6 +56,9 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
   protected static final int RET_NO_IMPROVEMENT = (OptimizationBasedFittingJob.RET_FAILED
       + 1);
 
+  /** the selected points */
+  private IFittingQualityMeasure m_selected;
+
   /** the evaluation counter */
   private Incrementor m_evaluationCounter;
   /** the iteration counter */
@@ -63,26 +66,28 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
 
   /** the start vector */
   private ArrayRealVector m_startVector;
-
   /** the start vector data */
   private double[] m_startVectorData;
 
-  /** the Gauss-Newton optimizer */
-  private GaussNewtonOptimizer m_gaussNewton;
-  /** the Levenberg-Marquardt optimizer */
-  private LevenbergMarquardtOptimizer m_levenbergMarquardt;
   /** the objective function */
   private ObjectiveFunction m_objective;
   /** the maximum evaluations */
   private MaxEval m_maxEval;
   /** the maximum iterations */
   private MaxIter m_maxIter;
+  /** the shared point value pair checker */
+  private __PointValuePairChecker m_pointValuePairChecker;
+
+  /** the Gauss-Newton optimizer */
+  private GaussNewtonOptimizer m_gaussNewton;
+  /** the Levenberg-Marquardt optimizer */
+  private LevenbergMarquardtOptimizer m_levenbergMarquardt;
   /** the simplex optimizer */
   private SimplexOptimizer m_simplex;
   /** the bobyqa optimizer */
-  private __SafeBOBYQAOptimizer m_BOBYQA;
-  /** the selected points */
-  private IFittingQualityMeasure m_selected;
+  private BOBYQAOptimizer m_bobyqa;
+  /** the CMA-ES optimizer */
+  private CMAESOptimizer m_cmaes;
 
   /** the maximum iterations granted to least squares methods */
   private int m_leastSquaresMaxIterations;
@@ -252,30 +257,48 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
   @Override
   public final boolean converged(final int iteration,
       final Evaluation previous, final Evaluation current) {
-    final double[] previousData, currentData;
-    int index;
-    double currentValue;
-
     if (iteration >= this.m_leastSquaresMaxIterations) {
       return true;
     }
+    return OptimizationBasedFittingJob.__check(previous.getRMS(),
+        current.getRMS());
+  }
 
-    previousData = OptimizationBasedFittingJob
-        .__toArray(previous.getPoint());
-    currentData = OptimizationBasedFittingJob
-        .__toArray(current.getPoint());
+  /**
+   * check two double (cost) values for convergence
+   *
+   * @param previousValue
+   *          the previous value
+   * @param currentValue
+   *          the current value
+   * @return {@code true} on convergence, {@code false} otherwise
+   */
+  private static final boolean __check(final double previousValue,
+      final double currentValue) {
+    return (Math.abs(previousValue - currentValue) < //
+    (OptimizationBasedFittingJob.OPTIMIZER_RELATIVE_THRESHOLD
+        * Math.max(Math.abs(previousValue), Math.abs(currentValue))));
+  }
 
-    index = (-1);
-    for (final double previousValue : previousData) {
-      currentValue = currentData[++index];
-      if (Math.abs(previousValue - currentValue) > //
-      (OptimizationBasedFittingJob.OPTIMIZER_RELATIVE_THRESHOLD
-          * Math.max(Math.abs(previousValue), Math.abs(currentValue)))) {
-        return false;
-      }
+  /**
+   * Check the convergence of a point value pair.
+   *
+   * @param iteration
+   *          the iteration
+   * @param previous
+   *          the previous point value pair
+   * @param current
+   *          the current point value pair
+   * @return {@code true} on convergence, {@code false} otherwise
+   */
+  public final boolean converged(final int iteration,
+      final PointValuePair previous, final PointValuePair current) {
+    if (iteration >= this.m_optimizerMaxIterations) {
+      return true;
     }
-
-    return true;
+    return OptimizationBasedFittingJob.__check(
+        previous.getValue().doubleValue(),
+        current.getValue().doubleValue());
   }
 
   /** {@inheritDoc} */
@@ -445,9 +468,13 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
    * @return the maximum evaluations fitting to the maximum iterations
    */
   private final MaxEval __getMaxEval() {
+    final int maxIt, numParams;
     if (this.m_maxEval == null) {
-      this.m_maxEval = new MaxEval(1 + (this.m_optimizerMaxIterations
-          * (this.m_function.getParameterCount() << 1)));
+      maxIt = this.m_optimizerMaxIterations;
+      numParams = this.m_function.getParameterCount();
+      this.m_maxEval = new MaxEval(//
+          Math.max(maxIt, Math.max(1000, //
+              (maxIt * numParams * numParams * 2))));
     }
     return this.m_maxEval;
   }
@@ -479,11 +506,13 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
     this.m_bestQuality = Double.POSITIVE_INFINITY;
 
     try {
+      if (this.m_pointValuePairChecker == null) {
+        this.m_pointValuePairChecker = new __PointValuePairChecker();
+      }
+
       if (this.m_simplex == null) {
         this.m_simplex = new SimplexOptimizer(
-            OptimizationBasedFittingJob.OPTIMIZER_RELATIVE_THRESHOLD,
-            Double.NEGATIVE_INFINITY);
-        // new __PointValuePairChecker());
+            this.m_pointValuePairChecker);
       }
       if (this.m_objective == null) {
         this.m_objective = new ObjectiveFunction(this);
@@ -545,8 +574,8 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
       }
       dim = solution.solution.length;
 
-      if (this.m_BOBYQA == null) {
-        this.m_BOBYQA = new __SafeBOBYQAOptimizer(dim << 1);
+      if (this.m_bobyqa == null) {
+        this.m_bobyqa = new BOBYQAOptimizer(dim << 1);
       }
 
       orig = solution.solution;
@@ -574,11 +603,80 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
         ++index;
       }
 
-      this.m_BOBYQA.optimize(GoalType.MINIMIZE, //
+      this.m_bobyqa.optimize(GoalType.MINIMIZE, //
           this.m_objective, //
           new InitialGuess(solution.solution), //
           new SimpleBounds(lower, upper), //
           this.__getMaxEval(), this.__getMaxIterations());
+
+    } catch (@SuppressWarnings("unused") final Throwable error) {
+      // ignored
+    }
+
+    return this.__return(solution);
+  }
+
+  /**
+   * refine a given solution using CMA-ES
+   *
+   * @param solution
+   *          the solution to refine
+   * @param stddev
+   *          the standard deviations
+   * @return one of the {@code RET_} codes
+   */
+  protected final int refineWithCMAES(final FCST solution,
+      final double[] stddev) {
+    final int dim;
+    final double[] lower, upper, orig;
+    double value, offset;
+    int index;
+
+    this.m_bestQuality = Double.POSITIVE_INFINITY;
+
+    try {
+      if (this.m_objective == null) {
+        this.m_objective = new ObjectiveFunction(this);
+      }
+
+      if (this.m_pointValuePairChecker == null) {
+        this.m_pointValuePairChecker = new __PointValuePairChecker();
+      }
+
+      dim = solution.solution.length;
+
+      if (this.m_cmaes == null) {
+        this.m_cmaes = new CMAESOptimizer(//
+            this.m_optimizerMaxIterations, //
+            0d, //
+            true, //
+            (this.m_optimizerMaxIterations / 10), //
+            0, //
+            new JDKRandomGenerator(), //
+            false, //
+            this.m_pointValuePairChecker);
+      }
+
+      orig = solution.solution;
+      lower = new double[orig.length];
+      upper = new double[orig.length];
+      for (index = orig.length; (--index) >= 0;) {
+        value = orig[index];
+        offset = Math.max((3d * stddev[index]), 1e-10d);
+        lower[index] = Math.nextAfter((value - offset),
+            Double.NEGATIVE_INFINITY);
+        upper[index] = Math.nextUp(value + offset);
+      }
+
+      this.m_cmaes.optimize(GoalType.MINIMIZE, //
+          this.m_objective, //
+          new InitialGuess(solution.solution), //
+          new CMAESOptimizer.Sigma(stddev), //
+          this.__getMaxEval(), this.__getMaxIterations(), //
+          new CMAESOptimizer.PopulationSize(
+              5 + ((int) (3 * Math.log(dim)))), //
+          new SimpleBounds(lower, upper)//
+      );
 
     } catch (@SuppressWarnings("unused") final Throwable error) {
       // ignored
@@ -653,9 +751,12 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
     } finally {
       this.m_gaussNewton = null;
       this.m_levenbergMarquardt = null;
+      this.m_cmaes = null;
+      this.m_bobyqa = null;
+      this.m_simplex = null;
+      this.m_pointValuePairChecker = null;
       this.m_startVector = null;
       this.m_startVectorData = null;
-      this.m_simplex = null;
       this.m_evaluationCounter = null;
       this.m_iterationCounter = null;
       this.m_objective = null;
@@ -765,50 +866,21 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
     }
   }
 
-  /**
-   * the interna {@link BOBYQAOptimizer} implementation which tries to
-   * prevent endless loops.
-   */
-  private static final class __SafeBOBYQAOptimizer
-      extends BOBYQAOptimizer {
+  /** the convergence checker */
+  private final class __PointValuePairChecker
+      implements ConvergenceChecker<PointValuePair> {
 
-    /** the remaining allowed steps */
-    private int m_remainingSteps;
-
-    /**
-     * create the BOBYQA optimizer
-     *
-     * @param numPoints
-     *          the number of points
-     */
-    __SafeBOBYQAOptimizer(final int numPoints) {
-      super(numPoints);
+    /** create the checker */
+    __PointValuePairChecker() {
+      super();
     }
 
     /** {@inheritDoc} */
     @Override
-    public final PointValuePair optimize(final OptimizationData... optData)
-        throws TooManyEvaluationsException {
-      checker: {
-        for (final OptimizationData param : optData) {
-          if (param instanceof MaxEval) {
-            this.m_remainingSteps = (10 * ((MaxEval) param).getMaxEval());
-            break checker;
-          }
-        }
-        this.m_remainingSteps = 10_000;
-      }
-      return super.optimize(optData);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public final int getEvaluations() {
-      if ((--this.m_remainingSteps) <= 0) {
-        throw new IllegalStateException(
-            "BOBYQAOptimizer has performed too man steps and thus is killed to prevent potential endless loop."); //$NON-NLS-1$
-      }
-      return this.evaluations.getCount();
+    public final boolean converged(final int iteration,
+        final PointValuePair previous, final PointValuePair current) {
+      return OptimizationBasedFittingJob.this.converged(iteration,
+          previous, current);
     }
   }
 }

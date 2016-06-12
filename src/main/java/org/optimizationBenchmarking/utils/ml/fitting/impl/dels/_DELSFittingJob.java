@@ -9,8 +9,7 @@ import org.optimizationBenchmarking.utils.ml.fitting.spec.IParameterGuesser;
 
 /**
  * A function fitting job which mixes Differential Evolution, Least-Squares
- * optimization, and Simplex Search to obtain high-quality fittings. This
- * hybrid approach is intended to achieve better overall convergence.
+ * optimization, and Simplex Search to obtain high-quality fittings.
  */
 final class _DELSFittingJob
     extends OptimizationBasedFittingJob<FittingCandidateSolution> {
@@ -45,7 +44,6 @@ final class _DELSFittingJob
       final FittingCandidateSolution parent3, final double[] dest,
       final Random random) {
     final double[] parent1Doubles, parent2Doubles, parent3Doubles;
-    // final int chosen;
     int index;
 
     parent1Doubles = parent1.solution;
@@ -61,12 +59,6 @@ final class _DELSFittingJob
     // chosen = random.nextInt(parent1Doubles.length);
     index = (-1);
     for (final double original : parent1Doubles) {
-      // ++index;
-      // if ((index == chosen) || (random.nextInt(4) <= 0)) {
-      // original = (original + (((0.5d * random.nextDouble())
-      // + (0.1d * random.nextGaussian()))
-      // * (parent2Doubles[index] - parent3Doubles[index])));
-      // }
       ++index;
       dest[index] = original
           + (original + ((0.3d + (random.nextGaussian() * 0.1d))
@@ -107,8 +99,14 @@ final class _DELSFittingJob
       parent2Doubles = parent3.solution;
     }
 
-    weight1 = (0.7d * random.nextDouble());
-    weight2 = (0.7d * weight1 * random.nextDouble());
+    weight1 = (0.5d * (random.nextDouble() - 0.07d));
+    weight2 = (0.5d * (random.nextDouble() - 0.07d));
+
+    if (weight1 < weight2) {
+      mul = weight1;
+      weight1 = weight2;
+      weight2 = mul;
+    }
     mul = (1d / (weight1 + weight2 + 1d));
 
     index = (-1);
@@ -160,25 +158,24 @@ final class _DELSFittingJob
 
     guesser = this.m_function.createParameterGuesser(this.m_data);
 
-    populationSize = ((numParameters * numParameters) * 3);
+    populationSize = (numParameters * numParameters);
 
     parents = new FittingCandidateSolution[populationSize];
     offspring = new FittingCandidateSolution[populationSize];
 
-    maxIterations = this.getNumericalOptimizerMaxIterations();
-    this.setNumericalOptimizerMaxIterations(
-        numParameters * numParameters * numParameters);
+    maxIterations = this.getLeastSquaresMaxIterations();
+    this.setLeastSquaresMaxIterations(150);
 
     for (index = populationSize; (--index) >= 0;) {
       offspring[index] = new FittingCandidateSolution(numParameters);
       parents[index] = current = new FittingCandidateSolution(
           numParameters);
       this.__randomSolution(guesser, current, random);
-      this.refineWithNelderMead(current);
+      this.refineWithLevenbergMarquardt(current);
     }
 
-    for (generation = (numParameters * numParameters
-        * populationSize); (--generation) >= 0;) {
+    for (generation = (((numParameters * numParameters
+        * populationSize) << 1) / 3); (--generation) >= 0;) {
       for (index = populationSize; (--index) >= 0;) {
         parent1 = parents[index];
 
@@ -214,7 +211,7 @@ final class _DELSFittingJob
     offspring = parents = null;
 
     this.getCopyOfBest(current);
-    this.setNumericalOptimizerMaxIterations(maxIterations);
+    this.setLeastSquaresMaxIterations(maxIterations);
     this.refineWithLeastSquaresAndSimplexSearch(current);
   }
 

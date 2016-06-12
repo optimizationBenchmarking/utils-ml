@@ -7,18 +7,10 @@ import org.optimizationBenchmarking.utils.ml.fitting.impl.abstr.OptimizationBase
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IParameterGuesser;
 
 /**
- * A function fitting job which proceeds as follows:
- * <p>
- * The goal is to obtain high-quality fittings by first using an ordinary
- * least-squares problem approach (Levenberg-Marquardt or Gauss-Newton
- * algorithm) and then to refine the result using a direct method, the
- * Nelder-Mead simplex. As afterburner, we apply BOBYQA.
- * </p>
- * <p>
- * Besides getting high-quality results, having stable and reproducible
- * results is also very important. This is why we perform the above several
- * times, more often if results seem to be unstable.
- * </p>
+ * A function fitting job to obtain high-quality fittings by first using an
+ * ordinary least-squares problem approach (Levenberg-Marquardt or
+ * Gauss-Newton algorithm) and then to refine the result using a direct
+ * method, the Nelder-Mead simplex. As afterburner, we apply BOBYQA.
  */
 final class _LSSimplexFittingJob
     extends OptimizationBasedFittingJob<_Candidate> {

@@ -15,6 +15,7 @@ import org.optimizationBenchmarking.utils.math.statistics.aggregate.ArithmeticMe
 import org.optimizationBenchmarking.utils.math.statistics.aggregate.QuantileAggregate;
 import org.optimizationBenchmarking.utils.math.statistics.ranking.ETieStrategy;
 import org.optimizationBenchmarking.utils.math.statistics.ranking.RankingStrategy;
+import org.optimizationBenchmarking.utils.ml.fitting.impl.cmaesls.CMAESLSFitter;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.dels.DELSFitter;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.lssimplex.LSSimplexFitter;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IFunctionFitter;
@@ -29,6 +30,7 @@ public class FittingExamples {
   /** the fitters */
   public static final ArrayListView<IFunctionFitter> FITTERS = //
   new ArrayListView<>(new IFunctionFitter[] { //
+      CMAESLSFitter.getInstance(), //
       DELSFitter.getInstance(), //
       LSSimplexFitter.getInstance(),//
   });
@@ -111,7 +113,7 @@ public class FittingExamples {
       }
     }
 
-    ranking = new RankingStrategy(null, ETieStrategy.MINIMUM);
+    ranking = new RankingStrategy(null, ETieStrategy.AVERAGE);
 
     outer: for (final MultiFittingExampleDataset dataSet : data) {
       index = (-1);
