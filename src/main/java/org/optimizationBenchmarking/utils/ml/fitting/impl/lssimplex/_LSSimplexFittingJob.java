@@ -2,7 +2,6 @@ package org.optimizationBenchmarking.utils.ml.fitting.impl.lssimplex;
 
 import java.util.Random;
 
-import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.abstr.FittingJobBuilder;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.abstr.OptimizationBasedFittingJob;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IParameterGuesser;
@@ -132,7 +131,7 @@ final class _LSSimplexFittingJob
 
         if (initRetVal < _LSSimplexFittingJob.RET_SAME) {
           tempSolution.quality = this.evaluate(tempSolution.solution);
-          if (MathUtils.isFinite(tempSolution.quality) && (hasNoStart
+          if ((tempSolution.quality >= 0d) && (hasNoStart
               || (tempSolution.quality < bestSolution.quality))) {
             bestSolution._assign(tempSolution);
             hasNoStart = false;

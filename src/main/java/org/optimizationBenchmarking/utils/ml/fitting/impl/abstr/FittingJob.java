@@ -3,7 +3,6 @@ package org.optimizationBenchmarking.utils.ml.fitting.impl.abstr;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.FittingUtils;
 import org.optimizationBenchmarking.utils.ml.fitting.quality.FittingQualityMeasure;
@@ -77,10 +76,8 @@ public class FittingJob extends ToolJob implements IFittingJob {
    *          the parameters
    */
   public final void register(final double quality, final double[] params) {
-    if (quality < this.m_result.quality) {
-      System.arraycopy(params, 0, this.m_result.solution, 0,
-          this.m_result.solution.length);
-      this.m_result.quality = quality;
+    if ((quality < this.m_result.quality) && (quality >= 0d)) {
+      this.m_result.assign(params, quality);
     }
   }
 
@@ -130,7 +127,8 @@ public class FittingJob extends ToolJob implements IFittingJob {
       this.fit();
 
       canLog = (logger != null) && (logger.isLoggable(Level.FINER));
-      isFinite = MathUtils.isFinite(this.m_result.quality);
+      isFinite = ((this.m_result.quality >= 0d)
+          && (this.m_result.quality < Double.POSITIVE_INFINITY));
       if (canLog || (!isFinite)) {
         if (textOut == null) {
           textOut = this.__createMessageBody();

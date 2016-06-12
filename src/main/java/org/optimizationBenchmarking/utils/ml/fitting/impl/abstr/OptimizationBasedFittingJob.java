@@ -5,7 +5,6 @@ import java.util.Random;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.fitting.leastsquares.GaussNewtonOptimizer;
-import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer.Optimum;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem.Evaluation;
 import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
@@ -27,7 +26,6 @@ import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.NelderMeadSimplex;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.SimplexOptimizer;
 import org.apache.commons.math3.util.Incrementor;
-import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.FittingEvaluation;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IFittingQualityMeasure;
 
@@ -88,15 +86,13 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
 
   /** the maximum iterations granted to least squares methods */
   private int m_leastSquaresMaxIterations;
-
   /** the maximum iterations granted to optimization algorithms */
   private int m_optimizerMaxIterations;
 
-  /**
-   * the iterations performed by nelder mead, guard against
-   * https://issues.apache.org/jira/browse/MATH-1376
-   */
-  private int m_nelderMeadDoneIterations;
+  /** the best solution found in the internal optimization steps */
+  private double[] m_bestData;
+  /** the best quality found in the internal optimization steps */
+  private double m_bestQuality;
 
   /**
    * create the fitting job
@@ -203,8 +199,13 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
     vector = OptimizationBasedFittingJob.__toArray(point);
 
     this.m_selected.evaluate(this.m_function, vector, eval);
-    if (this.m_selected == this.m_measure) {
-      this.register(eval.quality, vector);
+    if ((eval.quality < this.m_bestQuality) && (eval.quality >= 0d)) {
+      this.m_bestQuality = eval.quality;
+      System.arraycopy(vector, 0, this.m_bestData, 0,
+          this.m_bestData.length);
+      if (this.m_selected == this.m_measure) {
+        this.register(eval.quality, vector);
+      }
     }
     return eval;
   }
@@ -219,6 +220,7 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
    */
   protected final void subselect(final int npoints, final Random random) {
     this.m_selected = this.m_measure.subselect(npoints, random);
+    this.m_bestQuality = Double.POSITIVE_INFINITY;
   }
 
   /**
@@ -226,6 +228,7 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
    */
   protected final void deselectPoints() {
     this.m_selected = this.m_measure;
+    this.m_bestQuality = Double.POSITIVE_INFINITY;
   }
 
   /** {@inheritDoc} */
@@ -234,8 +237,13 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
     final double res;
 
     res = this.m_selected.evaluate(this.m_function, point);
-    if (this.m_selected == this.m_measure) {
-      this.register(res, point);
+    if ((res < this.m_bestQuality) && (res >= 0d)) {
+      this.m_bestQuality = res;
+      System.arraycopy(point, 0, this.m_bestData, 0,
+          this.m_bestData.length);
+      if (this.m_selected == this.m_measure) {
+        this.register(res, point);
+      }
     }
     return res;
   }
@@ -292,8 +300,7 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
    */
   public final boolean converged(final int iteration,
       final PointValuePair previous, final PointValuePair current) {
-    if ((iteration >= this.m_optimizerMaxIterations)
-        || ((++this.m_nelderMeadDoneIterations) >= this.m_optimizerMaxIterations)) {
+    if (iteration >= this.m_optimizerMaxIterations) {
       return true;
     }
     return OptimizationBasedFittingJob.__check(previous.getPointRef(),
@@ -338,37 +345,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
   }
 
   /**
-   * Refine a given {@code solution} with the Levenberg-Marquardt
-   * algorithm.
-   *
-   * @param solution
-   *          the solution to refine
-   * @return one of the {@code RET_} codes
-   */
-  protected final int refineWithLevenbergMarquardt(final FCST solution) {
-    try {
-      this.m_iterationCounter = new Incrementor(
-          this.m_leastSquaresMaxIterations);
-      this.m_evaluationCounter = new Incrementor(
-          this.m_leastSquaresMaxIterations
-              * this.m_leastSquaresMaxIterations);
-      this.__copyToStartVector(solution.solution);
-
-      if (this.m_levenbergMarquardt == null) {
-        this.m_levenbergMarquardt = new LevenbergMarquardtOptimizer();
-      }
-
-      return this.__checkOptimum(this.m_levenbergMarquardt.optimize(this),
-          solution);
-    } catch (@SuppressWarnings("unused") final Throwable error) {
-      return OptimizationBasedFittingJob.RET_FAILED;
-    } finally {
-      this.m_evaluationCounter = null;
-      this.m_iterationCounter = null;
-    }
-  }
-
-  /**
    * Check whether an improved fitting candidate solution can be accepted
    *
    * @param solution
@@ -380,25 +356,60 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
   }
 
   /**
-   * Check an optimum
+   * Produce the return value.
    *
-   * @param optimum
-   *          the discovered optimum
    * @param solution
    *          the solution to refine
    * @return one of the {@code RET_} codes
    */
-  private final int __checkOptimum(final Optimum optimum,
-      final FCST solution) {
+  private final int __return(final FCST solution) {
     final double quality;
-    quality = optimum.getRMS();
-    if ((quality < solution.quality) && MathUtils.isFinite(quality)) {
-      solution.assign(
-          OptimizationBasedFittingJob.__toArray(optimum.getPoint()),
-          quality);
+
+    quality = this.m_bestQuality;
+    this.m_bestQuality = Double.POSITIVE_INFINITY;
+
+    if ((quality < solution.quality) && (quality >= 0d)) {
+      solution.assign(this.m_bestData, quality);
       return this.checkImprovedSolution(solution);
     }
+    if ((quality < 0d) || (quality >= Double.POSITIVE_INFINITY)) {
+      return OptimizationBasedFittingJob.RET_FAILED;
+    }
+
     return OptimizationBasedFittingJob.RET_NO_IMPROVEMENT;
+  }
+
+  /**
+   * Refine a given {@code solution} with the Levenberg-Marquardt
+   * algorithm.
+   *
+   * @param solution
+   *          the solution to refine
+   * @return one of the {@code RET_} codes
+   */
+  protected final int refineWithLevenbergMarquardt(final FCST solution) {
+    this.m_bestQuality = Double.POSITIVE_INFINITY;
+
+    try {
+      this.m_iterationCounter = new Incrementor(
+          this.m_leastSquaresMaxIterations);
+      this.m_evaluationCounter = new Incrementor(
+          this.m_leastSquaresMaxIterations
+              * this.m_leastSquaresMaxIterations);
+      this.__copyToStartVector(solution.solution);
+
+      if (this.m_levenbergMarquardt == null) {
+        this.m_levenbergMarquardt = new LevenbergMarquardtOptimizer();
+      }
+      this.m_levenbergMarquardt.optimize(this);
+    } catch (@SuppressWarnings("unused") final Throwable error) {
+      // ignored
+    } finally {
+      this.m_evaluationCounter = null;
+      this.m_iterationCounter = null;
+    }
+
+    return this.__return(solution);
   }
 
   /**
@@ -409,6 +420,8 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
    * @return one of the {@code RET_} codes
    */
   protected final int refineWithGaussNewton(final FCST solution) {
+    this.m_bestQuality = Double.POSITIVE_INFINITY;
+
     try {
       this.__copyToStartVector(solution.solution);
 
@@ -423,14 +436,15 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
             GaussNewtonOptimizer.Decomposition.SVD);
       }
 
-      return this.__checkOptimum(this.m_gaussNewton.optimize(this),
-          solution);
+      this.m_gaussNewton.optimize(this);
     } catch (@SuppressWarnings("unused") final Throwable error) {
-      return OptimizationBasedFittingJob.RET_FAILED;
+      // ignored
     } finally {
       this.m_evaluationCounter = null;
       this.m_iterationCounter = null;
     }
+
+    return this.__return(solution);
   }
 
   /**
@@ -491,8 +505,8 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
     double value;
     int index;
 
-    // https://issues.apache.org/jira/browse/MATH-1376
-    this.m_nelderMeadDoneIterations = 0;
+    this.m_bestQuality = Double.POSITIVE_INFINITY;
+
     try {
       if (this.m_simplex == null) {
         this.m_simplex = new SimplexOptimizer(
@@ -513,15 +527,17 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
         }
       }
 
-      return this.__checkPointValuePair(this.m_simplex.optimize(//
+      this.m_simplex.optimize(//
           new NelderMeadSimplex(bounds), //
           new InitialGuess(solution.solution), //
           this.m_objective, this.__getMaxEval(), this.__getMaxIterations(),
-          GoalType.MINIMIZE), solution);
+          GoalType.MINIMIZE);
 
     } catch (@SuppressWarnings("unused") final Throwable error) {
-      return OptimizationBasedFittingJob.RET_FAILED;
+      // unused
     }
+
+    return this.__return(solution);
   }
 
   /**
@@ -548,9 +564,8 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
     double bound;
     int index;
 
-    // https://issues.apache.org/jira/browse/MATH-1376 does not apply
-    // here...
-    this.m_nelderMeadDoneIterations = Integer.MIN_VALUE;
+    this.m_bestQuality = Double.POSITIVE_INFINITY;
+
     try {
       if (this.m_objective == null) {
         this.m_objective = new ObjectiveFunction(this);
@@ -586,39 +601,17 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
         ++index;
       }
 
-      return this
-          .__checkPointValuePair(//
-              this.m_BOBYQA.optimize(GoalType.MINIMIZE, //
-                  this.m_objective, //
-                  new InitialGuess(solution.solution), //
-                  new SimpleBounds(lower, upper), //
-                  this.__getMaxEval(), this.__getMaxIterations()),
-          solution);
+      this.m_BOBYQA.optimize(GoalType.MINIMIZE, //
+          this.m_objective, //
+          new InitialGuess(solution.solution), //
+          new SimpleBounds(lower, upper), //
+          this.__getMaxEval(), this.__getMaxIterations());
 
     } catch (@SuppressWarnings("unused") final Throwable error) {
-      return OptimizationBasedFittingJob.RET_FAILED;
+      // ignored
     }
-  }
 
-  /**
-   * Check an point-value pair optimum
-   *
-   * @param optimum
-   *          the discovered optimum
-   * @param solution
-   *          the solution to refine
-   * @return one of the {@code RET_} codes
-   */
-  private final int __checkPointValuePair(final PointValuePair optimum,
-      final FCST solution) {
-    final double quality;
-
-    quality = optimum.getValue().doubleValue();
-    if ((quality < solution.quality) && MathUtils.isFinite(quality)) {
-      solution.assign(optimum.getPoint(), quality);
-      return this.checkImprovedSolution(solution);
-    }
-    return OptimizationBasedFittingJob.RET_NO_IMPROVEMENT;
+    return this.__return(solution);
   }
 
   /**
@@ -682,6 +675,7 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
   @Override
   protected final void fit() {
     try {
+      this.m_bestData = new double[this.m_function.getParameterCount()];
       this.doFit();
     } finally {
       this.m_gaussNewton = null;
@@ -695,6 +689,7 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
       this.m_maxEval = null;
       this.m_maxIter = null;
       this.m_selected = null;
+      this.m_bestData = null;
     }
   }
 

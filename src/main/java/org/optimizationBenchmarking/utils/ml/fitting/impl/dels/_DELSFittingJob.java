@@ -2,7 +2,6 @@ package org.optimizationBenchmarking.utils.ml.fitting.impl.dels;
 
 import java.util.Random;
 
-import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.abstr.FittingCandidateSolution;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.abstr.FittingJobBuilder;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.abstr.OptimizationBasedFittingJob;
@@ -90,7 +89,8 @@ final class _DELSFittingJob
     for (limiter = 100; (--limiter) >= 0;) {
       guesser.createRandomGuess(solution.solution, random);
       solution.quality = this.evaluate(solution.solution);
-      if (MathUtils.isFinite(solution.quality)) {
+      if ((solution.quality >= 0d)
+          && (solution.quality < Double.POSITIVE_INFINITY)) {
         return;
       }
     }
@@ -112,13 +112,10 @@ final class _DELSFittingJob
 
     guesser = this.m_function.createParameterGuesser(this.m_data);
 
-    // numPoints = this.m_measure.getPointCount();
-
     populationSize = (numParameters * 6);
 
     parents = new FittingCandidateSolution[populationSize];
     offspring = new FittingCandidateSolution[populationSize];
-    generation = (7 * populationSize);
 
     maxIterations = this.getNumericalOptimizerMaxIterations();
     this.setNumericalOptimizerMaxIterations(100);
@@ -131,7 +128,7 @@ final class _DELSFittingJob
       this.refineWithNelderMead(current);
     }
 
-    for (; (--generation) >= 0;) {
+    for (generation = (7 * populationSize); (--generation) >= 0;) {
       for (index = populationSize; (--index) >= 0;) {
         parent1 = parents[index];
 
@@ -151,19 +148,17 @@ final class _DELSFittingJob
         current = offspring[index];
         parent1 = parents[index];
         if ((current.quality < parent1.quality)
-            && MathUtils.isFinite(current.quality)) {
+            && (current.quality >= 0d)) {
           parent1.assign(current.solution, current.quality);
         }
       }
     }
 
-    this.setNumericalOptimizerMaxIterations(maxIterations);
     current = offspring[0];
     offspring = parents = null;
 
     this.getCopyOfBest(current);
-    this.setLeastSquaresMaxIterations(
-        OptimizationBasedFittingJob.DEFAULT_LEAST_SQUARES_MAX_ITERATIONS);
+    this.setNumericalOptimizerMaxIterations(maxIterations);
     this.refineWithLeastSquaresAndSimplexSearch(current);
   }
 
