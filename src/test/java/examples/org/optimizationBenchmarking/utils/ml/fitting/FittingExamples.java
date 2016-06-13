@@ -86,11 +86,11 @@ public class FittingExamples {
       final ArrayListView<MultiFittingExampleDataset> data,
       final Path path) throws IOException {
     final HashMap<MultiFittingExampleDataset, FittingOutcome>[] results;
-    final RankingStrategy ranking;
     final ArithmeticMeanAggregate[] meanQualityRanks, meanRuntimeRanks;
     final QuantileAggregate[] medianQualityRanks, medianRuntimeRanks;
     final double[][] qualities, runtimes;
     FittingOutcome current;
+    RankingStrategy ranking;
     int index;
 
     index = outcomes.length;
@@ -112,79 +112,93 @@ public class FittingExamples {
         results[index].put(outcome.example, outcome);
       }
     }
-
-    ranking = new RankingStrategy(null, ETieStrategy.AVERAGE);
-
-    outer: for (final MultiFittingExampleDataset dataSet : data) {
-      index = (-1);
-      for (final HashMap<MultiFittingExampleDataset, FittingOutcome> map : results) {
-        current = map.get(dataSet);
-        if (current == null) {
-          continue outer;
-        }
-        ++index;
-        qualities[index] = current._getQualities();
-        runtimes[index] = current._getRuntimes();
-      }
-
-      ranking.rank(qualities, meanQualityRanks);
-      ranking.rank(qualities, medianQualityRanks);
-      ranking.rank(runtimes, meanRuntimeRanks);
-      ranking.rank(runtimes, medianRuntimeRanks);
-    }
-
     try (final OutputStream os = PathUtils.openOutputStream(
         PathUtils.createPathInside(path, "summary.txt"))) { //$NON-NLS-1$
       try (final OutputStreamWriter osw = new OutputStreamWriter(os)) {
         try (final BufferedWriter bw = new BufferedWriter(osw)) {
-          bw.write("Mean Quality Ranks");//$NON-NLS-1$
-          for (index = 0; index < outcomes.length; index++) {
+          for (final ETieStrategy ties : new ETieStrategy[] {
+              ETieStrategy.MINIMUM_TIGHT, ETieStrategy.MINIMUM,
+              ETieStrategy.AVERAGE }) {
+            ranking = new RankingStrategy(null, ties);
+            bw.write("======================= ");//$NON-NLS-1$
+            bw.write(ties.toString());
+            bw.write(" ======================= ");//$NON-NLS-1$
             bw.newLine();
-            bw.write(outcomes[index].fitter.getClass().getSimpleName());
-            bw.write(':');
-            bw.write('\t');
-            bw.write(SimpleNumberAppender.INSTANCE.toString(
-                meanQualityRanks[index].doubleValue(),
-                ETextCase.AT_SENTENCE_START));
-          }
-          bw.newLine();
-          bw.newLine();
-          bw.write("Median Quality Ranks");//$NON-NLS-1$
-          for (index = 0; index < outcomes.length; index++) {
             bw.newLine();
-            bw.write(outcomes[index].fitter.getClass().getSimpleName());
-            bw.write(':');
-            bw.write('\t');
-            bw.write(SimpleNumberAppender.INSTANCE.toString(
-                medianQualityRanks[index].doubleValue(),
-                ETextCase.AT_SENTENCE_START));
-          }
-          bw.newLine();
-          bw.newLine();
-          bw.write("Mean Runtime Ranks");//$NON-NLS-1$
-          for (index = 0; index < outcomes.length; index++) {
+            for (; (--index) >= 0;) {
+              meanQualityRanks[index].reset();
+              meanRuntimeRanks[index].reset();
+              medianQualityRanks[index].reset();
+              medianRuntimeRanks[index].reset();
+            }
+
+            outer: for (final MultiFittingExampleDataset dataSet : data) {
+              index = (-1);
+              for (final HashMap<MultiFittingExampleDataset, FittingOutcome> map : results) {
+                current = map.get(dataSet);
+                if (current == null) {
+                  continue outer;
+                }
+                ++index;
+                qualities[index] = current._getQualities();
+                runtimes[index] = current._getRuntimes();
+              }
+
+              ranking.rank(qualities, meanQualityRanks);
+              ranking.rank(qualities, medianQualityRanks);
+              ranking.rank(runtimes, meanRuntimeRanks);
+              ranking.rank(runtimes, medianRuntimeRanks);
+            }
+
+            bw.write("Mean Quality Ranks");//$NON-NLS-1$
+            for (index = 0; index < outcomes.length; index++) {
+              bw.newLine();
+              bw.write(outcomes[index].fitter.getClass().getSimpleName());
+              bw.write(':');
+              bw.write('\t');
+              bw.write(SimpleNumberAppender.INSTANCE.toString(
+                  meanQualityRanks[index].doubleValue(),
+                  ETextCase.AT_SENTENCE_START));
+            }
             bw.newLine();
-            bw.write(outcomes[index].fitter.getClass().getSimpleName());
-            bw.write(':');
-            bw.write('\t');
-            bw.write(SimpleNumberAppender.INSTANCE.toString(
-                meanRuntimeRanks[index].doubleValue(),
-                ETextCase.AT_SENTENCE_START));
-          }
-          bw.newLine();
-          bw.newLine();
-          bw.write("Median Runtime Ranks");//$NON-NLS-1$
-          for (index = 0; index < outcomes.length; index++) {
             bw.newLine();
-            bw.write(outcomes[index].fitter.getClass().getSimpleName());
-            bw.write(':');
-            bw.write('\t');
-            bw.write(SimpleNumberAppender.INSTANCE.toString(
-                medianRuntimeRanks[index].doubleValue(),
-                ETextCase.AT_SENTENCE_START));
+            bw.write("Median Quality Ranks");//$NON-NLS-1$
+            for (index = 0; index < outcomes.length; index++) {
+              bw.newLine();
+              bw.write(outcomes[index].fitter.getClass().getSimpleName());
+              bw.write(':');
+              bw.write('\t');
+              bw.write(SimpleNumberAppender.INSTANCE.toString(
+                  medianQualityRanks[index].doubleValue(),
+                  ETextCase.AT_SENTENCE_START));
+            }
+            bw.newLine();
+            bw.newLine();
+            bw.write("Mean Runtime Ranks");//$NON-NLS-1$
+            for (index = 0; index < outcomes.length; index++) {
+              bw.newLine();
+              bw.write(outcomes[index].fitter.getClass().getSimpleName());
+              bw.write(':');
+              bw.write('\t');
+              bw.write(SimpleNumberAppender.INSTANCE.toString(
+                  meanRuntimeRanks[index].doubleValue(),
+                  ETextCase.AT_SENTENCE_START));
+            }
+            bw.newLine();
+            bw.newLine();
+            bw.write("Median Runtime Ranks");//$NON-NLS-1$
+            for (index = 0; index < outcomes.length; index++) {
+              bw.newLine();
+              bw.write(outcomes[index].fitter.getClass().getSimpleName());
+              bw.write(':');
+              bw.write('\t');
+              bw.write(SimpleNumberAppender.INSTANCE.toString(
+                  medianRuntimeRanks[index].doubleValue(),
+                  ETextCase.AT_SENTENCE_START));
+            }
+            bw.newLine();
+            bw.newLine();
           }
-          bw.newLine();
-          bw.newLine();
         }
       }
     }

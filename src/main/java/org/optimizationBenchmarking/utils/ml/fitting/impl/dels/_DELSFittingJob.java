@@ -164,13 +164,19 @@ final class _DELSFittingJob
     offspring = new FittingCandidateSolution[populationSize];
 
     maxIterations = this.getLeastSquaresMaxIterations();
-    this.setLeastSquaresMaxIterations(150);
 
     for (index = populationSize; (--index) >= 0;) {
       offspring[index] = new FittingCandidateSolution(numParameters);
       parents[index] = current = new FittingCandidateSolution(
           numParameters);
       this.__randomSolution(guesser, current, random);
+      this.setLeastSquaresMaxIterations(300);
+      this.subselect(numParameters, random);
+      current.quality = this.value(current.solution);
+      this.refineWithLevenbergMarquardt(current);
+      this.deselectPoints();
+      current.quality = this.evaluate(current.solution);
+      this.setLeastSquaresMaxIterations(100);
       this.refineWithLevenbergMarquardt(current);
     }
 
