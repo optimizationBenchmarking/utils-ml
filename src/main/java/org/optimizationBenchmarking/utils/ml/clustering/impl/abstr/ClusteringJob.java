@@ -130,9 +130,18 @@ public abstract class ClusteringJob extends ToolJob
   }
 
   /**
-   * Perform the clustering and return a solution record. The result of
-   * this method will be automatically
-   * {@link ClusteringTools#normalizeClusters(int[])} normalized.
+   * <p>
+   * Perform the clustering and return a solution record.
+   * </p>
+   * <p>
+   * The result of this method will be automatically
+   * {@link ClusteringTools#normalizeClusters(int[])} normalized and the
+   * number of clusters in it will be computed. In other words, you do not
+   * need to set {@link ClusteringSolution#count} and the cluster indexes
+   * do not need to be continuous or anything, i.e., you could even return
+   * a cluster assignment like {@code 1, 1, 9, 9, 9, 4}, which would then
+   * be transformed to {@code 1, 1, 0, 0, 0, 2}.
+   * </p>
    *
    * @return the solution
    * @throws Exception
@@ -194,7 +203,6 @@ public abstract class ClusteringJob extends ToolJob
     String message;
     char separator;
     boolean canLog, isFinite, wrongNumber;
-    int clusterCount;
 
     textOut = null;
     message = null;
@@ -209,15 +217,18 @@ public abstract class ClusteringJob extends ToolJob
 
       try {
         solution = this._cluster();
+        if (solution instanceof _DirectResult) {
+          return solution;
+        }
 
         isFinite = MathUtils.isFinite(solution.quality);
         if (isFinite) {
-          clusterCount = ClusteringTools
+          solution.count = ClusteringTools
               .normalizeClusters(solution.assignment);
-          wrongNumber = ((clusterCount > this.m_maxClusters)
-              || (clusterCount < this.m_minClusters));
+          wrongNumber = ((solution.count > this.m_maxClusters)
+              || (solution.count < this.m_minClusters));
         } else {
-          clusterCount = (-1);
+          solution.count = (-1);
           wrongNumber = true;
         }
 
@@ -236,9 +247,9 @@ public abstract class ClusteringJob extends ToolJob
           }
           textOut.append("] with quality ");//$NON-NLS-1$
           textOut.append(solution.quality);
-          if (clusterCount >= 0) {
+          if (solution.count >= 0) {
             textOut.append(" corresponding to ");//$NON-NLS-1$
-            textOut.append(clusterCount);
+            textOut.append(solution.count);
             textOut.append(" clusters");//$NON-NLS-1$
           }
           message = null;

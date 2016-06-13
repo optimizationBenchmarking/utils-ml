@@ -12,11 +12,14 @@ final class _DirectResult extends ClusteringSolution
    *
    * @param _assignment
    *          the assignment
+   * @param _count
+   *          the number of clusters
    * @param _quality
    *          the quality
    */
-  _DirectResult(final int[] _assignment, final double _quality) {
-    super(_assignment, _quality);
+  _DirectResult(final int[] _assignment, final int _count,
+      final double _quality) {
+    super(_assignment, _count, _quality);
   }
 
   /** {@inheritDoc} */

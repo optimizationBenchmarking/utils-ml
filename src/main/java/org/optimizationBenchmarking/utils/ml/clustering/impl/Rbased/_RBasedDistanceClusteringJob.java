@@ -64,7 +64,7 @@ final class _RBasedDistanceClusteringJob extends DistanceClusteringJob {
     }
 
     n = result.n();
-    solution = new ClusteringSolution(new int[n], quality);
+    solution = new ClusteringSolution(new int[n], -1, quality);
     for (; (--n) >= 0;) {
       solution.assignment[n] = ((int) (result.getLong(0, n)));
     }

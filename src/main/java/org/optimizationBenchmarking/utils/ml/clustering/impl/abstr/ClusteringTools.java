@@ -215,7 +215,7 @@ public final class ClusteringTools {
 
       }
       return new _DirectResult(CanonicalPermutation.createCanonicalZero(m),
-          0d);
+          m, 0d);
     }
 
     if (m == 1) {
@@ -224,7 +224,7 @@ public final class ClusteringTools {
             "There is only one element to cluster, so we put it into its own, single cluster."); //$NON-NLS-1$
 
       }
-      return new _DirectResult(new int[1], 0d);
+      return new _DirectResult(new int[1], 1, 0d);
     }
 
     if ((maxClusters >= 0) && (maxClusters <= 1)) {
@@ -233,7 +233,7 @@ public final class ClusteringTools {
             "The maximum number of clusters is one, so we put all elements into a single cluster."); //$NON-NLS-1$
 
       }
-      return new _DirectResult(new int[m], 0d);
+      return new _DirectResult(new int[m], 1, 0d);
     }
 
     return null;
@@ -270,11 +270,11 @@ public final class ClusteringTools {
             }
           }
         }
-        result = new _DirectResult(new int[2], 0d);
+        result = new _DirectResult(new int[2], 1, 0d);
         message = "The data set contains exactly two identical data samples. We will put them into one single cluster.";//$NON-NLS-1$
         break isTwoClusters;
       }
-      result = new _DirectResult(new int[] { 0, 1 }, 0d);
+      result = new _DirectResult(new int[] { 0, 1 }, 2, 0d);
       message = "The data set contains exactly two different data samples. We will put each one into a different cluster, i.e., get two clusters."; //$NON-NLS-1$
     }
 
@@ -309,11 +309,11 @@ public final class ClusteringTools {
             break isSingleCluster;
           }
         }
-        result = new _DirectResult(new int[2], 0d);
+        result = new _DirectResult(new int[2], 1, 0d);
         message = "The data set contains exactly two samples with distance 0, i.e., two identical samples. We will put them into one single cluster.";//$NON-NLS-1$
         break isTwoClusters;
       }
-      result = new _DirectResult(new int[] { 0, 1 }, 0d);
+      result = new _DirectResult(new int[] { 0, 1 }, 2, 0d);
       message = "The data set contains exactly two data samples with non-zero distance, i.e., two different samples. We will put each one into a different cluster, i.e., get two clusters."; //$NON-NLS-1$
     }
 

@@ -58,7 +58,7 @@ final class _RBasedDataClusteringJob extends DataClusteringJob {
     }
 
     n = result.n();
-    solution = new ClusteringSolution(new int[n], quality);
+    solution = new ClusteringSolution(new int[n], -1, quality);
     for (; (--n) >= 0;) {
       solution.assignment[n] = ((int) (result.getLong(0, n)));
     }

@@ -16,6 +16,9 @@ public class ClusteringSolution extends Textable
   /** the assignment of data rows to clusters */
   public final int[] assignment;
 
+  /** the number of clusters */
+  public int count;
+
   /** the clustering quality */
   public double quality;
 
@@ -28,6 +31,7 @@ public class ClusteringSolution extends Textable
   public ClusteringSolution(final int m) {
     super();
     this.assignment = new int[m];
+    this.count = 1;
     this.quality = Double.POSITIVE_INFINITY;
   }
 
@@ -36,13 +40,16 @@ public class ClusteringSolution extends Textable
    *
    * @param _assignment
    *          the assignment
+   * @param _count
+   *          the number of clusters
    * @param _quality
    *          the quality
    */
-  public ClusteringSolution(final int[] _assignment,
+  public ClusteringSolution(final int[] _assignment, final int _count,
       final double _quality) {
     super();
     this.assignment = _assignment;
+    this.count = _count;
     this.quality = _quality;
   }
 
@@ -60,12 +67,25 @@ public class ClusteringSolution extends Textable
 
   /** {@inheritDoc} */
   @Override
+  public final int getClusterCount() {
+    return this.count;
+  }
+
+  /** {@inheritDoc} */
+  @Override
   public final int compareTo(final ClusteringSolution o) {
     int res, index;
 
     res = Compare.compare(this.quality, o.quality);
     if (res != 0) {
       return res;
+    }
+
+    if (this.count < o.count) {
+      return (-1);
+    }
+    if (this.count > o.count) {
+      return 1;
     }
 
     index = (-1);
@@ -85,6 +105,8 @@ public class ClusteringSolution extends Textable
   @Override
   public final void toText(final ITextOutput textOut) {
     char x;
+    textOut.append(this.count);
+    textOut.append('=');
     textOut.append(this.quality);
     textOut.append(':');
     x = '[';
@@ -98,7 +120,7 @@ public class ClusteringSolution extends Textable
 
   /** {@inheritDoc} */
   @Override
-  public boolean equals(final Object o) {
+  public final boolean equals(final Object o) {
     final ClusteringSolution s;
     if (o instanceof ClusteringSolution) {
       s = ((ClusteringSolution) o);
@@ -110,7 +132,7 @@ public class ClusteringSolution extends Textable
 
   /** {@inheritDoc} */
   @Override
-  public int hashCode() {
+  public final int hashCode() {
     return HashUtils.combineHashes(//
         Arrays.hashCode(this.assignment), //
         HashUtils.hashCode(this.quality));
