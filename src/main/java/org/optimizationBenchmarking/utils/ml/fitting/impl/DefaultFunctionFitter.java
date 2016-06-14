@@ -1,10 +1,12 @@
 package org.optimizationBenchmarking.utils.ml.fitting.impl;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 
+import org.optimizationBenchmarking.utils.collections.iterators.IterableIterator;
 import org.optimizationBenchmarking.utils.collections.lists.ArrayListView;
 import org.optimizationBenchmarking.utils.error.ErrorUtils;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.cmaesls.CMAESLSFitter;
+import org.optimizationBenchmarking.utils.ml.fitting.impl.dels.DELSFitter;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.lssimplex.LSSimplexFitter;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IFunctionFitter;
 
@@ -62,12 +64,13 @@ public final class DefaultFunctionFitter {
     static final IFunctionFitter INSTANCE;
 
     static {
-      IFunctionFitter cur;
-
-      cur = LSSimplexFitter.getInstance();
-      if ((cur != null) && (cur.canUse())) {
-        INSTANCE = cur;
-      } else {
+      find: {
+        for (final IFunctionFitter current : new __FitterIterator()) {
+          if ((current != null) && (current.canUse())) {
+            INSTANCE = current;
+            break find;
+          }
+        }
         INSTANCE = null;
       }
     }
@@ -80,27 +83,56 @@ public final class DefaultFunctionFitter {
     static final ArrayListView<IFunctionFitter> INSTANCES;
 
     static {
-      HashSet<IFunctionFitter> fitters;
-      IFunctionFitter fitter;
+      ArrayList<IFunctionFitter> fitters;
 
-      fitters = new HashSet<>();
-      fitter = DefaultFunctionFitter.getInstance();
-      if ((fitter != null) && (fitter.canUse())) {
-        fitters.add(fitter);
-      }
-      fitter = LSSimplexFitter.getInstance();
-      if ((fitter != null) && (fitter.canUse())) {
-        fitters.add(fitter);
-      }
-      fitter = CMAESLSFitter.getInstance();
-      if ((fitter != null) && (fitter.canUse())) {
-        fitters.add(fitter);
+      fitters = new ArrayList<>();
+      for (final IFunctionFitter current : new __FitterIterator()) {
+        if ((current != null) && (current.canUse())) {
+          fitters.add(current);
+        }
       }
 
       if (!(fitters.isEmpty())) {
         INSTANCES = ArrayListView.collectionToView(fitters);
       } else {
         INSTANCES = null;
+      }
+    }
+  }
+
+  /** the internal iterator for fitters */
+  private static final class __FitterIterator
+      extends IterableIterator<IFunctionFitter> {
+    /** the fitter index */
+    private int m_index;
+
+    /** create */
+    __FitterIterator() {
+      super();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public final boolean hasNext() {
+      return (this.m_index <= 2);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public final IFunctionFitter next() {
+      switch (this.m_index++) {
+        case 0: {
+          return DELSFitter.getInstance();
+        }
+        case 1: {
+          return CMAESLSFitter.getInstance();
+        }
+        case 2: {
+          return LSSimplexFitter.getInstance();
+        }
+        default: {
+          return super.next();
+        }
       }
     }
   }

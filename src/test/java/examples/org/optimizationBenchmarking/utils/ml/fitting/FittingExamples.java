@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
 
@@ -81,11 +80,9 @@ public class FittingExamples {
    * @throws IOException
    *           if i/o fails
    */
-  @SuppressWarnings("unchecked")
   private static final void __print(final FitterOutcome[] outcomes,
       final ArrayListView<MultiFittingExampleDataset> data,
       final Path path) throws IOException {
-    final HashMap<MultiFittingExampleDataset, FittingOutcome>[] results;
     final ArithmeticMeanAggregate[] meanQualityRanks, meanRuntimeRanks;
     final QuantileAggregate[] medianQualityRanks, medianRuntimeRanks;
     final double[][] qualities, runtimes;
@@ -98,7 +95,6 @@ public class FittingExamples {
     medianQualityRanks = new QuantileAggregate[index];
     meanRuntimeRanks = new ArithmeticMeanAggregate[index];
     medianRuntimeRanks = new QuantileAggregate[index];
-    results = new HashMap[index];
     qualities = new double[index][];
     runtimes = new double[index][];
 
@@ -107,10 +103,6 @@ public class FittingExamples {
       meanRuntimeRanks[index] = new ArithmeticMeanAggregate();
       medianQualityRanks[index] = new QuantileAggregate(0.5d);
       medianRuntimeRanks[index] = new QuantileAggregate(0.5d);
-      results[index] = new HashMap<>();
-      for (final FittingOutcome outcome : outcomes[index].outcomes) {
-        results[index].put(outcome.example, outcome);
-      }
     }
     try (final OutputStream os = PathUtils.openOutputStream(
         PathUtils.createPathInside(path, "summary.txt"))) { //$NON-NLS-1$
@@ -120,7 +112,7 @@ public class FittingExamples {
               ETieStrategy.MINIMUM_TIGHT, ETieStrategy.MINIMUM,
               ETieStrategy.AVERAGE }) {
             ranking = new RankingStrategy(null, ties);
-            bw.write("======================= ");//$NON-NLS-1$
+            bw.write("======================= ranking method: ");//$NON-NLS-1$
             bw.write(ties.toString());
             bw.write(" ======================= ");//$NON-NLS-1$
             bw.newLine();
@@ -133,13 +125,11 @@ public class FittingExamples {
             }
 
             outer: for (final MultiFittingExampleDataset dataSet : data) {
-              index = (-1);
-              for (final HashMap<MultiFittingExampleDataset, FittingOutcome> map : results) {
-                current = map.get(dataSet);
+              for (index = outcomes.length; (--index) >= 0;) {
+                current = outcomes[index].outcomeForDataset(dataSet);
                 if (current == null) {
                   continue outer;
                 }
-                ++index;
                 qualities[index] = current._getQualities();
                 runtimes[index] = current._getRuntimes();
               }

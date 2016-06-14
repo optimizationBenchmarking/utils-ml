@@ -130,4 +130,21 @@ public final class FitterOutcome implements Comparable<FitterOutcome> {
 
     return this.minErrors.compareTo(o.minErrors);
   }
+
+  /**
+   * Get the fitting outcome for a given dataset
+   *
+   * @param dataset
+   *          the dataset
+   * @return the outcome
+   */
+  public final FittingOutcome outcomeForDataset(
+      final MultiFittingExampleDataset dataset) {
+    for (final FittingOutcome outcome : this.outcomes) {
+      if (outcome.example == dataset) {
+        return outcome;
+      }
+    }
+    return null;
+  }
 }
