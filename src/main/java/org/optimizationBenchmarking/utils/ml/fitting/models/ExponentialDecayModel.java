@@ -164,7 +164,7 @@ public final class ExponentialDecayModel extends _ModelBase {
       renderer.renderParameter(0, add);
       try (final IMath mul = add.mul()) {
         renderer.renderParameter(1, mul);
-        try (final IMath exp = add.exp()) {
+        try (final IMath exp = mul.exp()) {
           try (final IMath mul2 = exp.mul()) {
             renderer.renderParameter(2, mul2);
             try (final IMath pow = mul2.pow()) {
