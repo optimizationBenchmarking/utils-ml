@@ -59,7 +59,7 @@ public class FittingExamples {
     i = FittingExamples.FITTERS.size();
     wait = new Future[i];
     for (; (--i) >= 0;) {
-      wait[i] = Execute.submitToCommonPool(new _FitterJob(logger,
+      wait[i] = Execute.parallel(new _FitterJob(logger,
           FittingExamples.FITTERS.get(i), data, dest));
     }
 

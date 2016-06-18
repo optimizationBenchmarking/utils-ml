@@ -44,8 +44,8 @@ public final class ClusteringExamples {
     index = ClusteringExamples.CLUSTERERS.size();
     jobs = new Future[index];
     for (; (--index) >= 0;) {
-      jobs[index] = Execute.submitToCommonPool(new _ClustererJob(logger,
-          datasets, ClusteringExamples.CLUSTERERS.get(index)));
+      jobs[index] = Execute.parallel(new _ClustererJob(logger, datasets,
+          ClusteringExamples.CLUSTERERS.get(index)));
     }
     results = new ClustererOutcome[jobs.length];
     Execute.join(jobs, results, 0, true);

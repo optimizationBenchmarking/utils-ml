@@ -106,11 +106,12 @@ public final class MultiFittingJob extends ToolJob
     final ArrayList<Future<IFittingResult>> futures;
     final Logger logger;
     final int size;
-    final IFittingResult[] results;
-    IFittingResult best;
+    IFittingResult best, current;
     double bestQuality, curQuality;
     int bestLength, curLength;
     MemoryTextOutput textOut;
+    Throwable error;
+    String text;
 
     futures = new ArrayList<>();
     logger = this.getLogger();
@@ -143,25 +144,37 @@ public final class MultiFittingJob extends ToolJob
           "Error when fitting " + textOut.toString()); //$NON-NLS-1$
     }
 
-    results = new IFittingResult[size];
-    Execute.join(futures, results, 0, false);
-
-    best = null;
+    best = current = null;
     bestQuality = Double.POSITIVE_INFINITY;
     bestLength = Integer.MAX_VALUE;
+    error = null;
+    for (final Future<IFittingResult> future : futures) {
 
-    for (final IFittingResult cur : results) {
-      if (cur == null) {
+      try {
+        current = future.get();
+      } catch (final Throwable throwable) {
+        if (best == null) {
+          if (error == null) {
+            error = throwable;
+          } else {
+            error.addSuppressed(throwable);
+          }
+        }
         continue;
       }
-      curQuality = cur.getQuality();
-      curLength = cur.getFittedParametersRef().length;
+
+      if (current == null) {
+        continue;
+      }
+      curQuality = current.getQuality();
+      curLength = current.getFittedParametersRef().length;
       if ((best == null) || //
           (MathUtils.isFinite(curQuality) && (//
           (curQuality < bestQuality) || //
               ((curQuality == bestQuality)
                   && (curLength < bestLength))))) {
-        best = cur;
+        best = current;
+        error = null;
         bestQuality = curQuality;
         bestLength = curLength;
       }
@@ -187,8 +200,11 @@ public final class MultiFittingJob extends ToolJob
     }
     textOut.append(//
         "No function could successfully be fitted to the data.");//$NON-NLS-1$
-    throw new IllegalArgumentException(//
-        "Error when fitting " + textOut.toString()); //$NON-NLS-1$
+    text = ("Error when fitting: " + textOut.toString()); //$NON-NLS-1$
+    if (error != null) {
+      throw new IllegalArgumentException(text, error);
+    }
+    throw new IllegalArgumentException(text);
   }
 
   /** {@inheritDoc} */
