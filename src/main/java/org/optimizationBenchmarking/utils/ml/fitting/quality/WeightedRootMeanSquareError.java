@@ -26,9 +26,6 @@ public final class WeightedRootMeanSquareError
   /** the values backing this quality measure */
   private final double[] m_values;
 
-  /** the sum to use for computing the fitting quality */
-  private final StableSum m_sum;
-
   /**
    * create the root-mean-square error fitting quality measure
    *
@@ -53,7 +50,6 @@ public final class WeightedRootMeanSquareError
           "Invalid values array: must not be null or empty and must have a length which is a multiple of 3."); //$NON-NLS-1$
     }
     this.m_values = data;
-    this.m_sum = new StableSum();
   }
 
   /** {@inheritDoc} */
@@ -65,7 +61,7 @@ public final class WeightedRootMeanSquareError
     double residual;
     int index;
 
-    sum = this.m_sum;
+    sum = new StableSum();
     sum.reset();
 
     data = this.m_values;
@@ -108,7 +104,7 @@ public final class WeightedRootMeanSquareError
       dest.jacobian = jacobian = new double[numSamples][numParams];
     }
 
-    sum = this.m_sum;
+    sum = new StableSum();
     sum.reset();
 
     for (dataIndex = data.length, pointIndex = numSamples; (--pointIndex) >= 0;) {

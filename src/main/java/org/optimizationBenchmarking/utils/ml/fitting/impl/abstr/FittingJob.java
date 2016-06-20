@@ -19,7 +19,7 @@ public class FittingJob extends ToolJob implements IFittingJob {
   protected final ParametricUnaryFunction m_function;
 
   /** the fitting result */
-  protected final FittingResult m_result;
+  protected final FittingCandidateSolution m_result;
 
   /** the matrix */
   protected final IMatrix m_data;
@@ -43,7 +43,8 @@ public class FittingJob extends ToolJob implements IFittingJob {
     FittingJobBuilder.validateMeasure(//
         this.m_measure = builder.getQualityMeasure());
 
-    this.m_result = new FittingResult(this.m_function);
+    this.m_result = new FittingCandidateSolution(
+        this.m_function.getParameterCount());
   }
 
   /** Perform the fitting */
@@ -145,7 +146,7 @@ public class FittingJob extends ToolJob implements IFittingJob {
           logger.finer("Finished fitting" + //$NON-NLS-1$
               textOut.toString());
         }
-        return this.m_result;
+        return new FittingResult(this.m_result, this.m_function);
       }
     } catch (final Throwable cause) {
       error = cause;

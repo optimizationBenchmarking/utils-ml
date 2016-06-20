@@ -2,37 +2,30 @@ package org.optimizationBenchmarking.utils.ml.clustering.impl.abstr;
 
 import java.util.Arrays;
 
-import org.optimizationBenchmarking.utils.comparison.Compare;
 import org.optimizationBenchmarking.utils.comparison.EComparison;
 import org.optimizationBenchmarking.utils.hash.HashUtils;
 import org.optimizationBenchmarking.utils.ml.clustering.spec.IClusteringResult;
-import org.optimizationBenchmarking.utils.text.Textable;
-import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
 /** This record represents a solution to a clustering problem. */
-public class ClusteringSolution extends Textable
-    implements IClusteringResult, Comparable<ClusteringSolution> {
+public class ClusteringSolution implements IClusteringResult {
 
   /** the assignment of data rows to clusters */
-  public final int[] assignment;
+  private final int[] m_assignment;
 
   /** the number of clusters */
-  public int count;
+  private final int m_count;
 
   /** the clustering quality */
-  public double quality;
+  private final double m_quality;
 
   /**
    * Create the solution
    *
-   * @param m
-   *          the number of rows
+   * @param candidate
+   *          the candidate to copy
    */
-  public ClusteringSolution(final int m) {
-    super();
-    this.assignment = new int[m];
-    this.count = 1;
-    this.quality = Double.POSITIVE_INFINITY;
+  ClusteringSolution(final ClusteringCandidateSolution candidate) {
+    this(candidate.assignment, candidate.count, candidate.quality);
   }
 
   /**
@@ -45,77 +38,30 @@ public class ClusteringSolution extends Textable
    * @param _quality
    *          the quality
    */
-  public ClusteringSolution(final int[] _assignment, final int _count,
+  ClusteringSolution(final int[] _assignment, final int _count,
       final double _quality) {
     super();
-    this.assignment = _assignment;
-    this.count = _count;
-    this.quality = _quality;
+    this.m_assignment = _assignment;
+    this.m_count = _count;
+    this.m_quality = _quality;
   }
 
   /** {@inheritDoc} */
   @Override
   public final double getQuality() {
-    return this.quality;
+    return this.m_quality;
   }
 
   /** {@inheritDoc} */
   @Override
   public final int[] getClustersRef() {
-    return this.assignment;
+    return this.m_assignment;
   }
 
   /** {@inheritDoc} */
   @Override
   public final int getClusterCount() {
-    return this.count;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public final int compareTo(final ClusteringSolution o) {
-    int res, index;
-
-    res = Compare.compare(this.quality, o.quality);
-    if (res != 0) {
-      return res;
-    }
-
-    if (this.count < o.count) {
-      return (-1);
-    }
-    if (this.count > o.count) {
-      return 1;
-    }
-
-    index = (-1);
-    for (final int a : this.assignment) {
-      res = o.assignment[++index];
-      if (res < a) {
-        return 1;
-      }
-      if (res > a) {
-        return (-1);
-      }
-    }
-    return 0;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public final void toText(final ITextOutput textOut) {
-    char x;
-    textOut.append(this.count);
-    textOut.append('=');
-    textOut.append(this.quality);
-    textOut.append(':');
-    x = '[';
-    for (final int d : this.assignment) {
-      textOut.append(x);
-      textOut.append(d);
-      x = ',';
-    }
-    textOut.append(']');
+    return this.m_count;
   }
 
   /** {@inheritDoc} */
@@ -124,8 +70,8 @@ public class ClusteringSolution extends Textable
     final ClusteringSolution s;
     if (o instanceof ClusteringSolution) {
       s = ((ClusteringSolution) o);
-      return ((EComparison.EQUAL.compare(this.quality, s.quality))
-          && (Arrays.equals(this.assignment, s.assignment)));
+      return ((EComparison.EQUAL.compare(this.m_quality, s.m_quality))
+          && (Arrays.equals(this.m_assignment, s.m_assignment)));
     }
     return false;
   }
@@ -134,7 +80,7 @@ public class ClusteringSolution extends Textable
   @Override
   public final int hashCode() {
     return HashUtils.combineHashes(//
-        Arrays.hashCode(this.assignment), //
-        HashUtils.hashCode(this.quality));
+        Arrays.hashCode(this.m_assignment), //
+        HashUtils.hashCode(this.m_quality));
   }
 }

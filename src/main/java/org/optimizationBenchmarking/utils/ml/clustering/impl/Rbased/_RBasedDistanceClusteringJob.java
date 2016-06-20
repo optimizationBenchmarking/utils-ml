@@ -7,7 +7,7 @@ import org.optimizationBenchmarking.utils.math.mathEngine.impl.R.R;
 import org.optimizationBenchmarking.utils.math.mathEngine.impl.R.REngine;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
 import org.optimizationBenchmarking.utils.math.matrix.impl.DoubleDistanceMatrix1D;
-import org.optimizationBenchmarking.utils.ml.clustering.impl.abstr.ClusteringSolution;
+import org.optimizationBenchmarking.utils.ml.clustering.impl.abstr.ClusteringCandidateSolution;
 import org.optimizationBenchmarking.utils.ml.clustering.impl.abstr.DistanceClusteringJob;
 import org.optimizationBenchmarking.utils.ml.clustering.impl.abstr.DistanceClusteringJobBuilder;
 
@@ -26,10 +26,10 @@ final class _RBasedDistanceClusteringJob extends DistanceClusteringJob {
 
   /** {@inheritDoc} */
   @Override
-  protected final ClusteringSolution cluster() throws Exception {
+  protected final ClusteringCandidateSolution cluster() throws Exception {
     final IMatrix result;
     final double quality;
-    final ClusteringSolution solution;
+    final ClusteringCandidateSolution solution;
     int n;
 
     try (final REngine engine = R.getInstance().use()
@@ -64,7 +64,7 @@ final class _RBasedDistanceClusteringJob extends DistanceClusteringJob {
     }
 
     n = result.n();
-    solution = new ClusteringSolution(new int[n], -1, quality);
+    solution = new ClusteringCandidateSolution(new int[n], -1, quality);
     for (; (--n) >= 0;) {
       solution.assignment[n] = ((int) (result.getLong(0, n)));
     }

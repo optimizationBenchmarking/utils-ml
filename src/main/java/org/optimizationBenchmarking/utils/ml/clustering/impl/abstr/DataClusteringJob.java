@@ -13,9 +13,9 @@ public abstract class DataClusteringJob extends ClusteringJob {
     super(builder, false);
   }
 
-  /** {@inheritDoc} */
+  /** {@inheritDoc} **/
   @Override
-  final ClusteringSolution _cluster() throws Exception {
+  final ClusteringSolution _testTrivially() {
     final ClusteringSolution result;
     if (this.m_m == 2) {
       result = ClusteringTools.clusterTwoDataElements(this.getLogger(),
@@ -23,6 +23,6 @@ public abstract class DataClusteringJob extends ClusteringJob {
       this.m_matrix = null;
       return result;
     }
-    return this.cluster();
+    return null;
   }
 }

@@ -1,17 +1,20 @@
 package org.optimizationBenchmarking.utils.ml.fitting.impl.abstr;
 
 import org.optimizationBenchmarking.utils.hash.HashUtils;
-import org.optimizationBenchmarking.utils.math.text.DoubleConstantParameters;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IFittingResult;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.ParametricUnaryFunction;
-import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
 /** A fitting result record. */
-public final class FittingResult extends FittingCandidateSolution
-    implements IFittingResult {
+public final class FittingResult implements IFittingResult {
 
   /** the unary function */
   private final ParametricUnaryFunction m_function;
+
+  /** the fitting solution */
+  private final double[] m_solution;
+
+  /** the solution quality */
+  private final double m_quality;
 
   /** the internal hash code */
   private int m_hashCode;
@@ -19,38 +22,34 @@ public final class FittingResult extends FittingCandidateSolution
   /**
    * create the optimization result
    *
+   * @param candidate
+   *          the candidate solution to copy
    * @param function
    *          the function
    */
-  FittingResult(final ParametricUnaryFunction function) {
-    super(function.getParameterCount());
-
+  FittingResult(final FittingCandidateSolution candidate,
+      final ParametricUnaryFunction function) {
     this.m_function = function;
+    this.m_quality = candidate.quality;
+    this.m_solution = candidate.solution;
   }
 
   /** {@inheritDoc} */
   @Override
   public final double getQuality() {
-    return this.quality;
+    return this.m_quality;
   }
 
   /** {@inheritDoc} */
   @Override
   public final double[] getFittedParametersRef() {
-    return this.solution;
+    return this.m_solution;
   }
 
   /** {@inheritDoc} */
   @Override
   public final ParametricUnaryFunction getFittedFunction() {
     return this.m_function;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public final void toText(final ITextOutput textOut) {
-    this.m_function.mathRender(textOut, //
-        new DoubleConstantParameters(this.solution));
   }
 
   /** {@inheritDoc} */

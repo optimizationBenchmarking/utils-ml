@@ -117,19 +117,6 @@ public abstract class ClusteringJob extends ToolJob
   }
 
   /**
-   * Perform the clustering and return a solution record. The result of
-   * this method will be automatically
-   * {@link ClusteringTools#normalizeClusters(int[])} normalized.
-   *
-   * @return the solution
-   * @throws Exception
-   *           if something goes wrong
-   */
-  ClusteringSolution _cluster() throws Exception {
-    return this.cluster();
-  }
-
-  /**
    * <p>
    * Perform the clustering and return a solution record.
    * </p>
@@ -137,17 +124,26 @@ public abstract class ClusteringJob extends ToolJob
    * The result of this method will be automatically
    * {@link ClusteringTools#normalizeClusters(int[])} normalized and the
    * number of clusters in it will be computed. In other words, you do not
-   * need to set {@link ClusteringSolution#count} and the cluster indexes
-   * do not need to be continuous or anything, i.e., you could even return
-   * a cluster assignment like {@code 1, 1, 9, 9, 9, 4}, which would then
-   * be transformed to {@code 1, 1, 0, 0, 0, 2}.
+   * need to set {@link ClusteringCandidateSolution#count} and the cluster
+   * indexes do not need to be continuous or anything, i.e., you could even
+   * return a cluster assignment like {@code 1, 1, 9, 9, 9, 4}, which would
+   * then be transformed to {@code 1, 1, 0, 0, 0, 2}.
    * </p>
    *
    * @return the solution
    * @throws Exception
    *           if something goes wrong
    */
-  protected abstract ClusteringSolution cluster() throws Exception;
+  protected abstract ClusteringCandidateSolution cluster()
+      throws Exception;
+
+  /**
+   * Test whether the problem can be solved trivially
+   *
+   * @return the direct result, or {@code null} if the problem is
+   *         non-trivial
+   */
+  abstract ClusteringSolution _testTrivially();
 
   /**
    * create the basic message body
@@ -198,8 +194,9 @@ public abstract class ClusteringJob extends ToolJob
   public final IClusteringResult call() throws IllegalArgumentException {
     final Logger logger;
     MemoryTextOutput textOut;
-    ClusteringSolution solution;
+    ClusteringCandidateSolution solution;
     Throwable error;
+    ClusteringSolution trivial;
     String message;
     char separator;
     boolean canLog, isFinite, wrongNumber;
@@ -216,10 +213,12 @@ public abstract class ClusteringJob extends ToolJob
       }
 
       try {
-        solution = this._cluster();
-        if (solution instanceof _DirectResult) {
-          return solution;
+        trivial = this._testTrivially();
+        if (trivial != null) {
+          return trivial;
         }
+
+        solution = this.cluster();
 
         isFinite = MathUtils.isFinite(solution.quality);
         if (isFinite) {
@@ -261,7 +260,7 @@ public abstract class ClusteringJob extends ToolJob
             logger.finer("Finished clustering" + //$NON-NLS-1$
                 textOut.toString());
           }
-          return solution;
+          return new ClusteringSolution(solution);
         }
       } catch (final Throwable cause) {
         error = cause;

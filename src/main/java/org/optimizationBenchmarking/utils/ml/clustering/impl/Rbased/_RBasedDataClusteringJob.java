@@ -6,7 +6,7 @@ import org.optimizationBenchmarking.utils.io.StreamLineIterator;
 import org.optimizationBenchmarking.utils.math.mathEngine.impl.R.R;
 import org.optimizationBenchmarking.utils.math.mathEngine.impl.R.REngine;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
-import org.optimizationBenchmarking.utils.ml.clustering.impl.abstr.ClusteringSolution;
+import org.optimizationBenchmarking.utils.ml.clustering.impl.abstr.ClusteringCandidateSolution;
 import org.optimizationBenchmarking.utils.ml.clustering.impl.abstr.DataClusteringJob;
 import org.optimizationBenchmarking.utils.ml.clustering.impl.abstr.DataClusteringJobBuilder;
 
@@ -24,10 +24,10 @@ final class _RBasedDataClusteringJob extends DataClusteringJob {
 
   /** {@inheritDoc} */
   @Override
-  protected final ClusteringSolution cluster() throws Exception {
+  protected final ClusteringCandidateSolution cluster() throws Exception {
     final IMatrix result;
     final double quality;
-    final ClusteringSolution solution;
+    final ClusteringCandidateSolution solution;
     int n;
 
     try (final REngine engine = R.getInstance().use()
@@ -58,7 +58,7 @@ final class _RBasedDataClusteringJob extends DataClusteringJob {
     }
 
     n = result.n();
-    solution = new ClusteringSolution(new int[n], -1, quality);
+    solution = new ClusteringCandidateSolution(new int[n], -1, quality);
     for (; (--n) >= 0;) {
       solution.assignment[n] = ((int) (result.getLong(0, n)));
     }

@@ -36,9 +36,9 @@ public abstract class DistanceClusteringJob extends ClusteringJob {
     return new EuclideanDistance();
   }
 
-  /** {@inheritDoc} */
+  /** {@inheritDoc} **/
   @Override
-  final ClusteringSolution _cluster() throws Exception {
+  final ClusteringSolution _testTrivially() {
     final Logger logger;
     final ClusteringSolution result;
 
@@ -59,6 +59,6 @@ public abstract class DistanceClusteringJob extends ClusteringJob {
       this.m_matrix = new MeasureBasedDistanceMatrixBuilder(this.m_matrix,
           this.createDistanceMeasure()).call();
     }
-    return this.cluster();
+    return null;
   }
 }
