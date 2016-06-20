@@ -896,8 +896,8 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
    * . The BOBYQA optimizer is quite nice, but its implementation in the
    * current commons math version (3.6.1) can sometimes go into an endless
    * loop.
-   * <p>
    * </p>
+   * <p>
    * I have reported this problem under
    * https://issues.apache.org/jira/browse/MATH-1375 and a similar problem
    * has been reported under
@@ -2216,8 +2216,13 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
      * {@link org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer}
      *
      * @param knew
+     *          see
+     *          {@link org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer}
      * @param adelt
-     * @return the array
+     *          see
+     *          {@link org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer}
+     * @return the array see
+     *         {@link org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer}
      */
     private final double[] __altmov(final int knew, final double adelt) {
 
@@ -2243,8 +2248,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
       final double alpha = hcol.getEntry(knew);
       final double ha = __SafeBOBYQAOptimizer.HALF * alpha;
 
-      // Calculate the gradient of the KNEW-th Lagrange function at XOPT.
-
       for (int i = 0; i < n; i++) {
         glag.setEntry(i, this.m_bMatrix.getEntry(knew, i));
       }
@@ -2260,16 +2263,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
               + (tmp * this.m_interpolationPoints.getEntry(k, i)));
         }
       }
-
-      // Search for a large denominator along the straight lines through
-      // XOPT
-      // and another interpolation point. SLBD and SUBD will be lower and
-      // upper
-      // bounds on the step along each of these lines in turn. PREDSQ will
-      // be
-      // set to the square of the predicted denominator for each line.
-      // PRESAV
-      // will be set to the largest admissible value of PREDSQ that occurs.
 
       double presav = __SafeBOBYQAOptimizer.ZERO;
       double step = Double.NaN;
@@ -2293,9 +2286,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
         int ilbd = 0;
         int iubd = 0;
         final double sumin = FastMath.min(__SafeBOBYQAOptimizer.ONE, subd);
-
-        // Revise SLBD and SUBD if necessary because of the bounds in SL
-        // and SU.
 
         for (int i = 0; i < n; i++) {
           final double tmp = this.m_interpolationPoints.getEntry(k, i)
@@ -2337,11 +2327,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
             }
         }
 
-        // Seek a large modulus of the KNEW-th Lagrange function when the
-        // index
-        // of the other interpolation point on the line through XOPT is
-        // KNEW.
-
         step = slbd;
         int isbd = ilbd;
         double vlag = Double.NaN;
@@ -2366,9 +2351,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
             }
           }
 
-          // Search along each of the other lines through XOPT and another
-          // point.
-
         } else {
           vlag = slbd * (__SafeBOBYQAOptimizer.ONE - slbd);
           final double tmp = subd * (__SafeBOBYQAOptimizer.ONE - subd);
@@ -2386,9 +2368,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
           vlag *= dderiv;
         }
 
-        // Calculate PREDSQ for the current line search and maintain
-        // PRESAV.
-
         final double tmp = step * (__SafeBOBYQAOptimizer.ONE - step)
             * distsq;
         final double predsq = vlag * vlag
@@ -2400,9 +2379,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
           ibdsav = isbd;
         }
       }
-
-      // Construct XNEW in a way that satisfies the bound constraints
-      // exactly.
 
       for (int i = 0; i < n; i++) {
         final double tmp = this.m_trustRegionCenterOffset.getEntry(i)
@@ -2420,12 +2396,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
         this.m_newPoint.setEntry(ibdsav - 1,
             this.m_upperDifference.getEntry(ibdsav - 1));
       }
-
-      // Prepare for the iterative method that assembles the constrained
-      // Cauchy
-      // step in W. The sum of squares of the fixed components of W is
-      // formed in
-      // WFIXSQ, and the free components of W are set to BIGSTP.
 
       final double bigstp = adelt + adelt;
       int iflag = 0;
@@ -2446,7 +2416,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
                       - this.m_upperDifference.getEntry(i),
                   glagValue) < __SafeBOBYQAOptimizer.ZERO)) {
             work1.setEntry(i, bigstp);
-            // Computing 2nd power
             ggfree += glagValue * glagValue;
           }
         }
@@ -2454,7 +2423,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
           return new double[] { alpha, __SafeBOBYQAOptimizer.ZERO };
         }
 
-        // Investigate whether more components of W can be fixed.
         final double tmp1 = (adelt * adelt) - wfixsq;
         if (tmp1 > __SafeBOBYQAOptimizer.ZERO) {
           step = FastMath.sqrt(tmp1 / ggfree);
@@ -2466,28 +2434,21 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
               if (tmp2 <= this.m_lowerDifference.getEntry(i)) {
                 work1.setEntry(i, this.m_lowerDifference.getEntry(i)
                     - this.m_trustRegionCenterOffset.getEntry(i));
-                // Computing 2nd power
                 final double d1 = work1.getEntry(i);
                 wfixsq += d1 * d1;
               } else
                 if (tmp2 >= this.m_upperDifference.getEntry(i)) {
                   work1.setEntry(i, this.m_upperDifference.getEntry(i)
                       - this.m_trustRegionCenterOffset.getEntry(i));
-                  // Computing 2nd power
                   final double d1 = work1.getEntry(i);
                   wfixsq += d1 * d1;
                 } else {
-                  // Computing 2nd power
                   final double d1 = glag.getEntry(i);
                   ggfree += d1 * d1;
                 }
             }
           }
         }
-
-        // Set the remaining free components of W and all components of
-        // XALT,
-        // except that W may be scaled later.
 
         double gw = __SafeBOBYQAOptimizer.ZERO;
         for (int i = 0; i < n; i++) {
@@ -2514,14 +2475,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
               }
           gw += glagValue * work1.getEntry(i);
         }
-
-        // Set CURV to the curvature of the KNEW-th Lagrange function along
-        // W.
-        // Scale W by a factor less than one if that can reduce the modulus
-        // of
-        // the Lagrange function at XOPT+W. Set CAUCHY to the final value
-        // of
-        // the square of this function.
 
         double curv = __SafeBOBYQAOptimizer.ZERO;
         for (int k = 0; k < npt; k++) {
@@ -2554,12 +2507,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
           cauchy = d1 * d1;
         }
 
-        // If IFLAG is zero, then XALT is calculated as before after
-        // reversing
-        // the sign of GLAG. Thus two XALT vectors become available. The
-        // one that
-        // is chosen is the one that gives the larger value of CAUCHY.
-
         if (iflag == 0) {
           for (int i = 0; i < n; i++) {
             glag.setEntry(i, -glag.getEntry(i));
@@ -2579,7 +2526,7 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
       }
 
       return new double[] { alpha, cauchy };
-    } // altmov
+    }
 
     // ----------------------------------------------------------------------------------------
 
@@ -2628,13 +2575,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
           this.m_zMatrix.setEntry(k, j, __SafeBOBYQAOptimizer.ZERO);
         }
       }
-
-      // Begin the initialization procedure. NF becomes one more than the
-      // number
-      // of function values so far. The coordinates of the displacement of
-      // the
-      // next initial interpolation point from XBASE are set in
-      // XPT(NF+1,.).
 
       int ipt = 0;
       int jpt = 0;
@@ -2691,10 +2631,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
               this.m_interpolationPoints.getEntry(jpt, jptMinus1));
         }
 
-        // Calculate the next value of F. The least function value so far
-        // and
-        // its index are required.
-
         for (int j = 0; j < n; j++) {
           this.m_currentBest.setEntry(j,
               FastMath.min(
@@ -2726,17 +2662,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
               .getEntry(this.m_trustRegionCenterInterpolationPointIndex)) {
             this.m_trustRegionCenterInterpolationPointIndex = nfm;
           }
-
-        // Set the nonzero initial elements of BMAT and the quadratic model
-        // in the
-        // cases when NF is at most 2*N+1. If NF exceeds N+1, then the
-        // positions
-        // of the NF-th and (NF-N)-th interpolation points may be switched,
-        // in
-        // order that the function value at the first of them contributes
-        // to the
-        // off-diagonal second derivative terms of the initial quadratic
-        // model.
 
         if (numEval <= ((2 * n) + 1)) {
           if ((numEval >= 2) && (numEval <= (n + 1))) {
@@ -2792,11 +2717,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
                   -this.m_zMatrix.getEntry(0, nfxm)
                       - this.m_zMatrix.getEntry(nfm, nfxm));
             }
-
-          // Set the off-diagonal second derivatives of the Lagrange
-          // functions and
-          // the initial quadratic model.
-
         } else {
           this.m_zMatrix.setEntry(0, nfxm, recip);
           this.m_zMatrix.setEntry(nfm, nfxm, recip);
@@ -2812,20 +2732,30 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
                   / tmp);
         }
       } while (this.getEvaluations() < npt);
-    } // prelim
-
-    // ----------------------------------------------------------------------------------------
+    }
 
     /**
      * see
      * {@link org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer}
      *
      * @param delta
+     *          see
+     *          {@link org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer}
      * @param gnew
+     *          see
+     *          {@link org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer}
      * @param xbdi
+     *          see
+     *          {@link org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer}
      * @param s
+     *          see
+     *          {@link org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer}
      * @param hs
+     *          see
+     *          {@link org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer}
      * @param hred
+     *          see
+     *          {@link org.apache.commons.math3.optim.nonlinear.scalar.noderiv.BOBYQAOptimizer}
      * @return the array, or {@code null} if too many iterations were
      *         consumed
      */
@@ -2857,22 +2787,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
       double rdprev = 0, rdnext = 0, stplen = 0, stepsq = 0;
       int itermax = 0;
 
-      // Set some constants.
-
-      // Function Body
-
-      // The sign of GOPT(I) gives the sign of the change to the I-th
-      // variable
-      // that will reduce Q from its value at XOPT. Thus xbdi.get((I) shows
-      // whether
-      // or not to fix the I-th variable at one of its bounds initially,
-      // with
-      // NACT being set to the number of fixed variables. D and GNEW are
-      // also
-      // set for the first iteration. DELSQ is the upper bound on the sum
-      // of
-      // squares of the free variables. QRED is the reduction in Q so far.
-
       iterc = 0;
       nact = 0;
       for (int i = 0; i < n; i++) {
@@ -2899,16 +2813,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
       delsq = delta * delta;
       qred = __SafeBOBYQAOptimizer.ZERO;
       crvmin = __SafeBOBYQAOptimizer.MINUS_ONE;
-
-      // Set the next search direction of the conjugate gradient method. It
-      // is
-      // the steepest descent direction initially and when the iterations
-      // are
-      // restarted because a variable has just been fixed by a bound, and
-      // of
-      // course the components of the fixed variables are zero. ITERMAX is
-      // an
-      // upper bound on the indices of the conjugate gradient iterations.
 
       int state = 20;
       for (int index = 10000; (--index) >= 0;) {
@@ -2945,14 +2849,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
               break;
             }
 
-            // Multiply the search direction by the second derivative
-            // matrix of Q and
-            // calculate some scalars for the choice of steplength. Then
-            // set BLEN to
-            // the length of the the step to the trust region boundary and
-            // STPLEN to
-            // the steplength, ignoring the simple bounds.
-
             state = 210;
             break;
           }
@@ -2963,7 +2859,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
             shs = __SafeBOBYQAOptimizer.ZERO;
             for (int i = 0; i < n; i++) {
               if (xbdi.getEntry(i) == __SafeBOBYQAOptimizer.ZERO) {
-                // Computing 2nd power
                 final double d1 = this.m_trialStepPoint.getEntry(i);
                 resid -= d1 * d1;
                 ds += s.getEntry(i) * this.m_trialStepPoint.getEntry(i);
@@ -2982,13 +2877,8 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
             }
             stplen = blen;
             if (shs > __SafeBOBYQAOptimizer.ZERO) {
-              // Computing MIN
               stplen = FastMath.min(blen, gredsq / shs);
             }
-
-            // Reduce STPLEN if necessary in order to preserve the simple
-            // bounds,
-            // letting IACT be the index of the new constrained variable.
 
             iact = -1;
             for (int i = 0; i < n; i++) {
@@ -3008,9 +2898,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
                 }
               }
             }
-
-            // Update CRVMIN, GNEW and D. Set SDEC to the decrease that
-            // occurs in Q.
 
             sdec = __SafeBOBYQAOptimizer.ZERO;
             if (stplen > __SafeBOBYQAOptimizer.ZERO) {
@@ -3036,15 +2923,11 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
                     this.m_trialStepPoint.getEntry(i)
                         + (stplen * s.getEntry(i)));
               }
-              // Computing MAX
               final double d1 = stplen
                   * (ggsav - (__SafeBOBYQAOptimizer.HALF * stplen * shs));
               sdec = FastMath.max(d1, __SafeBOBYQAOptimizer.ZERO);
               qred += sdec;
             }
-
-            // Restart the conjugate gradient method if it has hit a new
-            // bound.
 
             if (iact >= 0) {
               ++nact;
@@ -3052,7 +2935,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
               if (s.getEntry(iact) < __SafeBOBYQAOptimizer.ZERO) {
                 xbdi.setEntry(iact, __SafeBOBYQAOptimizer.MINUS_ONE);
               }
-              // Computing 2nd power
               final double d1 = this.m_trialStepPoint.getEntry(iact);
               delsq -= d1 * d1;
               if (delsq <= __SafeBOBYQAOptimizer.ZERO) {
@@ -3062,10 +2944,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
               state = 20;
               break;
             }
-
-            // If STPLEN is less than BLEN, then either apply another
-            // conjugate
-            // gradient iteration or RETURN.
 
             if (stplen < blen) {
               if (iterc == itermax) {
@@ -3082,18 +2960,10 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
             }
           }
           case 90: {
-
             crvmin = __SafeBOBYQAOptimizer.ZERO;
-
-            // Prepare for the alternative iteration by calculating some
-            // scalars
-            // and by multiplying the reduced D by the second derivative
-            // matrix of
-            // Q, where S holds the reduced D in the call of GGMULT.
-
           }
-          case 100: {
 
+          case 100: {
             if (nact >= (n - 1)) {
               state = 190;
               break;
@@ -3103,12 +2973,10 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
             gredsq = __SafeBOBYQAOptimizer.ZERO;
             for (int i = 0; i < n; i++) {
               if (xbdi.getEntry(i) == __SafeBOBYQAOptimizer.ZERO) {
-                // Computing 2nd power
                 double d1 = this.m_trialStepPoint.getEntry(i);
                 dredsq += d1 * d1;
                 dredg += this.m_trialStepPoint.getEntry(i)
                     * gnew.getEntry(i);
-                // Computing 2nd power
                 d1 = gnew.getEntry(i);
                 gredsq += d1 * d1;
                 s.setEntry(i, this.m_trialStepPoint.getEntry(i));
@@ -3119,9 +2987,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
             itcsav = iterc;
             state = 210;
             break;
-            // Let the search direction S be a linear combination of the
-            // reduced D
-            // and the reduced G that is orthogonal to the reduced D.
           }
           case 120: {
 
@@ -3141,15 +3006,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
               }
             }
             sredg = -temp;
-
-            // By considering the simple bounds on the variables, calculate
-            // an upper
-            // bound on the tangent of half the angle of the alternative
-            // iteration,
-            // namely ANGBD, except that, if already a free variable has
-            // reached a
-            // bound, there is a branch back to label 100 after fixing that
-            // variable.
 
             angbd = __SafeBOBYQAOptimizer.ONE;
             iact = -1;
@@ -3173,12 +3029,9 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
                     state = 100;
                     break;
                   }
-                // Computing 2nd power
                 double d1 = this.m_trialStepPoint.getEntry(i);
-                // Computing 2nd power
                 final double d2 = s.getEntry(i);
                 ssq = (d1 * d1) + (d2 * d2);
-                // Computing 2nd power
                 d1 = this.m_trustRegionCenterOffset.getEntry(i)
                     - this.m_lowerDifference.getEntry(i);
                 temp = ssq - (d1 * d1);
@@ -3190,7 +3043,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
                     xsav = __SafeBOBYQAOptimizer.MINUS_ONE;
                   }
                 }
-                // Computing 2nd power
                 d1 = this.m_upperDifference.getEntry(i)
                     - this.m_trustRegionCenterOffset.getEntry(i);
                 temp = ssq - (d1 * d1);
@@ -3204,9 +3056,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
                 }
               }
             }
-
-            // Calculate HHD and some curvatures for the alternative
-            // iteration.
 
             state = 210;
             break;
@@ -3224,12 +3073,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
                     * hred.getEntry(i);
               }
             }
-
-            // Seek the greatest reduction in Q for a range of equally
-            // spaced values
-            // of ANGT in [0,ANGBD], where ANGT is the tangent of half the
-            // angle of
-            // the alternative iteration.
 
             redmax = __SafeBOBYQAOptimizer.ZERO;
             isav = -1;
@@ -3253,11 +3096,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
               redsav = rednew;
             }
 
-            // Return if the reduction is zero. Otherwise, set the sine and
-            // cosine
-            // of the angle of the alternative iteration, and calculate
-            // SDEC.
-
             if (isav < 0) {
               state = 190;
               break;
@@ -3279,12 +3117,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
               state = 190;
               break;
             }
-
-            // Update GNEW, D and HRED. If the angle of the alternative
-            // iteration
-            // is restricted by a bound on a free variable, that variable
-            // is fixed
-            // at the bound.
 
             dredg = __SafeBOBYQAOptimizer.ZERO;
             gredsq = __SafeBOBYQAOptimizer.ZERO;
@@ -3313,10 +3145,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
               break;
             }
 
-            // If SDEC is sufficiently small, then RETURN after setting
-            // XNEW to
-            // XOPT+D, giving careful attention to the bounds.
-
             if (sdec > (qred * .01)) {
               state = 120;
               break;
@@ -3326,8 +3154,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
 
             dsq = __SafeBOBYQAOptimizer.ZERO;
             for (int i = 0; i < n; i++) {
-              // Computing MAX
-              // Computing MIN
               final double min = FastMath.min(
                   this.m_trustRegionCenterOffset.getEntry(i)
                       + this.m_trialStepPoint.getEntry(i),
@@ -3344,21 +3170,13 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
               }
               this.m_trialStepPoint.setEntry(i, this.m_newPoint.getEntry(i)
                   - this.m_trustRegionCenterOffset.getEntry(i));
-              // Computing 2nd power
               final double d1 = this.m_trialStepPoint.getEntry(i);
               dsq += d1 * d1;
             }
             return new double[] { dsq, crvmin };
-            // The following instructions multiply the current S-vector by
-            // the second
-            // derivative matrix of the quadratic model, putting the
-            // product in HS.
-            // They are reached from three different parts of the software
-            // above and
-            // they can be regarded as an external subroutine.
           }
-          case 210: {
 
+          case 210: {
             int ih = 0;
             for (int j = 0; j < n; j++) {
               hs.setEntry(j, __SafeBOBYQAOptimizer.ZERO);
@@ -3408,9 +3226,7 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
       }
 
       return null;// too many iterations
-    } // trsbox
-
-    // ----------------------------------------------------------------------------------------
+    }
 
     /**
      * see
@@ -3445,8 +3261,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
       }
       ztest *= 1e-20;
 
-      // Apply the rotations that put zeros in the KNEW-th row of ZMAT.
-
       for (int j = 1; j < nptm; j++) {
         final double d1 = this.m_zMatrix.getEntry(knew, j);
         if (FastMath.abs(d1) > ztest) {
@@ -3468,9 +3282,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
         }
         this.m_zMatrix.setEntry(knew, j, __SafeBOBYQAOptimizer.ZERO);
       }
-
-      // Put the first NPT components of the KNEW-th column of HLAG into W,
-      // and calculate the parameters of the updating formula.
 
       for (int i = 0; i < npt; i++) {
         work.setEntry(i, this.m_zMatrix.getEntry(knew, 0)
@@ -3514,7 +3325,7 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
           }
         }
       }
-    } // update
+    }
 
     /**
      * see
@@ -3589,5 +3400,4 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
           (dimension * (dimension + 1)) / 2);
     }
   }
-
 }
