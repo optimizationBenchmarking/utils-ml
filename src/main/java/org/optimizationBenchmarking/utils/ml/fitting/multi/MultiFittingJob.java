@@ -6,7 +6,6 @@ import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.FittingUtils;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.abstr.FittingJobBuilder;
@@ -169,10 +168,11 @@ public final class MultiFittingJob extends ToolJob
       curQuality = current.getQuality();
       curLength = current.getFittedParametersRef().length;
       if ((best == null) || //
-          (MathUtils.isFinite(curQuality) && (//
-          (curQuality < bestQuality) || //
-              ((curQuality == bestQuality)
-                  && (curLength < bestLength))))) {
+          ((curQuality >= 0d) && (curQuality < Double.POSITIVE_INFINITY)
+              && (//
+              (curQuality < bestQuality) || //
+                  ((curQuality == bestQuality)
+                      && (curLength < bestLength))))) {
         best = current;
         error = null;
         bestQuality = curQuality;
@@ -180,7 +180,8 @@ public final class MultiFittingJob extends ToolJob
       }
     }
 
-    if ((best != null) && (MathUtils.isFinite(bestQuality))) {
+    if ((best != null) && (bestQuality >= 0d)
+        && (bestQuality < Double.POSITIVE_INFINITY)) {
       if ((logger != null) && (logger.isLoggable(Level.FINE))) {
         if (textOut == null) {
           textOut = this.__createMessageBody();
