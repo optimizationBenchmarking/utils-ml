@@ -6,7 +6,6 @@ import org.optimizationBenchmarking.utils.document.spec.IMath;
 import org.optimizationBenchmarking.utils.document.spec.IMathRenderable;
 import org.optimizationBenchmarking.utils.document.spec.IParameterRenderer;
 import org.optimizationBenchmarking.utils.math.Polynomials;
-import org.optimizationBenchmarking.utils.math.functions.arithmetic.AddN;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.SampleBasedParameterGuesser;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IParameterGuesser;
@@ -27,17 +26,15 @@ public final class QuadraticModel extends BasicModel {
   /** {@inheritDoc} */
   @Override
   public final double value(final double x, final double[] parameters) {
-    return AddN.destructiveSum(parameters[0], (parameters[1] * x),
-        (parameters[2] * x * x));
+    return Polynomials.degree2Compute(x, parameters[0], parameters[1],
+        parameters[2]);
   }
 
   /** {@inheritDoc} */
   @Override
   public final void gradient(final double x, final double[] parameters,
       final double[] gradient) {
-    gradient[0] = 1d;// a
-    gradient[1] = x;// b
-    gradient[2] = x * x;// c
+    Polynomials.degree2Gradient(x, gradient);
   }
 
   /** {@inheritDoc} */
