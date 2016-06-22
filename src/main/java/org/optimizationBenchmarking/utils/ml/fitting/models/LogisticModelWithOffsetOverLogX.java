@@ -222,9 +222,9 @@ public final class LogisticModelWithOffsetOverLogX
   @Override
   public final void mathRender(final ITextOutput out,
       final IParameterRenderer renderer, final IMathRenderable x) {
-    renderer.renderParameter(3, out);
-    out.append('+');
     super.mathRender(out, renderer, x);
+    out.append('+');
+    renderer.renderParameter(3, out);
   }
 
   /** {@inheritDoc} */
@@ -232,8 +232,8 @@ public final class LogisticModelWithOffsetOverLogX
   public final void mathRender(final IMath out,
       final IParameterRenderer renderer, final IMathRenderable x) {
     try (final IMath add = out.add()) {
-      renderer.renderParameter(3, add);
       super.mathRender(add, renderer, x);
+      renderer.renderParameter(3, add);
     }
   }
 
