@@ -107,8 +107,9 @@ public final class QuadraticModel extends BasicModel {
     @Override
     protected final boolean guess(final double[] points,
         final double[] dest, final Random random) {
-      return Polynomials.degree2FindCoefficients(points[0], points[1],
-          points[2], points[3], points[4], points[5], dest);
+      return (Polynomials.degree2FindCoefficients(points[0], points[1],
+          points[2], points[3], points[4], points[5],
+          dest) < Double.POSITIVE_INFINITY);
     }
 
     /** {@inheritDoc} */
@@ -117,12 +118,12 @@ public final class QuadraticModel extends BasicModel {
         final double[] dest, final Random random) {
       switch (points.length) {
         case 2: {
-          return Polynomials.degree0FindCoefficients(points[0], points[1],
-              dest);
+          return (Polynomials.degree0FindCoefficients(points[0], points[1],
+              dest) < Double.POSITIVE_INFINITY);
         }
         case 4: {
-          return Polynomials.degree1FindCoefficients(points[0], points[1],
-              points[2], points[3], dest);
+          return (Polynomials.degree1FindCoefficients(points[0], points[1],
+              points[2], points[3], dest) < Double.POSITIVE_INFINITY);
         }
         default: {
           this.fallback(dest, random);
