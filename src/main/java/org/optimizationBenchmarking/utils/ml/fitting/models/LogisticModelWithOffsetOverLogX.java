@@ -8,6 +8,7 @@ import org.optimizationBenchmarking.utils.document.spec.IParameterRenderer;
 import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueChecker;
+import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueCheckerMinMax;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IParameterGuesser;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
@@ -191,7 +192,8 @@ import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 public final class LogisticModelWithOffsetOverLogX
     extends LogisticModelOverLogX {
   /** the checker for parameter {@code d} */
-  static final __CheckerD D = new __CheckerD();
+  static final ParameterValueCheckerMinMax D = new ParameterValueCheckerMinMax(
+      -1e30d, 1e30d);
 
   /** create */
   public LogisticModelWithOffsetOverLogX() {
@@ -879,21 +881,6 @@ public final class LogisticModelWithOffsetOverLogX
       destGuess[1] = newB;
       destGuess[2] = newC;
       destGuess[3] = newD;
-    }
-  }
-
-  /** the checker for parameter {@code c}. */
-  private static final class __CheckerD extends ParameterValueChecker {
-
-    /** create */
-    __CheckerD() {
-      super();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public final boolean check(final double value) {
-      return (MathUtils.isFinite(value) && (Math.abs(value) < 1e30d));
     }
   }
 }

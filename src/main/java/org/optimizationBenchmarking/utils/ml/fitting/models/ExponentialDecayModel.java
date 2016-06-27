@@ -8,6 +8,7 @@ import org.optimizationBenchmarking.utils.document.spec.IParameterRenderer;
 import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueChecker;
+import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueCheckerMinMax;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.SamplePermutationBasedParameterGuesser;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IParameterGuesser;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
@@ -58,13 +59,15 @@ import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 public final class ExponentialDecayModel extends _ModelBase {
 
   /** the checker for {@code a} */
-  static final __CheckerAB A = new __CheckerAB();
+  static final ParameterValueCheckerMinMax A = new ParameterValueCheckerMinMax(
+      -1e100d, 1e100d);
   /** the checker for {@code b} */
-  static final __CheckerAB B = ExponentialDecayModel.A;
+  static final ParameterValueCheckerMinMax B = ExponentialDecayModel.A;
   /** the checker for {@code c} */
-  static final __CheckerCD C = new __CheckerCD();
+  static final ParameterValueCheckerMinMax C = new ParameterValueCheckerMinMax(
+      -1e5d, 0d);
   /** the checker for {@code d} */
-  static final __CheckerCD D = ExponentialDecayModel.C;
+  static final ParameterValueCheckerMinMax D = ExponentialDecayModel.C;
 
   /** create the exponential decay model */
   public ExponentialDecayModel() {
@@ -534,36 +537,4 @@ public final class ExponentialDecayModel extends _ModelBase {
       destGuess[3] = newD;
     }
   }
-
-  /** the checker for parameters {@code a} and {@code b}. */
-  private static final class __CheckerAB extends ParameterValueChecker {
-
-    /** create */
-    __CheckerAB() {
-      super();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public final boolean check(final double value) {
-      return (MathUtils.isFinite(value) && (Math.abs(value) < 1e100d));
-    }
-  }
-
-  /** the checker for parameters {@code c} and {@code d}. */
-  private static final class __CheckerCD extends ParameterValueChecker {
-
-    /** create */
-    __CheckerCD() {
-      super();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public final boolean check(final double value) {
-      return (MathUtils.isFinite(value) && (value > (-1e5d))
-          && (value < 0d));
-    }
-  }
-
 }

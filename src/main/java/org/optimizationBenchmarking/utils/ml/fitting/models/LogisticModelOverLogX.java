@@ -9,6 +9,7 @@ import org.optimizationBenchmarking.utils.document.spec.IText;
 import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueChecker;
+import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueCheckerMinMaxAbs;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.SamplePermutationBasedParameterGuesser;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IParameterGuesser;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
@@ -65,11 +66,14 @@ import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 public class LogisticModelOverLogX extends _ModelBase {
 
   /** the checker for parameter {@code a} */
-  static final _CheckerA A = new _CheckerA();
+  static final ParameterValueCheckerMinMaxAbs A = new ParameterValueCheckerMinMaxAbs(
+      1e-12d, 1e100d);
   /** the checker for parameter {@code b} */
-  static final _CheckerB B = new _CheckerB();
+  static final ParameterValueCheckerMinMaxAbs B = new ParameterValueCheckerMinMaxAbs(
+      1e-10d, 1e10d);
   /** the checker for parameter {@code c} */
-  static final _CheckerC C = new _CheckerC();
+  static final ParameterValueCheckerMinMaxAbs C = new ParameterValueCheckerMinMaxAbs(
+      1e-4d, 1e4d);
 
   /** create */
   public LogisticModelOverLogX() {
@@ -540,67 +544,6 @@ public class LogisticModelOverLogX extends _ModelBase {
       destGuess[0] = newA;
       destGuess[1] = newB;
       destGuess[2] = newC;
-    }
-  }
-
-  /** the checker for parameter {@code a}. */
-  static final class _CheckerA extends ParameterValueChecker {
-
-    /** create */
-    _CheckerA() {
-      super();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public final boolean check(final double value) {
-      final double abs;
-      if (MathUtils.isFinite(value)) {
-        abs = Math.abs(value);
-        return ((abs > 1e-12d) && (abs < 1e100));
-      }
-      return false;
-    }
-  }
-
-  /** the checker for parameter {@code b}. */
-  static final class _CheckerB extends ParameterValueChecker {
-
-    /** create */
-    _CheckerB() {
-      super();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public final boolean check(final double value) {
-
-      final double abs;
-      if (MathUtils.isFinite(value)) {
-        abs = Math.abs(value);
-        if (abs > 1e-10d) {
-          if (abs < 1e10d) {
-            return true;
-          }
-        }
-      }
-      return false;
-    }
-  }
-
-  /** the checker for parameter {@code c}. */
-  static final class _CheckerC extends ParameterValueChecker {
-
-    /** create */
-    _CheckerC() {
-      super();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public final boolean check(final double value) {
-      return (MathUtils.isFinite(value) && (value > 1e-4d)
-          && (value < 1e4d));
     }
   }
 }
