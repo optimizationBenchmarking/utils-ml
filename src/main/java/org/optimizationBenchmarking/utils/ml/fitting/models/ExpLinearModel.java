@@ -14,7 +14,11 @@ import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
 /**
  * <p>
- * A model of the type {@code a + exp(b + c*x)}.
+ * A model of the type {@code a + exp(b + c*x)}. This model is a special
+ * case of the {@link ExponentialDecayModel}. The
+ * {@link ExponentialDecayModel} is defined as {@code a'+(b'*exp(c'*x^d'))}
+ * . If {@code d'=1}, {@code c'=c}, {@code b'=exp(b)}, and {@code a=a'},
+ * both models are identical.
  * </p>
  * <h2>Derivatives</h2>
  * <ol>
