@@ -7,6 +7,7 @@ import org.optimizationBenchmarking.utils.document.spec.IMathRenderable;
 import org.optimizationBenchmarking.utils.document.spec.IParameterRenderer;
 import org.optimizationBenchmarking.utils.math.Polynomials;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
+import org.optimizationBenchmarking.utils.math.text.INegatableParameterRenderer;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueChecker;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueCheckerMinMax;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.SamplePermutationBasedParameterGuesser;
@@ -110,27 +111,76 @@ public class ExpLinearModelOverLogX extends BasicModel {
   }
 
   /** {@inheritDoc} */
+  @SuppressWarnings({ "resource", "null" })
   @Override
   public final void mathRender(final IMath out,
       final IParameterRenderer renderer, final IMathRenderable x) {
+    final INegatableParameterRenderer negatableRenderer;
+    final IMath closerC, closerD;
+    final boolean negateC, negateD;
+
+    if (renderer instanceof INegatableParameterRenderer) {
+      negatableRenderer = ((INegatableParameterRenderer) (renderer));
+    } else {
+      negatableRenderer = null;
+    }
+
     try (final IMath add = out.add()) {
       renderer.renderParameter(0, add);
       try (final IMath exp = add.exp()) {
         try (final IMath braces = exp.inBraces()) {
-          try (final IMath add2 = braces.add()) {
-            renderer.renderParameter(1, add2);
-            try (final IMath mul = add2.mul()) {
-              renderer.renderParameter(2, mul);
+
+          if ((negatableRenderer != null)
+              && (negatableRenderer.isNegative(2))) {
+            negateC = true;
+            closerC = braces.sub();
+          } else {
+            negateC = false;
+            closerC = braces.add();
+          }
+
+          try {
+            renderer.renderParameter(1, closerC);
+
+            try (final IMath mul = closerC.mul()) {
+
+              if (negateC) {
+                negatableRenderer.renderNegatedParameter(2, mul);
+              } else {
+                renderer.renderParameter(2, mul);
+              }
+
               try (final IMath log = mul.ln()) {
                 try (final IMath braces2 = log.inBraces()) {
-                  try (final IMath add3 = braces2.add()) {
-                    renderer.renderParameter(3, add3);
-                    x.mathRender(add3, renderer);
+
+                  if ((negatableRenderer != null)
+                      && (negatableRenderer.isNegative(3))) {
+                    negateD = true;
+                    closerD = braces2.sub();
+                  } else {
+                    negateD = false;
+                    closerD = braces2.add();
                   }
+
+                  try {
+                    x.mathRender(closerD, renderer);
+                    if (negateD) {
+                      negatableRenderer.renderNegatedParameter(3, closerD);
+                    } else {
+                      renderer.renderParameter(3, closerD);
+                    }
+                  } finally {
+                    closerD.close();
+                  }
+
                 }
               }
             }
+
+          } finally {
+            closerC.close();
           }
+
         }
       }
     }

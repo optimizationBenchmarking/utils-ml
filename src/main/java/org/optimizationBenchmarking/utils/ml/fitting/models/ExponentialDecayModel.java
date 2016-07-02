@@ -7,16 +7,31 @@ import org.optimizationBenchmarking.utils.document.spec.IMathRenderable;
 import org.optimizationBenchmarking.utils.document.spec.IParameterRenderer;
 import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
+import org.optimizationBenchmarking.utils.math.text.INegatableParameterRenderer;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueChecker;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueCheckerMinMax;
+import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueCheckerMinMaxAbs;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.SamplePermutationBasedParameterGuesser;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IParameterGuesser;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
 /**
  * <p>
- * A model describing the relationship of input to output data as
- * exponential decay according to the formula {@code a+(b*exp(c*x^d))}.
+ * A model describing the relationship of input to output data similar to
+ * an "exponential decay" according to the formula {@code a+(b*exp(c*x^d))}
+ * .
+ * </p>
+ * <h2>Behavior Occurrences</h2>
+ * <p>
+ * We encounter this model in two basic forms when modeling optimization
+ * processes, either with {@code b} and {@code d} both positive or both
+ * negative. Below you can find two examples:
+ * </p>
+ * <ul>
+ * <li>{@code 1.447E-5 +  2.017 ∗ exp(-1.642 ∗ x^ 0.265)}</li>
+ * <li>{@code 0.231    + -0.231 ∗ exp(-43.66 ∗ x^-1.685)}</li>
+ * </ul>
+ * <p>
  * </p>
  * <h2>Derivatives</h2>
  * <p>
@@ -60,14 +75,15 @@ public final class ExponentialDecayModel extends _ModelBase {
 
   /** the checker for {@code a} */
   static final ParameterValueCheckerMinMax A = new ParameterValueCheckerMinMax(
-      -1e100d, 1e100d);
+      -1e30d, 1e30d);
   /** the checker for {@code b} */
   static final ParameterValueCheckerMinMax B = ExponentialDecayModel.A;
   /** the checker for {@code c} */
   static final ParameterValueCheckerMinMax C = new ParameterValueCheckerMinMax(
-      -1e5d, 0d);
+      -1e5d, -1e-5d);
   /** the checker for {@code d} */
-  static final ParameterValueCheckerMinMax D = ExponentialDecayModel.C;
+  static final ParameterValueCheckerMinMaxAbs D = new ParameterValueCheckerMinMaxAbs(
+      1e-5d, 50d);
 
   /** create the exponential decay model */
   public ExponentialDecayModel() {
@@ -160,13 +176,37 @@ public final class ExponentialDecayModel extends _ModelBase {
   }
 
   /** {@inheritDoc} */
+  @SuppressWarnings({ "null", "resource" })
   @Override
   public final void mathRender(final IMath out,
       final IParameterRenderer renderer, final IMathRenderable x) {
-    try (final IMath add = out.add()) {
-      renderer.renderParameter(0, add);
-      try (final IMath mul = add.mul()) {
-        renderer.renderParameter(1, mul);
+    final INegatableParameterRenderer negatableRenderer;
+    final IMath closer;
+    final boolean negate;
+
+    if (renderer instanceof INegatableParameterRenderer) {
+      negatableRenderer = ((INegatableParameterRenderer) (renderer));
+    } else {
+      negatableRenderer = null;
+    }
+
+    if ((negatableRenderer != null) && (negatableRenderer.isNegative(1))) {
+      negate = true;
+      closer = out.sub();
+    } else {
+      negate = false;
+      closer = out.add();
+    }
+
+    try {
+      renderer.renderParameter(0, closer);
+
+      try (final IMath mul = closer.mul()) {
+        if (negate) {
+          negatableRenderer.renderNegatedParameter(1, mul);
+        } else {
+          renderer.renderParameter(1, mul);
+        }
         try (final IMath exp = mul.exp()) {
           try (final IMath braces = exp.inBraces()) {
             try (final IMath mul2 = braces.mul()) {
@@ -179,6 +219,9 @@ public final class ExponentialDecayModel extends _ModelBase {
           }
         }
       }
+
+    } finally {
+      closer.close();
     }
   }
 
@@ -343,6 +386,52 @@ public final class ExponentialDecayModel extends _ModelBase {
         / _ModelBase._log(x1);
   }
 
+  /**
+   * the internal fallback routine
+   *
+   * @param minY
+   *          the minimal y coordinate
+   * @param maxY
+   *          the maximum y coordinate
+   * @param dest
+   *          the destination array
+   * @param random
+   *          the random number generator
+   */
+  static final void _fallback(final double minY, final double maxY,
+      final double[] dest, final Random random) {
+    double trialA, trialB;
+    int trials;
+
+    if (random.nextBoolean()) {
+      trials = 100;
+      do {
+        trialA = (minY * (1d + (0.05d * random.nextGaussian())));
+      } while ((((minY > 0d) && (trialA < 0d)) || (trialA >= maxY))
+          && ((--trials) >= 0));
+      dest[0] = trialA;
+
+      trials = 100;
+      do {
+        trialB = ((maxY - trialA) * ((1d + //
+            Math.abs(0.05d * random.nextGaussian()))));
+      } while (((minY > 0d) && ((maxY - trialB) < 0d))
+          && ((--trials) >= 0));
+      dest[1] = trialB;
+
+      dest[2] = -(random.nextDouble() + random.nextInt(5));
+      dest[3] = (1e-5d + random.nextDouble());
+    } else {
+      dest[0] = trialB = (maxY
+          * (1d + Math.abs(0.05d * random.nextGaussian())));
+      dest[1] = ((minY - trialB)
+          * (1d + Math.abs(0.05d * random.nextGaussian())));
+      dest[2] = -1d - (random.nextDouble() + random.nextInt(5));
+      dest[3] = -(random.nextDouble()
+          + (random.nextInt(3) * random.nextDouble()));
+    }
+  }
+
   /** the parameter guesser */
   private class __DecayModelParameterGuesser
       extends SamplePermutationBasedParameterGuesser {
@@ -398,14 +487,7 @@ public final class ExponentialDecayModel extends _ModelBase {
         }
       }
 
-      maxY -= minY;
-      dest[0] = (minY * ((1d + //
-          Math.abs(0.05d * random.nextGaussian()))));
-      dest[1] = (maxY * ((1d + //
-          Math.abs(0.05d * random.nextGaussian()))));
-      dest[2] = -random.nextDouble();
-      dest[3] = (0.1d * random.nextDouble());
-
+      ExponentialDecayModel._fallback(minY, maxY, dest, random);
       return true;
     }
 
@@ -413,10 +495,14 @@ public final class ExponentialDecayModel extends _ModelBase {
     @Override
     protected final void fallback(final double[] dest,
         final Random random) {
-      dest[0] = ((random.nextInt(11) - 5) + (random.nextGaussian() * 10));
-      dest[1] = Math.abs(random.nextInt(1000) * random.nextGaussian());
-      dest[2] = -random.nextDouble();
-      dest[3] = (0.1d * random.nextDouble());
+      final double maxY, minY;
+
+      minY = (random.nextBoolean() ? this.m_minY
+          : ((random.nextInt(11) - 5) + (random.nextGaussian() * 10)));
+      maxY = (random.nextBoolean() ? this.m_maxY
+          : (minY
+              + Math.abs(random.nextInt(1000) * random.nextGaussian())));
+      ExponentialDecayModel._fallback(minY, maxY, dest, random);
     }
 
     /** {@inheritDoc} */

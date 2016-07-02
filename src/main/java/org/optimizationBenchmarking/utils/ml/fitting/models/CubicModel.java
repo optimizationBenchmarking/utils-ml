@@ -7,6 +7,7 @@ import org.optimizationBenchmarking.utils.document.spec.IMathRenderable;
 import org.optimizationBenchmarking.utils.document.spec.IParameterRenderer;
 import org.optimizationBenchmarking.utils.math.Polynomials;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
+import org.optimizationBenchmarking.utils.math.text.INegatableParameterRenderer;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.SampleBasedParameterGuesser;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IParameterGuesser;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
@@ -61,34 +62,95 @@ public class CubicModel extends BasicModel {
   }
 
   /** {@inheritDoc} */
+  @SuppressWarnings({ "resource", "null" })
   @Override
   public final void mathRender(final IMath out,
       final IParameterRenderer renderer, final IMathRenderable x) {
-    try (final IMath add = out.add()) {
-      renderer.renderParameter(0, add);
+    final INegatableParameterRenderer negatableRenderer;
+    final IMath closerA, closerB, closerC;
+    final boolean negateA, negateB, negateC;
 
-      try (final IMath add2 = add.add()) {
-        try (final IMath mul = add2.mul()) {
-          renderer.renderParameter(1, mul);
-          x.mathRender(mul, renderer);
+    if (renderer instanceof INegatableParameterRenderer) {
+      negatableRenderer = ((INegatableParameterRenderer) (renderer));
+    } else {
+      negatableRenderer = null;
+    }
+
+    if ((negatableRenderer != null) && (negatableRenderer.isNegative(0))) {
+      negateA = true;
+      closerA = out.sub();
+    } else {
+      negateA = false;
+      closerA = out.add();
+    }
+
+    try {
+
+      if ((negatableRenderer != null)
+          && (negatableRenderer.isNegative(1))) {
+        negateB = true;
+        closerB = closerA.sub();
+      } else {
+        negateB = false;
+        closerB = closerA.add();
+      }
+
+      try {
+
+        if ((negatableRenderer != null)
+            && (negatableRenderer.isNegative(2))) {
+          negateC = true;
+          closerC = closerB.sub();
+        } else {
+          negateC = false;
+          closerC = closerB.add();
         }
 
-        try (final IMath add3 = add2.add()) {
-          try (final IMath mul = add3.mul()) {
-            renderer.renderParameter(2, mul);
-            try (final IMath sqr = mul.sqr()) {
-              x.mathRender(sqr, renderer);
-            }
-          }
+        try {
 
-          try (final IMath mul = add3.mul()) {
-            renderer.renderParameter(3, mul);
-            try (final IMath cube = mul.cube()) {
+          try (final IMath mulD = closerC.mul()) {
+            renderer.renderParameter(3, mulD);
+            try (final IMath cube = mulD.cube()) {
               x.mathRender(cube, renderer);
             }
           }
+
+          try (final IMath mulC = closerC.mul()) {
+            if (negateC) {
+              negatableRenderer.renderNegatedParameter(2, mulC);
+            } else {
+              renderer.renderParameter(2, mulC);
+            }
+            try (final IMath cube = mulC.sqr()) {
+              x.mathRender(cube, renderer);
+            }
+          }
+
+        } finally {
+          closerC.close();
         }
+
+        try (final IMath mulB = closerB.mul()) {
+          if (negateB) {
+            negatableRenderer.renderNegatedParameter(1, mulB);
+          } else {
+            renderer.renderParameter(1, mulB);
+          }
+          x.mathRender(mulB, renderer);
+        }
+
+      } finally {
+        closerB.close();
       }
+
+      if (negateA) {
+        negatableRenderer.renderNegatedParameter(0, closerA);
+      } else {
+        renderer.renderParameter(0, closerA);
+      }
+
+    } finally {
+      closerA.close();
     }
   }
 

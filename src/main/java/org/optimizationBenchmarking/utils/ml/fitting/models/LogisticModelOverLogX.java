@@ -8,6 +8,7 @@ import org.optimizationBenchmarking.utils.document.spec.IParameterRenderer;
 import org.optimizationBenchmarking.utils.document.spec.IText;
 import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
+import org.optimizationBenchmarking.utils.math.text.INegatableParameterRenderer;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueChecker;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueCheckerMinMaxAbs;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.SamplePermutationBasedParameterGuesser;
@@ -183,22 +184,52 @@ public class LogisticModelOverLogX extends _ModelBase {
   }
 
   /** {@inheritDoc} */
+  @SuppressWarnings({ "null", "resource" })
   @Override
   public void mathRender(final IMath out,
       final IParameterRenderer renderer, final IMathRenderable x) {
+    final INegatableParameterRenderer negatableRenderer;
+    final IMath closer;
+    final boolean negate;
+
+    if (renderer instanceof INegatableParameterRenderer) {
+      negatableRenderer = ((INegatableParameterRenderer) (renderer));
+    } else {
+      negatableRenderer = null;
+    }
+
     try (final IMath div = out.div()) {
       renderer.renderParameter(0, div);
-      try (final IMath add = div.add()) {
-        try (final IText num = add.number()) {
+
+      if ((negatableRenderer != null)
+          && (negatableRenderer.isNegative(1))) {
+        negate = true;
+        closer = div.sub();
+      } else {
+        negate = false;
+        closer = div.add();
+      }
+
+      try {
+        try (final IText num = closer.number()) {
           num.append('1');
         }
-        try (final IMath mul = add.mul()) {
-          renderer.renderParameter(1, mul);
+        try (final IMath mul = closer.mul()) {
+
+          if (negate) {
+            negatableRenderer.renderNegatedParameter(1, mul);
+          } else {
+            renderer.renderParameter(1, mul);
+          }
+
           try (final IMath pow = mul.pow()) {
             x.mathRender(pow, renderer);
             renderer.renderParameter(2, pow);
           }
         }
+
+      } finally {
+        closer.close();
       }
     }
   }
