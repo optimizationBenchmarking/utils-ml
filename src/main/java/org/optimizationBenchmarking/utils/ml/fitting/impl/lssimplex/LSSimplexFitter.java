@@ -7,7 +7,8 @@ import org.optimizationBenchmarking.utils.ml.fitting.impl.abstr.OptimizationBase
 /**
  * <p>
  * This curve fitter uses a combination of least-squares solvers and
- * simplex search and BOBYQA to fit a function.</p>
+ * simplex search and BOBYQA to fit a function.
+ * </p>
  * <p>
  * It tends to be slower than
  * {@link org.optimizationBenchmarking.utils.ml.fitting.impl.dels.DELSFitter}
@@ -31,9 +32,9 @@ public final class LSSimplexFitter extends OptimizationBasedFitter {
   }
 
   /**
-   * Get the globally shared instance of the Opti-based curve fitter
+   * Get the globally shared instance of the LS-Simplex-based curve fitter
    *
-   * @return the instance of the Opti-based curve fitter
+   * @return the instance of the LS-Simplex-based curve fitter
    */
   public static final LSSimplexFitter getInstance() {
     return _DECurveFitterHolder.INSTANCE;

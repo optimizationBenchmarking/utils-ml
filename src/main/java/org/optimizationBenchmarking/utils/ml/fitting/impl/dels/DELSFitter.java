@@ -26,9 +26,9 @@ public final class DELSFitter extends OptimizationBasedFitter {
   }
 
   /**
-   * Get the globally shared instance of the Opti-based curve fitter
+   * Get the globally shared instance of the DE/LS-based curve fitter
    *
-   * @return the instance of the Opti-based curve fitter
+   * @return the instance of the DE/LS-based curve fitter
    */
   public static final DELSFitter getInstance() {
     return _DECurveFitterHolder.INSTANCE;

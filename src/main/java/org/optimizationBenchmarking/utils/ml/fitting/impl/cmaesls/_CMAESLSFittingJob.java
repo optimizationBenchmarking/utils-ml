@@ -9,9 +9,9 @@ import org.optimizationBenchmarking.utils.ml.fitting.impl.abstr.OptimizationBase
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IParameterGuesser;
 
 /**
- * A function fitting job which mixes Differential Evolution, Least-Squares
- * optimization, and Simplex Search to obtain high-quality fittings. This
- * hybrid approach is intended to achieve better overall convergence.
+ * A function fitting job which mixes CMA-ES and Least-Squares optimization
+ * to obtain high-quality fittings. This hybrid approach is intended to
+ * achieve better overall convergence.
  */
 final class _CMAESLSFittingJob
     extends OptimizationBasedFittingJob<FittingCandidateSolution> {

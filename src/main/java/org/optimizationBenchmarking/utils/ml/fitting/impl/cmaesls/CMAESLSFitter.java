@@ -25,9 +25,9 @@ public final class CMAESLSFitter extends OptimizationBasedFitter {
   }
 
   /**
-   * Get the globally shared instance of the Opti-based curve fitter
+   * Get the globally shared instance of the CMA-ES/LS-based curve fitter
    *
-   * @return the instance of the Opti-based curve fitter
+   * @return the instance of the CMA-ES/LS-based curve fitter
    */
   public static final CMAESLSFitter getInstance() {
     return _DECurveFitterHolder.INSTANCE;
