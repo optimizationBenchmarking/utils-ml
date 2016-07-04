@@ -19,7 +19,9 @@ public class FittingJob extends ToolJob implements IFittingJob {
   protected final ParametricUnaryFunction m_function;
 
   /** the fitting result */
-  protected final FittingCandidateSolution m_result;
+  private final double[] m_result;
+  /** the quality */
+  private double m_quality;
 
   /** the matrix */
   protected final IMatrix m_data;
@@ -43,8 +45,8 @@ public class FittingJob extends ToolJob implements IFittingJob {
     FittingJobBuilder.validateMeasure(//
         this.m_measure = builder.getQualityMeasure());
 
-    this.m_result = new FittingCandidateSolution(
-        this.m_function.getParameterCount());
+    this.m_result = new double[this.m_function.getParameterCount()];
+    this.m_quality = Double.POSITIVE_INFINITY;
   }
 
   /** Perform the fitting */
@@ -77,8 +79,9 @@ public class FittingJob extends ToolJob implements IFittingJob {
    *          the parameters
    */
   public final void register(final double quality, final double[] params) {
-    if ((quality < this.m_result.quality) && (quality >= 0d)) {
-      this.m_result.assign(params, quality);
+    if ((quality < this.m_quality) && (quality >= 0d)) {
+      System.arraycopy(params, 0, this.m_result, 0, this.m_result.length);
+      this.m_quality = quality;
     }
   }
 
@@ -128,15 +131,15 @@ public class FittingJob extends ToolJob implements IFittingJob {
       this.fit();
 
       canLog = (logger != null) && (logger.isLoggable(Level.FINER));
-      isFinite = ((this.m_result.quality >= 0d)
-          && (this.m_result.quality < Double.POSITIVE_INFINITY));
+      isFinite = ((this.m_quality >= 0d)
+          && (this.m_quality < Double.POSITIVE_INFINITY));
       if (canLog || (!isFinite)) {
         if (textOut == null) {
           textOut = this.__createMessageBody();
         }
         textOut.append(", obtained result ");//$NON-NLS-1$
-        FittingUtils.renderFittingResult(this.m_result.solution,
-            this.m_result.quality, textOut);
+        FittingUtils.renderFittingResult(this.m_result, this.m_quality,
+            textOut);
         message = null;
       }
 
@@ -146,7 +149,8 @@ public class FittingJob extends ToolJob implements IFittingJob {
           logger.finer("Finished fitting" + //$NON-NLS-1$
               textOut.toString());
         }
-        return new FittingResult(this.m_result, this.m_function);
+        return new FittingResult(this.m_result, this.m_quality,
+            this.m_function);
       }
     } catch (final Throwable cause) {
       error = cause;
@@ -178,6 +182,6 @@ public class FittingJob extends ToolJob implements IFittingJob {
    *          the destination record
    */
   protected final void getCopyOfBest(final FittingCandidateSolution dest) {
-    dest.assign(this.m_result.solution, this.m_result.quality);
+    dest.assign(this.m_result, this.m_quality);
   }
 }

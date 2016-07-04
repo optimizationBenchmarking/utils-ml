@@ -22,13 +22,13 @@ final class _CMAESLSFittingJob
    * @param builder
    *          the builder
    */
-  protected _CMAESLSFittingJob(final FittingJobBuilder builder) {
+  _CMAESLSFittingJob(final FittingJobBuilder builder) {
     super(builder);
   }
 
   /** {@inheritDoc} */
   @Override
-  protected void doFit() {
+  protected final void doFit() {
     final int numParams;
     final FittingCandidateSolution current;
     final int maxLSIterations;

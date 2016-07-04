@@ -16,6 +16,7 @@ import org.optimizationBenchmarking.utils.math.statistics.ranking.ETieStrategy;
 import org.optimizationBenchmarking.utils.math.statistics.ranking.RankingStrategy;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.cmaesls.CMAESLSFitter;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.dels.DELSFitter;
+import org.optimizationBenchmarking.utils.ml.fitting.impl.esls.ESLSFitter;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.lssimplex.LSSimplexFitter;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IFunctionFitter;
 import org.optimizationBenchmarking.utils.parallel.Execute;
@@ -31,6 +32,7 @@ public class FittingExamples {
   new ArrayListView<>(new IFunctionFitter[] { //
       CMAESLSFitter.getInstance(), //
       DELSFitter.getInstance(), //
+      ESLSFitter.getInstance(), //
       LSSimplexFitter.getInstance(),//
   });
 

@@ -36,7 +36,7 @@ final class _LSSimplexFittingJob
    * @param builder
    *          the builder
    */
-  protected _LSSimplexFittingJob(final FittingJobBuilder builder) {
+  _LSSimplexFittingJob(final FittingJobBuilder builder) {
     super(builder);
   }
 

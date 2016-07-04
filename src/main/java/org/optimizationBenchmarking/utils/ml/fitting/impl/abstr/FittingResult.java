@@ -22,16 +22,18 @@ public final class FittingResult implements IFittingResult {
   /**
    * create the optimization result
    *
-   * @param candidate
-   *          the candidate solution to copy
+   * @param result
+   *          the result array
+   * @param quality
+   *          the quality
    * @param function
    *          the function
    */
-  FittingResult(final FittingCandidateSolution candidate,
+  FittingResult(final double[] result, final double quality,
       final ParametricUnaryFunction function) {
     this.m_function = function;
-    this.m_quality = candidate.quality;
-    this.m_solution = candidate.solution;
+    this.m_quality = quality;
+    this.m_solution = result;
   }
 
   /** {@inheritDoc} */

@@ -20,7 +20,7 @@ final class _DELSFittingJob
    * @param builder
    *          the builder
    */
-  protected _DELSFittingJob(final FittingJobBuilder builder) {
+  _DELSFittingJob(final FittingJobBuilder builder) {
     super(builder);
   }
 

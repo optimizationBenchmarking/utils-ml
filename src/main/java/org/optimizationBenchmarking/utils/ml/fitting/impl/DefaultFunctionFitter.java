@@ -7,6 +7,7 @@ import org.optimizationBenchmarking.utils.collections.lists.ArrayListView;
 import org.optimizationBenchmarking.utils.error.ErrorUtils;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.cmaesls.CMAESLSFitter;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.dels.DELSFitter;
+import org.optimizationBenchmarking.utils.ml.fitting.impl.esls.ESLSFitter;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.lssimplex.LSSimplexFitter;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IFunctionFitter;
 
@@ -114,7 +115,7 @@ public final class DefaultFunctionFitter {
     /** {@inheritDoc} */
     @Override
     public final boolean hasNext() {
-      return (this.m_index <= 2);
+      return (this.m_index <= 3);
     }
 
     /** {@inheritDoc} */
@@ -122,12 +123,15 @@ public final class DefaultFunctionFitter {
     public final IFunctionFitter next() {
       switch (this.m_index++) {
         case 0: {
-          return DELSFitter.getInstance();
+          return ESLSFitter.getInstance();
         }
         case 1: {
-          return CMAESLSFitter.getInstance();
+          return DELSFitter.getInstance();
         }
         case 2: {
+          return CMAESLSFitter.getInstance();
+        }
+        case 3: {
           return LSSimplexFitter.getInstance();
         }
         default: {
