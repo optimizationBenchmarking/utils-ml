@@ -208,7 +208,7 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
     eval = new _InternalEvaluation(point);
     vector = OptimizationBasedFittingJob.__toArray(point);
 
-    this.m_selected.evaluate(this.m_function, vector, eval);
+    this.m_selected.evaluate(this.m_function, vector, true, true, eval);
     if ((eval.quality < this.m_bestQuality) && (eval.quality >= 0d)) {
       this.m_bestQuality = eval.quality;
       System.arraycopy(vector, 0, this.m_bestData, 0,

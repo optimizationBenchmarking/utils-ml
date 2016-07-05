@@ -119,7 +119,7 @@ final class _ESLSFittingJob
     int generation, index, index2, findSamples;
 
     numParams = this.m_function.getParameterCount();
-    mu = Primes.nextPrime(numParams + 1);
+    mu = Primes.nextPrime((5 * (numParams + 1)) >>> 2);
     lambda = Primes.nextPrime(mu + 1);
 
     population = new _ESCandidate[mu + lambda];

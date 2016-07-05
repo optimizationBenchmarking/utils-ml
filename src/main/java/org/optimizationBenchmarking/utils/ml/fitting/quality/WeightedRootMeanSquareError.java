@@ -79,7 +79,8 @@ public final class WeightedRootMeanSquareError
   /** {@inheritDoc} */
   @Override
   public final void evaluate(final ParametricUnaryFunction model,
-      final double[] parameters, final FittingEvaluation dest) {
+      final double[] parameters, final boolean computeResiduals,
+      final boolean computeJacobinian, final FittingEvaluation dest) {
     double[][] jacobian;
     double[] residuals;
     final int numSamples, numParams;
@@ -93,15 +94,19 @@ public final class WeightedRootMeanSquareError
     numSamples = (data.length / 3);
 
     residuals = dest.residuals;
-    if ((residuals == null) || (residuals.length != numSamples)) {
-      dest.residuals = residuals = new double[numSamples];
+    if (computeResiduals) {
+      if ((residuals == null) || (residuals.length != numSamples)) {
+        dest.residuals = residuals = new double[numSamples];
+      }
     }
 
     numParams = parameters.length;// =model.getParameterCount();
     jacobian = dest.jacobian;
-    if ((jacobian == null) || (jacobian.length != numSamples)
-        || (jacobian[0].length != numParams)) {
-      dest.jacobian = jacobian = new double[numSamples][numParams];
+    if (computeJacobinian) {
+      if ((jacobian == null) || (jacobian.length != numSamples)
+          || (jacobian[0].length != numParams)) {
+        dest.jacobian = jacobian = new double[numSamples][numParams];
+      }
     }
 
     sum = new StableSum();
@@ -115,13 +120,17 @@ public final class WeightedRootMeanSquareError
       residual = ((expectedY - model.value(x, parameters))
           / inverseWeight);
 
-      residuals[pointIndex] = residual;
+      if (computeResiduals) {
+        residuals[pointIndex] = residual;
+      }
       sum.append(residual * residual);
 
-      jacobianRow = jacobian[pointIndex];
-      model.gradient(x, parameters, jacobianRow);
-      for (j = numParams; (--j) >= 0;) {
-        jacobianRow[j] /= inverseWeight;
+      if (computeJacobinian) {
+        jacobianRow = jacobian[pointIndex];
+        model.gradient(x, parameters, jacobianRow);
+        for (j = numParams; (--j) >= 0;) {
+          jacobianRow[j] /= inverseWeight;
+        }
       }
     }
 
