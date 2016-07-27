@@ -61,7 +61,7 @@ public final class DimensionRelationshipModels {
     new ArrayListView<>(new ParametricUnaryFunction[] { //
         new LogisticModelWithOffsetOverLogX(), //
         new ExponentialDecayModel(),//
-    });
+    }, false);
   }
 
   /** the holder for relationships of equally-typed dimensions */
@@ -71,7 +71,7 @@ public final class DimensionRelationshipModels {
     static final ArrayListView<ParametricUnaryFunction> MODELS = //
     new ArrayListView<>(new ParametricUnaryFunction[] { //
         new QuadraticModel(),//
-    });
+    }, false);
   }
 
 }

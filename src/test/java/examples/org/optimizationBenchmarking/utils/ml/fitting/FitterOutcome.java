@@ -45,7 +45,7 @@ public final class FitterOutcome implements Comparable<FitterOutcome> {
     int i;
 
     this.fitter = _fitter;
-    this.outcomes = new ArrayListView<>(results);
+    this.outcomes = new ArrayListView<>(results, false);
     this.path = _path;
 
     med = new ArithmeticMeanAggregate[4];

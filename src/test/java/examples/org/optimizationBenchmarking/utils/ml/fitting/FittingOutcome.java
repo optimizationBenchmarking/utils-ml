@@ -63,7 +63,7 @@ public final class FittingOutcome implements Comparable<FittingOutcome> {
 
     this.example = _example;
     this.path = _path;
-    this.outcomes = new ArrayListView<>(results);
+    this.outcomes = new ArrayListView<>(results, false);
 
     this.min = new double[maxParams];
     this.max = new double[maxParams];

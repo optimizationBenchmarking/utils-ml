@@ -72,7 +72,7 @@ final class _MultiClusteringJob
       cl.append(oc.clusterNumError);
     }
 
-    return new MultiClusteringOutcome(new ArrayListView<>(results), //
+    return new MultiClusteringOutcome(new ArrayListView<>(results, false), //
         this.m_ds, //
         new Errors(rt.getArithmeticMean().doubleValue(), //
             df.getArithmeticMean().doubleValue(), //

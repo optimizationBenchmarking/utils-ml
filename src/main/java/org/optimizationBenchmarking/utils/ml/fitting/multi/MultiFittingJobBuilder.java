@@ -146,7 +146,7 @@ public final class MultiFittingJobBuilder
       throw new IllegalArgumentException(
           "There must be at least one Function fitter.");//$NON-NLS-1$
     }
-    return this.setFitters(new ArrayListView<>(fitters));
+    return this.setFitters(new ArrayListView<>(fitters, false));
   }
 
   /**

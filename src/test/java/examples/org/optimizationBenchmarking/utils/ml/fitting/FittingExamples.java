@@ -34,7 +34,7 @@ public class FittingExamples {
       DELSFitter.getInstance(), //
       ESLSFitter.getInstance(), //
       LSSimplexFitter.getInstance(),//
-  });
+  }, false);
 
   /**
    * The main entry point

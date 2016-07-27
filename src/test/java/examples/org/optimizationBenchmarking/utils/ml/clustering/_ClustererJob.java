@@ -75,7 +75,7 @@ final class _ClustererJob implements Callable<ClustererOutcome> {
       cls.append(oc.stddev.clusterNumError);
     }
 
-    return new ClustererOutcome(new ArrayListView<>(results),
+    return new ClustererOutcome(new ArrayListView<>(results, false),
         this.m_clusterer, //
         new Errors(rtm.doubleValue(), dfm.doubleValue(),
             clm.doubleValue()), //

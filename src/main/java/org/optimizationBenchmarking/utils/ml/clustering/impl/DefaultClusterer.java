@@ -133,7 +133,8 @@ public final class DefaultClusterer {
 
       inst = __DefaultDataClusterer.INSTANCE;
       if (inst instanceof __DefaultDataClusterer) {
-        INSTANCES = new ArrayListView<>(new IDataClusterer[] { inst });
+        INSTANCES = new ArrayListView<>(new IDataClusterer[] { inst },
+            false);
       } else {
         insts = new LinkedHashSet<>();
         insts.add(inst);
@@ -222,7 +223,8 @@ public final class DefaultClusterer {
 
       inst = __DefaultDistanceClusterer.INSTANCE;
       if (inst instanceof __DefaultDistanceClusterer) {
-        INSTANCES = new ArrayListView<>(new IDistanceClusterer[] { inst });
+        INSTANCES = new ArrayListView<>(new IDistanceClusterer[] { inst },
+            false);
       } else {
         insts = new LinkedHashSet<>();
         insts.add(inst);

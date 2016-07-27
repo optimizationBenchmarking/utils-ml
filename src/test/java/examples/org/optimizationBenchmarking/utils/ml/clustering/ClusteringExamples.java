@@ -20,7 +20,7 @@ public final class ClusteringExamples {
       new IClusterer[] { //
           RBasedDataClusterer.getInstance(), //
           RBasedDistanceClusterer.getInstance(),//
-  });
+  }, false);
 
   /**
    * run all the clustering jobs
@@ -50,7 +50,7 @@ public final class ClusteringExamples {
     results = new ClustererOutcome[jobs.length];
     Execute.join(jobs, results, 0, true);
 
-    return new ArrayListView<>(results);
+    return new ArrayListView<>(results, false);
   }
 
   /**
