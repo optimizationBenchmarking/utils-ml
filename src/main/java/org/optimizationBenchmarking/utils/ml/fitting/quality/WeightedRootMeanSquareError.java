@@ -62,7 +62,6 @@ public final class WeightedRootMeanSquareError
     int index;
 
     sum = new StableSum();
-    sum.reset();
 
     data = this.m_values;
     for (index = data.length; index > 0;) {
@@ -110,7 +109,6 @@ public final class WeightedRootMeanSquareError
     }
 
     sum = new StableSum();
-    sum.reset();
 
     for (dataIndex = data.length, pointIndex = numSamples; (--pointIndex) >= 0;) {
       x = data[--dataIndex];
