@@ -25,17 +25,9 @@ public class ConfusionMatrixBasedMeasure
   @Override
   public final int[][] createToken(
       final ClassifiedSample[] trainingSamples) {
-    int maxClass;
-
-    maxClass = (-1);
-    for (final ClassifiedSample sample : trainingSamples) {
-      if (sample.sampleClass > maxClass) {
-        maxClass = sample.sampleClass;
-      }
-    }
-
-    ++maxClass;
-    return new int[maxClass][maxClass];
+    final int numClasses;
+    numClasses = ClassificationTools.getClassCount(trainingSamples);
+    return new int[numClasses][numClasses];
   }
 
   /**
