@@ -78,7 +78,8 @@ public class FittingJob extends ToolJob implements IFittingJob {
    * @param params
    *          the parameters
    */
-  public final void register(final double quality, final double[] params) {
+  protected final void register(final double quality,
+      final double[] params) {
     if ((quality < this.m_quality) && (quality >= 0d)) {
       System.arraycopy(params, 0, this.m_result, 0, this.m_result.length);
       this.m_quality = quality;

@@ -18,6 +18,7 @@ public abstract class ClassifierTrainer extends Tool
   /** {@inheritDoc} */
   @Override
   public IClassifierTrainingJobBuilder use() {
+    this.checkCanUse();
     return new ClassifierTrainingJobBuilder(this);
   }
 

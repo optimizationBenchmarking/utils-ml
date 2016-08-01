@@ -1,6 +1,7 @@
 package org.optimizationBenchmarking.utils.ml.fitting.impl.cmaesls;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.optimizationBenchmarking.utils.math.statistics.aggregate.StandardDeviationAggregate;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.abstr.FittingCandidateSolution;
@@ -44,7 +45,7 @@ final class _CMAESLSFittingJob
     currentArray = current.solution;
     stddev = new StandardDeviationAggregate[numParams];
     stddevs = new double[numParams];
-    random = new Random();
+    random = ThreadLocalRandom.current();
 
     for (index = numParams; (--index) >= 0;) {
       stddev[index] = new StandardDeviationAggregate();

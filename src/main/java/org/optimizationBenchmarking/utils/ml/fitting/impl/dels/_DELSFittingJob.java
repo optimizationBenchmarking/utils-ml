@@ -1,6 +1,7 @@
 package org.optimizationBenchmarking.utils.ml.fitting.impl.dels;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.optimizationBenchmarking.utils.ml.fitting.impl.abstr.FittingCandidateSolution;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.abstr.FittingJobBuilder;
@@ -153,7 +154,7 @@ final class _DELSFittingJob
     int index, generation, maxIterations;
 
     // initialize and allocate all needed variables
-    random = new Random();
+    random = ThreadLocalRandom.current();
     numParameters = this.m_function.getParameterCount();
 
     guesser = this.m_function.createParameterGuesser(this.m_data);

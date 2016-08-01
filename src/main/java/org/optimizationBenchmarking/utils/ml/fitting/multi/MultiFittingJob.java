@@ -1,7 +1,6 @@
 package org.optimizationBenchmarking.utils.ml.fitting.multi;
 
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -10,6 +9,7 @@ import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.FittingUtils;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.abstr.FittingJobBuilder;
 import org.optimizationBenchmarking.utils.ml.fitting.quality.FittingQualityMeasure;
+import org.optimizationBenchmarking.utils.ml.fitting.spec.IFittingJob;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IFittingQualityMeasure;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IFittingResult;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IFunctionFitter;
@@ -22,8 +22,7 @@ import org.optimizationBenchmarking.utils.tools.impl.abstr.ToolJob;
  * A fitting job which tries to fit multiple models to a given data set and
  * picks the best result.
  */
-public final class MultiFittingJob extends ToolJob
-    implements Callable<IFittingResult> {
+public final class MultiFittingJob extends ToolJob implements IFittingJob {
 
   /** the fitters */
   private final Iterable<IFunctionFitter> m_fitters;

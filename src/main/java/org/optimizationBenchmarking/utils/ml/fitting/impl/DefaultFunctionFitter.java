@@ -94,7 +94,7 @@ public final class DefaultFunctionFitter {
       }
 
       if (!(fitters.isEmpty())) {
-        INSTANCES = ArrayListView.collectionToView(fitters);
+        INSTANCES = ArrayListView.collectionToView(fitters, false);
       } else {
         INSTANCES = null;
       }

@@ -1,5 +1,8 @@
 package org.optimizationBenchmarking.utils.ml.classification.impl.abstr;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.optimizationBenchmarking.utils.ml.classification.spec.ClassifiedSample;
 import org.optimizationBenchmarking.utils.ml.classification.spec.EFeatureType;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierQualityMeasure;
@@ -8,7 +11,7 @@ import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrai
 import org.optimizationBenchmarking.utils.tools.impl.abstr.ToolJob;
 
 /** The abstract base class for classifier training jobs */
-public class ClassifierTrainingJob extends ToolJob
+public abstract class ClassifierTrainingJob extends ToolJob
     implements IClassifierTrainingJob {
 
   /** the classifier quality measure */
@@ -36,10 +39,68 @@ public class ClassifierTrainingJob extends ToolJob
         this.m_qualityMeasure = builder.m_qualityMeasure);
   }
 
-  @Override
-  public IClassifierTrainingResult call() throws IllegalArgumentException {
-    // TODO Auto-generated method stub
-    return null;
+  /**
+   * Do the actual work.
+   *
+   * @return the classification result
+   */
+  protected abstract IClassifierTrainingResult doCall();
+
+  /**
+   * get the textual representation of this object
+   *
+   * @return the textual representation
+   */
+  private final String __toText() {
+    return " applying " + this.toString() + //$NON-NLS-1$
+        " to a data set of " + this.m_knownSamples.length//$NON-NLS-1$
+        + " samples with " + this.m_featureTypes.length//$NON-NLS-1$
+        + " features and quality measure " + //$NON-NLS-1$
+        this.m_qualityMeasure.toString();
   }
 
+  /** {@iheritDoc} */
+  @Override
+  public final IClassifierTrainingResult call()
+      throws IllegalArgumentException {
+    final Logger logger;
+    String use;
+    IClassifierTrainingResult result;
+
+    logger = this.getLogger();
+    if ((logger != null) && (logger.isLoggable(Level.FINER))) {
+      use = this.__toText();
+      logger.finer("Beginning to" + use + '.');//$NON-NLS-1$
+    } else {
+      use = null;
+    }
+
+    result = null;
+    try {
+      result = this.doCall();
+      if ((logger != null) && (logger.isLoggable(Level.FINER))) {
+        if (use == null) {
+          use = this.__toText();
+        }
+        logger.finer("Finished" + use + //$NON-NLS-1$
+            ", obtained a classifier of type "//$NON-NLS-1$
+            + result.getClassifier().toString() + " and quality " + //$NON-NLS-1$
+            result.getQuality() + '.');
+      }
+    } catch (final Throwable error) {
+      if (use == null) {
+        use = this.__toText();
+      }
+      throw new IllegalArgumentException("Failed to apply" + use//$NON-NLS-1$
+          + '.', error);
+    } finally {
+      this.m_knownSamples = null;
+      this.m_featureTypes = null;
+      this.m_qualityMeasure = null;
+    }
+
+    ClassificationTools.checkClassifierTrainingResult(result);
+
+    return result;
+  }
 }

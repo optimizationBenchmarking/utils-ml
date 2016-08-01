@@ -202,7 +202,7 @@ public final class MultiFittingJobBuilder
     final ArrayListView<IFunctionFitter> fitters;
     if (this.m_fitters == null) {
       fitters = DefaultFunctionFitter.getAllInstance();
-      if (fitters.size() > 0) {
+      if ((fitters != null) && (fitters.size() > 0)) {
         this.setFitters(fitters);
       }
     }

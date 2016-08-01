@@ -9,6 +9,7 @@ import org.optimizationBenchmarking.utils.math.combinatorics.Shuffle;
 import org.optimizationBenchmarking.utils.math.functions.numeric.CeilDiv;
 import org.optimizationBenchmarking.utils.ml.classification.spec.ClassifiedSample;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrainingJob;
+import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrainingResult;
 
 /** Some simple tools for classification. */
 public final class ClassificationTools {
@@ -93,6 +94,7 @@ public final class ClassificationTools {
    * @return the cross-validation samples, or {@code null} if no meaningful
    *         division could be created
    */
+  @SuppressWarnings("unchecked")
   public static final ClassifiedSample[][][] divideForCrossValidation(
       final ClassifiedSample[] samples, final Random random) {
     final ClassifiedSample[][] perClass;
@@ -108,8 +110,11 @@ public final class ClassificationTools {
     // We first find the number of classes.
     classCount = ClassificationTools.getClassCount(samples);
 
-    // Cross-validation makes no sense on one class.
-    if (classCount <= 1) {
+    // Cross-validation makes no sense on one class or if we have less
+    // samples than two times the number of folds, i.e., less than 20
+    // samples.
+    if ((classCount <= 1) || (samples.length < (2
+        * ClassificationTools.DEFAULT_CROSSVALIDATION_FOLDS))) {
       return null;
     }
 
@@ -241,6 +246,33 @@ public final class ClassificationTools {
     }
 
     return result;
+  }
+
+  /**
+   * Check a classifier training result record and throw a
+   * {@link IllegalArgumentException} if the result is invalid.
+   *
+   * @param result
+   *          the result record
+   */
+  public static final void checkClassifierTrainingResult(
+      final IClassifierTrainingResult result) {
+    final double quality;
+
+    if (result == null) {
+      throw new IllegalArgumentException(
+          "Result returned by classifier trainer cannot be null.");//$NON-NLS-1$
+    }
+    if (result.getClassifier() == null) {
+      throw new IllegalArgumentException(
+          "Classifier stored in training result cannot be null.");//$NON-NLS-1$
+    }
+
+    quality = result.getQuality();
+    if ((quality < 0d) || (quality != quality)) {
+      throw new IllegalArgumentException(
+          "Invalid classifier quality:" + quality); //$NON-NLS-1$
+    }
   }
 
   /** do not call */

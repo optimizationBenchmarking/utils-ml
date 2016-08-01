@@ -1,11 +1,13 @@
 package org.optimizationBenchmarking.utils.ml.classification.impl.abstr;
 
+import org.optimizationBenchmarking.utils.comparison.Compare;
+import org.optimizationBenchmarking.utils.hash.HashUtils;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifier;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrainingResult;
 
 /** A classification result record */
-public final class ClassifierTrainingResult
-    implements IClassifierTrainingResult {
+public final class ClassifierTrainingResult implements
+    IClassifierTrainingResult, Comparable<IClassifierTrainingResult> {
 
   /** the classifier */
   public final IClassifier classifier;
@@ -45,5 +47,43 @@ public final class ClassifierTrainingResult
   @Override
   public final double getQuality() {
     return this.quality;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public final int hashCode() {
+    return HashUtils.combineHashes(HashUtils.hashCode(this.classifier),
+        HashUtils.hashCode(this.quality));
+
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public final boolean equals(final Object other) {
+    final IClassifierTrainingResult otherRes;
+    if (other == this) {
+      return true;
+    }
+    if (other instanceof IClassifierTrainingResult) {
+      otherRes = ((IClassifierTrainingResult) other);
+      return ((Compare.equals(this.quality, otherRes.getQuality())
+          && Compare.equals(this.classifier, otherRes.getClassifier())));
+    }
+    return true;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public final int compareTo(final IClassifierTrainingResult o) {
+    int res;
+
+    if (o == this) {
+      return 0;
+    }
+    res = Compare.compare(this.quality, o.getQuality());
+    if (res != 0) {
+      return res;
+    }
+    return Compare.compare(this, o);
   }
 }

@@ -2,6 +2,7 @@ package org.optimizationBenchmarking.utils.ml.fitting.impl.esls;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.math3.primes.Primes;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.abstr.FittingJobBuilder;
@@ -123,7 +124,7 @@ final class _ESLSFittingJob
     lambda = Primes.nextPrime(mu + 1);
 
     population = new _ESCandidate[mu + lambda];
-    random = new Random();
+    random = ThreadLocalRandom.current();
 
     guesser = this.m_function.createParameterGuesser(this.m_data);
 

@@ -1,6 +1,7 @@
 package org.optimizationBenchmarking.utils.ml.fitting.impl.lssimplex;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.optimizationBenchmarking.utils.ml.fitting.impl.abstr.FittingJobBuilder;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.abstr.OptimizationBasedFittingJob;
@@ -87,7 +88,7 @@ final class _LSSimplexFittingJob
 
     // initialize and allocate all needed variables
 
-    random = new Random();
+    random = ThreadLocalRandom.current();
     numParameters = this.m_function.getParameterCount();
 
     this.m_manager = new _CandidateManager(numParameters,
