@@ -17,8 +17,14 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-/** a classifier training job wrapping around Weka */
-abstract class _WekaClassifierTrainingJob extends ClassifierTrainingJob {
+/**
+ * a classifier training job wrapping around Weka
+ *
+ * @param <CT>
+ *          the classifier type
+ */
+abstract class _WekaClassifierTrainingJob<CT extends Classifier>
+    extends ClassifierTrainingJob {
 
   /**
    * Create the weka classifier training job
@@ -37,7 +43,7 @@ abstract class _WekaClassifierTrainingJob extends ClassifierTrainingJob {
    *          the instances
    * @return the classifier
    */
-  abstract Classifier _train(Instances instances);
+  abstract CT _train(Instances instances);
 
   /**
    * Create the weka classifier wrapper
@@ -50,7 +56,7 @@ abstract class _WekaClassifierTrainingJob extends ClassifierTrainingJob {
    *          to use
    * @return the weka classifier wrapper
    */
-  abstract _WekaClassifier _createClassifier(final Classifier classifier,
+  abstract _WekaClassifier<CT> _createClassifier(final CT classifier,
       final double[] vector, final Instance instance);
 
   /** {@iheritDoc} */
@@ -69,7 +75,7 @@ abstract class _WekaClassifierTrainingJob extends ClassifierTrainingJob {
     Object token;
     ClassifierTrainingResult result;
     double quality;
-    Classifier wekaClassifier;
+    CT wekaClassifier;
 
     attributes = new ArrayList<>();
     index = 0;

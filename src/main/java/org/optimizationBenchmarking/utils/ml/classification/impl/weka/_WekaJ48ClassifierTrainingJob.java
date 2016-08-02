@@ -2,13 +2,13 @@ package org.optimizationBenchmarking.utils.ml.classification.impl.weka;
 
 import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.ClassifierTrainingJobBuilder;
 
-import weka.classifiers.Classifier;
 import weka.classifiers.trees.J48;
 import weka.core.Instance;
 import weka.core.Instances;
 
 /** a classifier training job wrapping around Weka */
-class _WekaJ48ClassifierTrainingJob extends _WekaClassifierTrainingJob {
+class _WekaJ48ClassifierTrainingJob
+    extends _WekaClassifierTrainingJob<J48> {
 
   /** pruning is turned off */
   static final int PRUNING_OFF = 0;
@@ -43,7 +43,7 @@ class _WekaJ48ClassifierTrainingJob extends _WekaClassifierTrainingJob {
 
   /** {@inheritDoc} */
   @Override
-  final Classifier _train(final Instances instances) {
+  final J48 _train(final Instances instances) {
     final J48 classifier;
 
     classifier = new J48();
@@ -91,7 +91,7 @@ class _WekaJ48ClassifierTrainingJob extends _WekaClassifierTrainingJob {
 
   /** {@inheritDoc} */
   @Override
-  final _WekaClassifier _createClassifier(final Classifier classifier,
+  final _WekaClassifier<J48> _createClassifier(final J48 classifier,
       final double[] vector, final Instance instance) {
     return new _WekaJ48Classifier(classifier, vector, instance);
   }

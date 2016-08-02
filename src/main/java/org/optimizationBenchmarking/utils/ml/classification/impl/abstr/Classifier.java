@@ -1,36 +1,16 @@
 package org.optimizationBenchmarking.utils.ml.classification.impl.abstr;
 
-import org.optimizationBenchmarking.utils.ml.classification.spec.ClassifiedSample;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifier;
-import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierQualityMeasure;
+import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierParameterRenderer;
 import org.optimizationBenchmarking.utils.text.ETextCase;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
-/**
- * A base class for classifier quality measures
- *
- * @param <T>
- *          the token type
- */
-public class ClassifierQualityMeasure<T>
-    implements IClassifierQualityMeasure<T> {
+/** A base class for classifiers. */
+public abstract class Classifier implements IClassifier {
 
   /** create */
-  protected ClassifierQualityMeasure() {
+  protected Classifier() {
     super();
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public double evaluate(final IClassifier classifier, final T token,
-      final ClassifiedSample[] trainingSamples) {
-    return 0.5d;
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public T createToken(final ClassifiedSample[] trainingSamples) {
-    return null;
   }
 
   /** {@inheritDoc} */
@@ -58,5 +38,12 @@ public class ClassifierQualityMeasure<T>
   @Override
   public String getPathComponentSuggestion() {
     return this.getClass().getSimpleName();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public void render(final IClassifierParameterRenderer renderer,
+      final ITextOutput textOutput) {
+    this.printDescription(textOutput, ETextCase.AT_SENTENCE_START);
   }
 }

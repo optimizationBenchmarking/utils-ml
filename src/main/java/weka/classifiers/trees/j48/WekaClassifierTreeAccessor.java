@@ -1,9 +1,13 @@
 package weka.classifiers.trees.j48;
 
+import org.optimizationBenchmarking.utils.document.spec.ELabelType;
 import org.optimizationBenchmarking.utils.document.spec.ICode;
+import org.optimizationBenchmarking.utils.document.spec.ILabel;
 import org.optimizationBenchmarking.utils.document.spec.ISectionBody;
 import org.optimizationBenchmarking.utils.document.spec.IText;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierParameterRenderer;
+import org.optimizationBenchmarking.utils.text.ESequenceMode;
+import org.optimizationBenchmarking.utils.text.ETextCase;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 import org.optimizationBenchmarking.utils.text.tokenizers.LineIterator;
 
@@ -32,7 +36,9 @@ public final class WekaClassifierTreeAccessor {
   public static final void renderJ48Classifier(final J48 tree,
       final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
+    final ILabel label;
     String src;
+    ISectionBody body;
     boolean notFirst;
 
     try {
@@ -42,20 +48,26 @@ public final class WekaClassifierTreeAccessor {
     }
 
     if (textOutput instanceof ISectionBody) {
-      try (final ICode code = ((ISectionBody) textOutput).code(null,
+      body = ((ISectionBody) textOutput);
+      label = body.createLabel(ELabelType.CODE);
+      body.append("The classifier is rendered in "); //$NON-NLS-1$
+      body.reference(ETextCase.IN_SENTENCE, ESequenceMode.AND, label);
+      body.append('.');
+
+      try (final ICode code = ((ISectionBody) textOutput).code(label,
           true)) {
         try (final IText caption = code.caption()) {
           caption.append("caption");//$NON-NLS-1$
         }
         notFirst = true;
-        try (final IText body = code.body()) {
+        try (final IText codeBody = code.body()) {
           for (final String line : new LineIterator(src, false, false)) {
             if (notFirst) {
               notFirst = true;
             } else {
-              body.appendLineBreak();
+              codeBody.appendLineBreak();
             }
-            body.append(line);
+            codeBody.append(line);
           }
         }
       }

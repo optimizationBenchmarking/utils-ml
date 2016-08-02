@@ -5,8 +5,8 @@ import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrai
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrainingResult;
 
 /** a trivial, immediate classifier result */
-abstract class _ImmediateClassifier implements IClassifier,
-    IClassifierTrainingJob, IClassifierTrainingResult {
+abstract class _ImmediateClassifier extends Classifier
+    implements IClassifierTrainingJob, IClassifierTrainingResult {
 
   /** create the immediate classifier */
   _ImmediateClassifier() {

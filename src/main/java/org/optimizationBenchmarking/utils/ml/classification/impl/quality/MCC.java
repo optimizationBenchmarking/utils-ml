@@ -1,10 +1,22 @@
 package org.optimizationBenchmarking.utils.ml.classification.impl.quality;
 
+import org.optimizationBenchmarking.utils.bibliography.data.BibArticle;
+import org.optimizationBenchmarking.utils.bibliography.data.BibAuthor;
+import org.optimizationBenchmarking.utils.bibliography.data.BibAuthors;
+import org.optimizationBenchmarking.utils.bibliography.data.BibDate;
+import org.optimizationBenchmarking.utils.bibliography.data.BibOrganization;
+import org.optimizationBenchmarking.utils.bibliography.data.BibliographyBuilder;
+import org.optimizationBenchmarking.utils.bibliography.data.EBibMonth;
+import org.optimizationBenchmarking.utils.document.spec.ECitationMode;
+import org.optimizationBenchmarking.utils.document.spec.IComplexText;
 import org.optimizationBenchmarking.utils.math.functions.arithmetic.Div;
 import org.optimizationBenchmarking.utils.math.functions.power.Sqrt;
 import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.ConfusionMatrixBasedMeasure;
 import org.optimizationBenchmarking.utils.ml.classification.spec.ClassifiedSample;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifier;
+import org.optimizationBenchmarking.utils.text.ESequenceMode;
+import org.optimizationBenchmarking.utils.text.ETextCase;
+import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
 /**
  * A shifted and normalized version of the multi-class MCC measure defined
@@ -20,6 +32,43 @@ import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifier;
  */
 public final class MCC extends ConfusionMatrixBasedMeasure {
 
+  /** The globally shared instance of this class. */
+  public static final MCC INSTANCE = new MCC();
+
+  /** The article for citing multi-class MCC */
+  private static final BibArticle MCC_REFERENCE_1 = new BibArticle(
+      new BibAuthors(new BibAuthor[] { new BibAuthor("Mark", "Hall"), //$NON-NLS-1$//$NON-NLS-2$
+          new BibAuthor("Jan", "Gorodkin"), //$NON-NLS-1$//$NON-NLS-2$
+  }), "Comparing Two K-Category Assignments by a K-Category Correlation Coefficient", //$NON-NLS-1$
+      new BibDate(2004, EBibMonth.DECEMBER),
+      "Computational Biology and Chemistry", //$NON-NLS-1$
+      "1476-9271", //$NON-NLS-1$
+      "28", //$NON-NLS-1$
+      "5-6", //$NON-NLS-1$
+      "367", //$NON-NLS-1$
+      "374", //$NON-NLS-1$
+      new BibOrganization(//
+          "Elsevier Science Publishers B.V.", //$NON-NLS-1$
+          "Amsterdam, The Netherlands", null), //$NON-NLS-1$
+      null, "10.1016/j.compbiolchem.2004.09.006");//$NON-NLS-1$
+
+  /** The article for citing MCC */
+  private static final BibArticle MCC_REFERENCE_2 = new BibArticle(
+      new BibAuthors(new BibAuthor[] { new BibAuthor("Mark", "Hall"), //$NON-NLS-1$//$NON-NLS-2$
+          new BibAuthor("B. W.", "Matthews"), //$NON-NLS-1$//$NON-NLS-2$
+  }), "Comparison of the Predicted and Observed Secondary Structure of T4 Phage Lysozyme", //$NON-NLS-1$
+      new BibDate(195, EBibMonth.OCTOBER, 20),
+      "Biochimica et Biophysica Acta (BBA) - Protein Structure", //$NON-NLS-1$
+      null, //
+      "405", //$NON-NLS-1$
+      "2", //$NON-NLS-1$
+      "442", //$NON-NLS-1$
+      "451", //$NON-NLS-1$
+      new BibOrganization(//
+          "Elsevier Science Publishers B.V.", //$NON-NLS-1$
+          "Amsterdam, The Netherlands", null), //$NON-NLS-1$
+      null, "10.1016/0005-2795(75)90109-9");//$NON-NLS-1$
+
   /** create */
   private MCC() {
     super();
@@ -32,6 +81,40 @@ public final class MCC extends ConfusionMatrixBasedMeasure {
     ConfusionMatrixBasedMeasure.fillInConfusionMatrix(classifier,
         trainingSamples, token);
     return (1d - (0.5d * MCC.computeMCC(token)));
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public final ETextCase printShortName(final ITextOutput textOut,
+      final ETextCase textCase) {
+    return textCase.appendWord("multi-class MCC", textOut); //$NON-NLS-1$
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public final ETextCase printLongName(final ITextOutput textOut,
+      final ETextCase textCase) {
+    return textCase.appendWord(
+        "multi-class Matthews Correlation Coefficient (MCC)", textOut); //$NON-NLS-1$
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public final ETextCase printDescription(final ITextOutput textOut,
+      final ETextCase textCase) {
+    ETextCase next;
+
+    next = this.printLongName(textOut, textCase);
+
+    if (textOut instanceof IComplexText) {
+      try (final BibliographyBuilder builder = (((IComplexText) textOut)
+          .cite(ECitationMode.ID, next, ESequenceMode.COMMA))) {
+        builder.add(MCC.MCC_REFERENCE_1);
+        builder.add(MCC.MCC_REFERENCE_2);
+      }
+    }
+
+    return next;
   }
 
   /**

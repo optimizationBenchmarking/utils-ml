@@ -3,6 +3,7 @@ package org.optimizationBenchmarking.utils.ml.classification.impl.abstr;
 import org.optimizationBenchmarking.utils.document.spec.IComplexText;
 import org.optimizationBenchmarking.utils.document.spec.IText;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierParameterRenderer;
+import org.optimizationBenchmarking.utils.text.ETextCase;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
 /** All the samples belong to the same class */
@@ -41,6 +42,13 @@ final class _AllTheSameClass extends _ImmediateClassifier {
     }
   }
 
+  /** {@inheritDoc} */
+  @Override
+  public ETextCase printShortName(final ITextOutput textOut,
+      final ETextCase textCase) {
+    return textCase.appendWords("fixed class", textOut); //$NON-NLS-1$
+  }
+
   /**
    * Render the classifier to a given text output destination.
    *
@@ -51,7 +59,8 @@ final class _AllTheSameClass extends _ImmediateClassifier {
    */
   private final void __render(final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
-    textOutput.append("Always class "); //$NON-NLS-1$
+    textOutput.append("The classifier always returns class "); //$NON-NLS-1$
     renderer.renderShortClassName(this.m_clazz, textOutput);
+    textOutput.append('.');
   }
 }
