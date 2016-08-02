@@ -11,6 +11,9 @@ import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrai
 /** A classifier trainer multiple classifiers. */
 public final class MultiClassifierTrainer extends ClassifierTrainer {
 
+  /** The multi-classifier method name */
+  static final String METHOD = "Multi Classifier Trainer"; //$NON-NLS-1$
+
   /** create */
   MultiClassifierTrainer() {
     super();
@@ -31,6 +34,12 @@ public final class MultiClassifierTrainer extends ClassifierTrainer {
       }
     }
     return new _MultiClassifierTrainingJob(multiBuilder);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public final String toString() {
+    return MultiClassifierTrainer.METHOD;
   }
 
   /** {@inheritDoc} */

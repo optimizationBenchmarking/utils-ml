@@ -6,6 +6,9 @@ import org.optimizationBenchmarking.utils.reflection.ReflectionUtils;
 /** A classifier trainer for Weka's J48 trainers. */
 abstract class _WekaJ48Trainer extends ClassifierTrainer {
 
+  /** The fitting method name */
+  static final String BASE_METHOD = "Weka J48 Trainer"; //$NON-NLS-1$
+
   /** the error */
   private final Throwable m_error;
 
@@ -49,5 +52,11 @@ abstract class _WekaJ48Trainer extends ClassifierTrainer {
           this.m_error);
     }
     super.checkCanUse();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public String toString() {
+    return _WekaJ48Trainer.BASE_METHOD;
   }
 }

@@ -6,6 +6,9 @@ import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrai
 /** A classifier trainer for error-reducing pruned J48 trees in Weka. */
 public final class WekaJ48TrainerPruned extends _WekaJ48Trainer {
 
+  /** The fitting method name */
+  static final String METHOD = _WekaJ48Trainer.BASE_METHOD + " (Pruned)"; //$NON-NLS-1$
+
   /** create */
   WekaJ48TrainerPruned() {
     super();
@@ -17,6 +20,12 @@ public final class WekaJ48TrainerPruned extends _WekaJ48Trainer {
       final ClassifierTrainingJobBuilder builder) {
     return new _WekaJ48ClassifierTrainingJob(builder,
         _WekaJ48ClassifierTrainingJob.PRUNING_REDUCED_ERROR, false);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public final String toString() {
+    return WekaJ48TrainerPruned.METHOD;
   }
 
   /**

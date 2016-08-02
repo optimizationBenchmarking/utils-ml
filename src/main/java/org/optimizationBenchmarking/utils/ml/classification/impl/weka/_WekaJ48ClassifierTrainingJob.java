@@ -95,4 +95,24 @@ class _WekaJ48ClassifierTrainingJob
       final double[] vector, final Instance instance) {
     return new _WekaJ48Classifier(classifier, vector, instance);
   }
+
+  /** {@inheritDoc} */
+  @Override
+  public final String toString() {
+    switch (this.m_pruning) {
+      case PRUNING_ON: {
+        return (this.m_binary ? WekaJ48TrainerPrunedBinary.METHOD
+            : WekaJ48TrainerPruned.METHOD);
+      }
+      case PRUNING_REDUCED_ERROR: {
+        return (this.m_binary
+            ? WekaJ48TrainerReducedErrorPrunedBinary.METHOD
+            : WekaJ48TrainerReducedErrorPruned.METHOD);
+      }
+      default: {
+        return (this.m_binary ? WekaJ48TrainerUnprunedBinary.METHOD
+            : WekaJ48TrainerUnpruned.METHOD);
+      }
+    }
+  }
 }

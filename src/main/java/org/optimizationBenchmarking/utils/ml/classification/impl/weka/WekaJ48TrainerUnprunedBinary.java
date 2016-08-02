@@ -8,6 +8,10 @@ import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrai
  */
 public final class WekaJ48TrainerUnprunedBinary extends _WekaJ48Trainer {
 
+  /** The fitting method name */
+  static final String METHOD = _WekaJ48Trainer.BASE_METHOD
+      + " (Unpruned, Binary)"; //$NON-NLS-1$
+
   /** create */
   WekaJ48TrainerUnprunedBinary() {
     super();
@@ -19,6 +23,12 @@ public final class WekaJ48TrainerUnprunedBinary extends _WekaJ48Trainer {
       final ClassifierTrainingJobBuilder builder) {
     return new _WekaJ48ClassifierTrainingJob(builder,
         _WekaJ48ClassifierTrainingJob.PRUNING_OFF, true);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public final String toString() {
+    return WekaJ48TrainerUnprunedBinary.METHOD;
   }
 
   /**

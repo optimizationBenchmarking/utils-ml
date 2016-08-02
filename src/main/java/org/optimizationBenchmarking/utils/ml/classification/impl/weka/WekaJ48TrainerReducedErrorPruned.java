@@ -7,6 +7,10 @@ import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrai
 public final class WekaJ48TrainerReducedErrorPruned
     extends _WekaJ48Trainer {
 
+  /** The fitting method name */
+  static final String METHOD = _WekaJ48Trainer.BASE_METHOD
+      + " (Reduced-Error Pruned)"; //$NON-NLS-1$
+
   /** create */
   WekaJ48TrainerReducedErrorPruned() {
     super();
@@ -18,6 +22,12 @@ public final class WekaJ48TrainerReducedErrorPruned
       final ClassifierTrainingJobBuilder builder) {
     return new _WekaJ48ClassifierTrainingJob(builder,
         _WekaJ48ClassifierTrainingJob.PRUNING_ON, false);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public final String toString() {
+    return WekaJ48TrainerReducedErrorPruned.METHOD;
   }
 
   /**

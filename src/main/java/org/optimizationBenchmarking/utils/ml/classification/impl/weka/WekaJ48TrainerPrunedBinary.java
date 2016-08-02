@@ -9,6 +9,10 @@ import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrai
  */
 public final class WekaJ48TrainerPrunedBinary extends _WekaJ48Trainer {
 
+  /** The fitting method name */
+  static final String METHOD = _WekaJ48Trainer.BASE_METHOD
+      + " (Pruned, Binary)"; //$NON-NLS-1$
+
   /** create */
   WekaJ48TrainerPrunedBinary() {
     super();
@@ -20,6 +24,12 @@ public final class WekaJ48TrainerPrunedBinary extends _WekaJ48Trainer {
       final ClassifierTrainingJobBuilder builder) {
     return new _WekaJ48ClassifierTrainingJob(builder,
         _WekaJ48ClassifierTrainingJob.PRUNING_REDUCED_ERROR, true);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public final String toString() {
+    return WekaJ48TrainerPrunedBinary.METHOD;
   }
 
   /**

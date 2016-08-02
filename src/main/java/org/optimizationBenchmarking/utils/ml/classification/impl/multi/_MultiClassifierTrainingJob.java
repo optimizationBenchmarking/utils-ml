@@ -288,4 +288,9 @@ final class _MultiClassifierTrainingJob extends ClassifierTrainingJob {
     throw new IllegalStateException(message);
   }
 
+  /** {@inheritDoc} */
+  @Override
+  public final String toString() {
+    return MultiClassifierTrainer.METHOD;
+  }
 }
