@@ -68,7 +68,7 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
     ArrayList<String> values;
     Instances instances;
     String name;
-    int index, needed, index2, max, min, current;
+    int index, index2, max, current;
     double[] vector;
     IClassifier classifier;
     Instance used;
@@ -86,23 +86,34 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
     for (index = 0; index <= this.m_featureTypes.length; index++) {
       name = Integer.toString(index, Character.MAX_RADIX);
 
-      if ((index < this.m_featureTypes.length)
-          && (this.m_featureTypes[index] == EFeatureType.NUMERICAL)) {
-        attributes.add(new Attribute(name));
-        continue;
-      }
-
-      max = Integer.MIN_VALUE;
-      min = Integer.MAX_VALUE;
-
-      // find the number of different values
-      for (final ClassifiedSample sample : this.m_knownSamples) {
-        current = ((int) (sample.featureValues[index]));
-        if (current < min) {
-          min = current;
+      if (index < this.m_featureTypes.length) {
+        // OK, this is a normal attribute
+        if (this.m_featureTypes[index] == EFeatureType.NUMERICAL) {
+          // Numerical attributes just need a name, nothing else
+          attributes.add(new Attribute(name));
+          continue;
         }
-        if (current > max) {
-          max = current;
+
+        // Find the number of different values of the binary or nominal
+        // attribute. Such attributes are index values starting at zero. If
+        // the maximum value is "max", then there are values like 0...max,
+        // i.e., max+1 in total.
+        max = 0;
+        for (final ClassifiedSample sample : this.m_knownSamples) {
+          current = ((int) (sample.featureValues[index]));
+          if (current > max) {
+            max = current;
+          }
+        }
+      } else {
+        // OK, we have class attribute: This is basically a nominal
+        // attribute, with values starting at 0 and going to max,
+        // indicating max+1 classes.
+        max = 0;
+        for (final ClassifiedSample sample : this.m_knownSamples) {
+          if (sample.sampleClass > max) {
+            max = sample.sampleClass;
+          }
         }
       }
 
@@ -110,13 +121,14 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
       if (values == null) {
         values = new ArrayList<>();
       }
-      needed = ((max - min) + 1);
-      for (index2 = values.size(); (index < needed); ++index2) {
+
+      for (index2 = values.size(); index2 <= max; index2++) {
         values.add(Integer.toString(index2, Character.MAX_RADIX));
       }
 
+      ++max;
       attributes.add(new Attribute(name,
-          (values.size() != needed) ? values.subList(0, needed) : values));
+          (values.size() != max) ? values.subList(0, max) : values));
     }
 
     // Now build the instances set.

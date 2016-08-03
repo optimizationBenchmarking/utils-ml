@@ -37,7 +37,7 @@ public class ClassifierQualityMeasure<T>
   @Override
   public ETextCase printShortName(final ITextOutput textOut,
       final ETextCase textCase) {
-    return textCase.appendWord(this.getClass().getSimpleName(), textOut);
+    return textCase.appendWord(this.toString(), textOut);
   }
 
   /** {@inheritDoc} */
@@ -57,6 +57,12 @@ public class ClassifierQualityMeasure<T>
   /** {@inheritDoc} */
   @Override
   public String getPathComponentSuggestion() {
+    return this.getClass().getSimpleName();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public String toString() {
     return this.getClass().getSimpleName();
   }
 }

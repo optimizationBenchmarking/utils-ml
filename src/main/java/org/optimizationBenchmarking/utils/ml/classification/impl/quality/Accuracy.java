@@ -34,4 +34,10 @@ public final class Accuracy extends ClassifierQualityMeasure<Void> {
 
     return (((double) correct) / trainingSamples.length);
   }
+
+  /** {@inheritDoc} */
+  @Override
+  public final String toString() {
+    return "(In)Accuracy"; //$NON-NLS-1$
+  }
 }

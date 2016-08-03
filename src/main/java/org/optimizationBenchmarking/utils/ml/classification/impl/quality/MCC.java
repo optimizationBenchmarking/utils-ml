@@ -94,8 +94,7 @@ public final class MCC extends ConfusionMatrixBasedMeasure {
   @Override
   public final ETextCase printLongName(final ITextOutput textOut,
       final ETextCase textCase) {
-    return textCase.appendWord(
-        "multi-class Matthews Correlation Coefficient (MCC)", textOut); //$NON-NLS-1$
+    return textCase.appendWord(this.toString(), textOut);
   }
 
   /** {@inheritDoc} */
@@ -115,6 +114,12 @@ public final class MCC extends ConfusionMatrixBasedMeasure {
     }
 
     return next;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public final String toString() {
+    return "multi-class Matthews Correlation Coefficient (MCC)"; //$NON-NLS-1$
   }
 
   /**
