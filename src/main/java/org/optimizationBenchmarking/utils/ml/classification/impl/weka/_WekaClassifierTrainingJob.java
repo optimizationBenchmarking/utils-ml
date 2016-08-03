@@ -138,7 +138,7 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
     for (final ClassifiedSample sample : this.m_knownSamples) {
       vector = new double[sample.featureValues.length];
       System.arraycopy(sample.featureValues, 0, vector, 0, vector.length);
-      vector[vector.length] = sample.sampleClass;
+      vector[vector.length - 1] = sample.sampleClass;
       instances.add(new DenseInstance(1d, vector));
     }
 
