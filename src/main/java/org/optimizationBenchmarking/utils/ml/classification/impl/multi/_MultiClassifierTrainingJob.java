@@ -290,7 +290,7 @@ final class _MultiClassifierTrainingJob extends ClassifierTrainingJob {
 
   /** {@inheritDoc} */
   @Override
-  public final String toString() {
+  protected final String getJobName() {
     return MultiClassifierTrainer.METHOD;
   }
 }

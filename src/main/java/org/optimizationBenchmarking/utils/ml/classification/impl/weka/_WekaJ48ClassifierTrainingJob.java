@@ -98,7 +98,7 @@ class _WekaJ48ClassifierTrainingJob
 
   /** {@inheritDoc} */
   @Override
-  public final String toString() {
+  protected final String getJobName() {
     switch (this.m_pruning) {
       case PRUNING_ON: {
         return (this.m_binary ? WekaJ48TrainerPrunedBinary.METHOD

@@ -8,11 +8,14 @@ import org.optimizationBenchmarking.utils.ml.classification.spec.EFeatureType;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierQualityMeasure;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrainingJob;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrainingResult;
+import org.optimizationBenchmarking.utils.text.ITextable;
+import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
+import org.optimizationBenchmarking.utils.text.textOutput.MemoryTextOutput;
 import org.optimizationBenchmarking.utils.tools.impl.abstr.ToolJob;
 
 /** The abstract base class for classifier training jobs */
 public abstract class ClassifierTrainingJob extends ToolJob
-    implements IClassifierTrainingJob {
+    implements IClassifierTrainingJob, ITextable {
 
   /** the classifier quality measure */
   protected IClassifierQualityMeasure<?> m_qualityMeasure;
@@ -46,19 +49,6 @@ public abstract class ClassifierTrainingJob extends ToolJob
    */
   protected abstract IClassifierTrainingResult doCall();
 
-  /**
-   * get the textual representation of this object
-   *
-   * @return the textual representation
-   */
-  private final String __toText() {
-    return " applying " + this.toString() + //$NON-NLS-1$
-        " to a data set of " + this.m_knownSamples.length//$NON-NLS-1$
-        + " samples with " + this.m_featureTypes.length//$NON-NLS-1$
-        + " features and quality measure " + //$NON-NLS-1$
-        this.m_qualityMeasure.toString();
-  }
-
   /** {@iheritDoc} */
   @Override
   public final IClassifierTrainingResult call()
@@ -69,8 +59,8 @@ public abstract class ClassifierTrainingJob extends ToolJob
 
     logger = this.getLogger();
     if ((logger != null) && (logger.isLoggable(Level.FINER))) {
-      use = this.__toText();
-      logger.finer("Beginning to" + use + '.');//$NON-NLS-1$
+      use = this.toString();
+      logger.finer("Beginning to execute " + use + '.');//$NON-NLS-1$
     } else {
       use = null;
     }
@@ -80,18 +70,18 @@ public abstract class ClassifierTrainingJob extends ToolJob
       result = this.doCall();
       if ((logger != null) && (logger.isLoggable(Level.FINER))) {
         if (use == null) {
-          use = this.__toText();
+          use = this.toString();
         }
-        logger.finer("Finished" + use + //$NON-NLS-1$
+        logger.finer("Finished executing " + use + //$NON-NLS-1$
             ", obtained a classifier of type "//$NON-NLS-1$
             + result.getClassifier().toString() + " and quality " + //$NON-NLS-1$
             result.getQuality() + '.');
       }
     } catch (final Throwable error) {
       if (use == null) {
-        use = this.__toText();
+        use = this.toString();
       }
-      throw new IllegalArgumentException("Failed to apply" + use//$NON-NLS-1$
+      throw new IllegalArgumentException("Failed to execute " + use//$NON-NLS-1$
           + '.', error);
     } finally {
       this.m_knownSamples = null;
@@ -102,5 +92,53 @@ public abstract class ClassifierTrainingJob extends ToolJob
     ClassificationTools.checkClassifierTrainingResult(result);
 
     return result;
+  }
+
+  /**
+   * Get the job name
+   *
+   * @return the job name
+   */
+  protected abstract String getJobName();
+
+  /** {@inheritDoc} */
+  @Override
+  public void toText(final ITextOutput textOut) {
+    final ClassifiedSample[] dataSamples;
+    final EFeatureType[] featureTypes;
+    final IClassifierQualityMeasure<?> qualityMeasure;
+
+    textOut.append(this.getJobName());
+
+    dataSamples = this.m_knownSamples;
+    if ((dataSamples != null)) {
+      textOut.append(" applied to a data set of ");//$NON-NLS-1$
+      textOut.append(dataSamples.length);
+      textOut.append(" samples");//$NON-NLS-1$
+    }
+
+    featureTypes = this.m_featureTypes;
+    if (featureTypes != null) {
+      textOut.append((dataSamples != null) ? " with " //$NON-NLS-1$
+          : " to a data set with ");//$NON-NLS-1$
+      textOut.append(featureTypes.length);
+      textOut.append(" features");//$NON-NLS-1$
+    }
+
+    qualityMeasure = this.m_qualityMeasure;
+    if (qualityMeasure != null) {
+      textOut.append(" using quality measure ");//$NON-NLS-1$
+      textOut.append(qualityMeasure);
+    }
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public final String toString() {
+    final MemoryTextOutput memText;
+
+    memText = new MemoryTextOutput();
+    this.toText(memText);
+    return memText.toString();
   }
 }
