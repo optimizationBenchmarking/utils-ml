@@ -13,6 +13,9 @@ import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifier;
  */
 public final class Accuracy extends ClassifierQualityMeasure<Void> {
 
+  /** the globally shared instance of the accuracy measure */
+  public static final Accuracy INSTANCE = new Accuracy();
+
   /** create */
   private Accuracy() {
     super();

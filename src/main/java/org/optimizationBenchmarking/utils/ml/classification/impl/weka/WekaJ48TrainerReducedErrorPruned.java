@@ -21,7 +21,7 @@ public final class WekaJ48TrainerReducedErrorPruned
   protected final IClassifierTrainingJob create(
       final ClassifierTrainingJobBuilder builder) {
     return new _WekaJ48ClassifierTrainingJob(builder,
-        _WekaJ48ClassifierTrainingJob.PRUNING_ON, false);
+        _WekaJ48ClassifierTrainingJob.PRUNING_REDUCED_ERROR, false);
   }
 
   /** {@inheritDoc} */

@@ -19,7 +19,7 @@ public final class WekaJ48TrainerPruned extends _WekaJ48Trainer {
   protected final IClassifierTrainingJob create(
       final ClassifierTrainingJobBuilder builder) {
     return new _WekaJ48ClassifierTrainingJob(builder,
-        _WekaJ48ClassifierTrainingJob.PRUNING_REDUCED_ERROR, false);
+        _WekaJ48ClassifierTrainingJob.PRUNING_ON, false);
   }
 
   /** {@inheritDoc} */

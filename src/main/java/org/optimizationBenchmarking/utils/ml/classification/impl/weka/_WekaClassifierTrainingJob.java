@@ -134,10 +134,12 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
     // Now build the instances set.
     instances = new Instances(name, attributes,
         this.m_knownSamples.length);
+    instances.setClassIndex(this.m_featureTypes.length);
     vector = null;
     for (final ClassifiedSample sample : this.m_knownSamples) {
-      vector = new double[sample.featureValues.length];
-      System.arraycopy(sample.featureValues, 0, vector, 0, vector.length);
+      vector = new double[sample.featureValues.length + 1];
+      System.arraycopy(sample.featureValues, 0, vector, 0,
+          sample.featureValues.length);
       vector[vector.length - 1] = sample.sampleClass;
       instances.add(new DenseInstance(1d, vector));
     }
@@ -146,7 +148,6 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
     wekaClassifier = this._train(instances);
 
     used = instances.remove(instances.size() - 1);
-    instances.classAttribute();
     instances.add(used.copy(vector));
     used = instances.get(0);
     classifier = this._createClassifier(wekaClassifier, vector, used);
