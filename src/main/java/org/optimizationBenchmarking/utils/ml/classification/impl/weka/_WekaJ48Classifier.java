@@ -15,7 +15,6 @@ import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
 import weka.classifiers.trees.J48;
 import weka.classifiers.trees.j48.WekaClassifierTreeAccessor;
-import weka.core.Instance;
 
 /**
  * The wrapper for Weka's {@link weka.classifiers.trees.J48} classifiers
@@ -43,14 +42,12 @@ final class _WekaJ48Classifier extends _WekaClassifier<J48> {
    *
    * @param classifier
    *          the classifier
-   * @param vector
-   *          the attribute vector
    * @param instance
    *          to use
    */
-  _WekaJ48Classifier(final J48 classifier, final double[] vector,
-      final Instance instance) {
-    super(classifier, vector, instance);
+  _WekaJ48Classifier(final J48 classifier,
+      final _InternalInstance instance) {
+    super(classifier, instance);
   }
 
   /** {@inheritDoc} */

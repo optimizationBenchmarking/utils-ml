@@ -13,8 +13,6 @@ import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrai
 
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
-import weka.core.DenseInstance;
-import weka.core.Instance;
 import weka.core.Instances;
 
 /**
@@ -50,14 +48,12 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
    *
    * @param classifier
    *          the classifier
-   * @param vector
-   *          the attribute vector
    * @param instance
    *          to use
    * @return the weka classifier wrapper
    */
   abstract _WekaClassifier<CT> _createClassifier(final CT classifier,
-      final double[] vector, final Instance instance);
+      final _InternalInstance instance);
 
   /** {@iheritDoc} */
   @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -71,7 +67,6 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
     int index, index2, max, current;
     double[] vector;
     IClassifier classifier;
-    Instance used;
     Object token;
     ClassifierTrainingResult result;
     double quality;
@@ -141,16 +136,17 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
       System.arraycopy(sample.featureValues, 0, vector, 0,
           sample.featureValues.length);
       vector[vector.length - 1] = sample.sampleClass;
-      instances.add(new DenseInstance(1d, vector));
+      instances.add(new _InternalInstance(vector));
     }
 
     // Having built all the data, we can train the classifier.
     wekaClassifier = this._train(instances);
+    instances.clear();
 
-    used = instances.remove(instances.size() - 1);
-    instances.add(used.copy(vector));
-    used = instances.get(0);
-    classifier = this._createClassifier(wekaClassifier, vector, used);
+    instances.add(
+        new _InternalInstance(new double[this.m_featureTypes.length]));
+    classifier = this._createClassifier(wekaClassifier,
+        ((_InternalInstance) (instances.get(0))));
 
     // Evaluate and return the classifier.
 

@@ -63,7 +63,7 @@ public final class WekaClassifierTreeAccessor {
         try (final IText codeBody = code.body()) {
           for (final String line : new LineIterator(src, false, false)) {
             if (notFirst) {
-              notFirst = true;
+              notFirst = false;
             } else {
               codeBody.appendLineBreak();
             }

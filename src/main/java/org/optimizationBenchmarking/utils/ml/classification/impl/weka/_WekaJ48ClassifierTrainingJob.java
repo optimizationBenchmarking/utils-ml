@@ -3,7 +3,6 @@ package org.optimizationBenchmarking.utils.ml.classification.impl.weka;
 import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.ClassifierTrainingJobBuilder;
 
 import weka.classifiers.trees.J48;
-import weka.core.Instance;
 import weka.core.Instances;
 
 /** a classifier training job wrapping around Weka */
@@ -92,8 +91,8 @@ class _WekaJ48ClassifierTrainingJob
   /** {@inheritDoc} */
   @Override
   final _WekaClassifier<J48> _createClassifier(final J48 classifier,
-      final double[] vector, final Instance instance) {
-    return new _WekaJ48Classifier(classifier, vector, instance);
+      final _InternalInstance instance) {
+    return new _WekaJ48Classifier(classifier, instance);
   }
 
   /** {@inheritDoc} */

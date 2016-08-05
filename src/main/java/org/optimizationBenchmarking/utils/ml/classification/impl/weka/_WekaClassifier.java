@@ -11,7 +11,6 @@ import org.optimizationBenchmarking.utils.bibliography.data.BibOrganization;
 import org.optimizationBenchmarking.utils.bibliography.data.EBibMonth;
 
 import weka.classifiers.Classifier;
-import weka.core.Instance;
 
 /**
  * The base class for wrapping Weka classifiers
@@ -47,44 +46,35 @@ abstract class _WekaClassifier<CT extends Classifier> extends
   /** the internal classifier */
   final CT m_classifier;
 
-  /** the vector to use */
-  private final double[] m_vector;
-
   /** the instance to use */
-  private final Instance m_instance;
+  private final _InternalInstance m_instance;
 
   /**
    * Create the weka classifier wrapper
    *
    * @param classifier
    *          the classifier
-   * @param vector
-   *          the attribute vector
    * @param instance
    *          to use
    */
-  _WekaClassifier(final CT classifier, final double[] vector,
-      final Instance instance) {
+  _WekaClassifier(final CT classifier, final _InternalInstance instance) {
     super();
     if (classifier == null) {
       throw new IllegalArgumentException("Classifier must not be null."); //$NON-NLS-1$
-    }
-    if (vector == null) {
-      throw new IllegalArgumentException("Raw vector must not be null."); //$NON-NLS-1$
     }
     if (instance == null) {
       throw new IllegalArgumentException("Instance must not be null."); //$NON-NLS-1$
     }
 
     this.m_classifier = classifier;
-    this.m_vector = vector;
     this.m_instance = instance;
   }
 
   /** {@inheritDoc} */
   @Override
   public final int classify(final double[] features) {
-    System.arraycopy(features, 0, this.m_vector, 0, features.length);
+    this.m_instance._assign(features);
+
     try {
       return ((int) (0.5d
           + this.m_classifier.classifyInstance(this.m_instance)));
