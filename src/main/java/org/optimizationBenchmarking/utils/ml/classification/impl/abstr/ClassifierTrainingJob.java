@@ -49,7 +49,7 @@ public abstract class ClassifierTrainingJob extends ToolJob
    */
   protected abstract IClassifierTrainingResult doCall();
 
-  /** {@iheritDoc} */
+  /** {@inheritDoc} */
   @Override
   public final IClassifierTrainingResult call()
       throws IllegalArgumentException {

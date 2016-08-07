@@ -71,8 +71,35 @@ final class _WekaJ48Classifier extends _WekaClassifier<J48> {
    */
   private final ETextCase __printDescription(final ITextOutput textOut,
       final ETextCase textCase, final boolean addInfos) {
+    return _WekaJ48Classifier._printDescription(textOut, textCase,
+        (this.m_classifier.getUnpruned()
+            ? _WekaJ48ClassifierTrainingJob.PRUNING_OFF
+            : (this.m_classifier.getReducedErrorPruning()
+                ? _WekaJ48ClassifierTrainingJob.PRUNING_REDUCED_ERROR
+                : _WekaJ48ClassifierTrainingJob.PRUNING_ON)),
+        this.m_classifier.getBinarySplits(), addInfos);
+  }
+
+  /**
+   * print the description
+   *
+   * @param textOut
+   *          the text output device
+   * @param textCase
+   *          the text case
+   * @param pruningMode
+   *          the pruning mode
+   * @param isBinary
+   *          is this classifier binary
+   * @param addInfos
+   *          can we add infos and potentially insert citations?
+   * @return the next case
+   */
+  static final ETextCase _printDescription(final ITextOutput textOut,
+      final ETextCase textCase, final int pruningMode,
+      final boolean isBinary, final boolean addInfos) {
     ETextCase nextCase;
-    if (this.m_classifier.getUnpruned()) {
+    if (pruningMode == _WekaJ48ClassifierTrainingJob.PRUNING_OFF) {
       nextCase = textCase.appendWord("unpruned", textOut); //$NON-NLS-1$
     } else {
       nextCase = textCase;
@@ -105,15 +132,15 @@ final class _WekaJ48Classifier extends _WekaClassifier<J48> {
       textOut.append("3.8)");//$NON-NLS-1$
     }
 
-    if (this.m_classifier.getUnpruned()) {
+    if (pruningMode == _WekaJ48ClassifierTrainingJob.PRUNING_OFF) {
       textOut.append(" with binary splits");//$NON-NLS-1$
     } else {
       textOut.append(" with ");//$NON-NLS-1$
-      if (this.m_classifier.getReducedErrorPruning()) {
+      if (pruningMode == _WekaJ48ClassifierTrainingJob.PRUNING_REDUCED_ERROR) {
         textOut.append(" reduced-error");//$NON-NLS-1$
       }
       textOut.append(" pruning");//$NON-NLS-1$
-      if (this.m_classifier.getBinarySplits()) {
+      if (isBinary) {
         textOut.append(" and binary splits");//$NON-NLS-1$
       }
     }

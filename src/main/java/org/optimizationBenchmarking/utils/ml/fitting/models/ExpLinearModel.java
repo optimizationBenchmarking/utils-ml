@@ -217,6 +217,7 @@ public class ExpLinearModel extends BasicModel {
    * @param x0
    *          the {@code x}-coordinate of the first point
    * @param y0
+   *          the {@code y}-coordinate of the first point
    * @param b
    *          the {@code b} value
    * @param c
@@ -234,6 +235,7 @@ public class ExpLinearModel extends BasicModel {
    * @param x0
    *          the {@code x}-coordinate of the first point
    * @param y0
+   *          the {@code y}-coordinate of the first point
    * @param a
    *          the {@code a} value
    * @param c
@@ -251,6 +253,7 @@ public class ExpLinearModel extends BasicModel {
    * @param x0
    *          the {@code x}-coordinate of the first point
    * @param y0
+   *          the {@code y}-coordinate of the first point
    * @param a
    *          the {@code a} value
    * @param b

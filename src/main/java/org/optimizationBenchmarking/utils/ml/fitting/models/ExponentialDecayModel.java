@@ -31,8 +31,6 @@ import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
  * <li>{@code 1.447E-5 +  2.017 ∗ exp(-1.642 ∗ x^ 0.265)}</li>
  * <li>{@code 0.231    + -0.231 ∗ exp(-43.66 ∗ x^-1.685)}</li>
  * </ul>
- * <p>
- * </p>
  * <h2>Derivatives</h2>
  * <p>
  * The derivatives have been obtained with http://www.numberempire.com/.

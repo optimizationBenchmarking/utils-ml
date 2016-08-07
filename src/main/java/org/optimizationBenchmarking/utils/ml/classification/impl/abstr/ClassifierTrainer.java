@@ -4,6 +4,8 @@ import org.optimizationBenchmarking.utils.ml.classification.spec.ClassifiedSampl
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrainer;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrainingJob;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrainingJobBuilder;
+import org.optimizationBenchmarking.utils.text.ETextCase;
+import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 import org.optimizationBenchmarking.utils.tools.impl.abstr.Tool;
 
 /** A classifier trainer. */
@@ -52,5 +54,33 @@ public abstract class ClassifierTrainer extends Tool
     }
 
     return this.create(builder);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public ETextCase printShortName(final ITextOutput textOut,
+      final ETextCase textCase) {
+    return textCase.appendWords(this.toString(), textOut);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public ETextCase printLongName(final ITextOutput textOut,
+      final ETextCase textCase) {
+    return this.printLongName(textOut, textCase);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public ETextCase printDescription(final ITextOutput textOut,
+      final ETextCase textCase) {
+    this.toText(textOut);
+    return textCase.nextCase();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public String getPathComponentSuggestion() {
+    return this.getClass().getSimpleName();
   }
 }

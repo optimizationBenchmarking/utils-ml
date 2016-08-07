@@ -2,6 +2,8 @@ package org.optimizationBenchmarking.utils.ml.classification.impl.weka;
 
 import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.ClassifierTrainingJobBuilder;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrainingJob;
+import org.optimizationBenchmarking.utils.text.ETextCase;
+import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
 /** A classifier trainer for error-reducing pruned J48 trees in Weka. */
 public final class WekaJ48TrainerPruned extends _WekaJ48Trainer {
@@ -20,6 +22,14 @@ public final class WekaJ48TrainerPruned extends _WekaJ48Trainer {
       final ClassifierTrainingJobBuilder builder) {
     return new _WekaJ48ClassifierTrainingJob(builder,
         _WekaJ48ClassifierTrainingJob.PRUNING_ON, false);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public ETextCase printDescription(final ITextOutput textOut,
+      final ETextCase textCase) {
+    return _WekaJ48Classifier._printDescription(textOut, textCase,
+        _WekaJ48ClassifierTrainingJob.PRUNING_ON, false, true);
   }
 
   /** {@inheritDoc} */

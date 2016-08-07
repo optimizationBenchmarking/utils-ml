@@ -55,7 +55,7 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
   abstract _WekaClassifier<CT> _createClassifier(final CT classifier,
       final _InternalInstance instance);
 
-  /** {@iheritDoc} */
+  /** {@inheritDoc} */
   @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
   protected final IClassifierTrainingResult doCall()
