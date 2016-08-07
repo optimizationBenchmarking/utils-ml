@@ -2,6 +2,8 @@ package org.optimizationBenchmarking.utils.ml.clustering.impl.abstr;
 
 import org.optimizationBenchmarking.utils.ml.clustering.spec.IClusterer;
 import org.optimizationBenchmarking.utils.ml.clustering.spec.IClusteringJob;
+import org.optimizationBenchmarking.utils.text.ETextCase;
+import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 import org.optimizationBenchmarking.utils.tools.impl.abstr.Tool;
 
 /**
@@ -45,5 +47,32 @@ public abstract class Clusterer<R extends ClusteringJobBuilder<?>>
       return job;
     }
     return this.create((R) builder);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public ETextCase printShortName(final ITextOutput textOut,
+      final ETextCase textCase) {
+    return textCase.appendWords(this.toString(), textOut);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public ETextCase printLongName(final ITextOutput textOut,
+      final ETextCase textCase) {
+    return this.printShortName(textOut, textCase);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public ETextCase printDescription(final ITextOutput textOut,
+      final ETextCase textCase) {
+    return this.printLongName(textOut, textCase);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public String getPathComponentSuggestion() {
+    return this.getClass().getSimpleName();
   }
 }

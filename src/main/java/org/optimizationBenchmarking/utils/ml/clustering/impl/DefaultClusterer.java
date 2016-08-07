@@ -10,6 +10,7 @@ import org.optimizationBenchmarking.utils.ml.clustering.spec.IDataClusterer;
 import org.optimizationBenchmarking.utils.ml.clustering.spec.IDataClusteringJobBuilder;
 import org.optimizationBenchmarking.utils.ml.clustering.spec.IDistanceClusterer;
 import org.optimizationBenchmarking.utils.ml.clustering.spec.IDistanceClusteringJobBuilder;
+import org.optimizationBenchmarking.utils.text.ETextCase;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
 /** The default clusterers. */
@@ -106,8 +107,9 @@ public final class DefaultClusterer {
       textOut.append(this.toString());
     }
 
+    /** {@inheritDoc} */
     @Override
-    public IDataClusteringJobBuilder use() {
+    public final IDataClusteringJobBuilder use() {
       throw __DefaultDataClusterer.__noDataInstance();
     }
 
@@ -119,6 +121,33 @@ public final class DefaultClusterer {
     private static final IllegalStateException __noDataInstance() {
       throw new IllegalStateException(
           "No useable data clusterer detected."); //$NON-NLS-1$
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public final ETextCase printShortName(final ITextOutput textOut,
+        final ETextCase textCase) {
+      return textCase.appendWords(this.toString(), textOut);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public final ETextCase printLongName(final ITextOutput textOut,
+        final ETextCase textCase) {
+      return this.printShortName(textOut, textCase);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public final ETextCase printDescription(final ITextOutput textOut,
+        final ETextCase textCase) {
+      return this.printLongName(textOut, textCase);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public final String getPathComponentSuggestion() {
+      return this.getClass().getSimpleName();
     }
   }
 
@@ -196,8 +225,9 @@ public final class DefaultClusterer {
       textOut.append(this.toString());
     }
 
+    /** {@inheritDoc} */
     @Override
-    public IDistanceClusteringJobBuilder use() {
+    public final IDistanceClusteringJobBuilder use() {
       throw __DefaultDistanceClusterer.__noDistanceInstance();
     }
 
@@ -209,6 +239,33 @@ public final class DefaultClusterer {
     private static final IllegalStateException __noDistanceInstance() {
       throw new IllegalStateException(
           "No useable distance clusterer detected."); //$NON-NLS-1$
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public final ETextCase printShortName(final ITextOutput textOut,
+        final ETextCase textCase) {
+      return textCase.appendWords(this.toString(), textOut);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public final ETextCase printLongName(final ITextOutput textOut,
+        final ETextCase textCase) {
+      return this.printShortName(textOut, textCase);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public final ETextCase printDescription(final ITextOutput textOut,
+        final ETextCase textCase) {
+      return this.printLongName(textOut, textCase);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public final String getPathComponentSuggestion() {
+      return this.getClass().getSimpleName();
     }
   }
 
