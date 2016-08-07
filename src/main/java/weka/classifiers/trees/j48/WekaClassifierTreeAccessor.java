@@ -82,7 +82,7 @@ public final class WekaClassifierTreeAccessor {
       if (tree.m_sons[index].m_isLeaf) {
         textOutput.append(" class = "); //$NON-NLS-1$
         renderer.renderShortClassName(
-            tree.m_localModel.distribution().maxClass(0), textOutput);
+            tree.m_localModel.distribution().maxClass(index), textOutput);
       } else {
         WekaClassifierTreeAccessor.__renderClassifierTree(
             tree.m_sons[index], renderer, textOutput, (depth + 2), false);
