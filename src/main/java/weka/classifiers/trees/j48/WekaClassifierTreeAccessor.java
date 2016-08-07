@@ -74,9 +74,9 @@ public final class WekaClassifierTreeAccessor {
 
       textOutput.append(((index <= 0) ? "if " : ((index < end) //$NON-NLS-1$
           ? "else if " : "else ")));//$NON-NLS-1$//$NON-NLS-2$
-      WekaClassifierTreeAccessor.__renderExpression(tree.m_localModel,
-          index, tree.m_train, renderer, textOutput);
       if (index < end) {
+        WekaClassifierTreeAccessor.__renderExpression(tree.m_localModel,
+            index, tree.m_train, renderer, textOutput);
         textOutput.append(" then");//$NON-NLS-1$
       }
       if (tree.m_sons[index].m_isLeaf) {
