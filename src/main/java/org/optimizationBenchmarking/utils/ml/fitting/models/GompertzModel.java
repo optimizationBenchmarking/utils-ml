@@ -306,7 +306,7 @@ public final class GompertzModel extends _ModelBase {
    *          the value of {@code c}
    * @param d
    *          the value of {@code d}
-   * @return
+   * @return {@code a}
    */
   static final double _a_x1y1x2y2cd(final double x1, final double y1,
       final double x2, final double y2, final double c, final double d) {
@@ -337,7 +337,7 @@ public final class GompertzModel extends _ModelBase {
    *          the value of {@code c}
    * @param d
    *          the value of {@code d}
-   * @return
+   * @return {@code b}
    */
   static final double _b_x1y1x2y2cd(final double x1, final double y1,
       final double x2, final double y2, final double c, final double d) {
@@ -360,7 +360,7 @@ public final class GompertzModel extends _ModelBase {
    *          the value of {@code c}
    * @param d
    *          the value of {@code d}
-   * @return
+   * @return {@code a}
    */
   static final double _a_x1y1bcd(final double x1, final double y1,
       final double b, final double c, final double d) {
@@ -382,7 +382,7 @@ public final class GompertzModel extends _ModelBase {
    *          the value of {@code c}
    * @param d
    *          the value of {@code d}
-   * @return
+   * @return {@code b}
    */
   static final double _b_x1y1acd(final double x1, final double y1,
       final double a, final double c, final double d) {
@@ -404,7 +404,7 @@ public final class GompertzModel extends _ModelBase {
    *          the value of {@code b}
    * @param d
    *          the value of {@code d}
-   * @return
+   * @return {@code c}
    */
   static final double _c_x1y1abd(final double x1, final double y1,
       final double a, final double b, final double d) {
@@ -429,7 +429,7 @@ public final class GompertzModel extends _ModelBase {
    *          the value of {@code b}
    * @param c
    *          the value of {@code c}
-   * @return
+   * @return {@code d}
    */
   static final double _d_x1y1abc(final double x1, final double y1,
       final double a, final double b, final double c) {
