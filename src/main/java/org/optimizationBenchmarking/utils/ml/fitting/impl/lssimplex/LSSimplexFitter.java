@@ -3,6 +3,8 @@ package org.optimizationBenchmarking.utils.ml.fitting.impl.lssimplex;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.abstr.FittingJob;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.abstr.FittingJobBuilder;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.abstr.OptimizationBasedFitter;
+import org.optimizationBenchmarking.utils.text.ETextCase;
+import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
 /**
  * <p>
@@ -38,6 +40,24 @@ public final class LSSimplexFitter extends OptimizationBasedFitter {
    */
   public static final LSSimplexFitter getInstance() {
     return _DECurveFitterHolder.INSTANCE;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public final ETextCase printLongName(final ITextOutput textOut,
+      final ETextCase textCase) {
+    ETextCase next;
+
+    next = OptimizationBasedFitter.printLevenbergMarcquardt(textCase,
+        textOut, true);
+    textOut.append('/');
+    next = OptimizationBasedFitter.printGaussNewton(next, textOut, false);
+    textOut.append('-');
+    next = OptimizationBasedFitter.printNelderMead(next, textOut);
+    textOut.append('-');
+    next = OptimizationBasedFitter.printBOBYQA(next, textOut, true);
+    textOut.append(' ');
+    return next.appendWord("hybrid", textOut); //$NON-NLS-1$
   }
 
   /** {@inheritDoc} */

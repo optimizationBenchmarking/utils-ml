@@ -48,6 +48,17 @@ abstract class _ModelBase extends BasicModel {
   }
 
   /**
+   * compute the natural logarithm
+   *
+   * @param a
+   *          the number
+   * @return the result
+   */
+  static final double _ln(final double a) {
+    return Ln.INSTANCE.computeAsDouble(a);
+  }
+
+  /**
    * compute the power
    *
    * @param a

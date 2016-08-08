@@ -3,6 +3,8 @@ package org.optimizationBenchmarking.utils.ml.fitting.impl.cmaesls;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.abstr.FittingJob;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.abstr.FittingJobBuilder;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.abstr.OptimizationBasedFitter;
+import org.optimizationBenchmarking.utils.text.ETextCase;
+import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
 /**
  * This curve fitter uses a combination of least-squares solvers and CMA-ES
@@ -31,6 +33,20 @@ public final class CMAESLSFitter extends OptimizationBasedFitter {
    */
   public static final CMAESLSFitter getInstance() {
     return _DECurveFitterHolder.INSTANCE;
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public final ETextCase printLongName(final ITextOutput textOut,
+      final ETextCase textCase) {
+    ETextCase next;
+
+    next = OptimizationBasedFitter.printCMAES(textCase, textOut, true);
+    textOut.append('-');
+    next = OptimizationBasedFitter.printLevenbergMarcquardt(next, textOut,
+        false);
+    textOut.append(' ');
+    return next.appendWord("hybrid", textOut); //$NON-NLS-1$
   }
 
   /** {@inheritDoc} */

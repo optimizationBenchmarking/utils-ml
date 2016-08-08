@@ -67,6 +67,12 @@ public class ExpLinearModelOverLogX extends BasicModel {
 
   /** {@inheritDoc} */
   @Override
+  public final String toString() {
+    return "exp-linear model over logarithmic inputs"; //$NON-NLS-1$
+  }
+
+  /** {@inheritDoc} */
+  @Override
   public final double value(final double x, final double[] parameters) {
     return (parameters[0] + Math.exp(
         parameters[1] + (parameters[2] * Math.log(parameters[3] + x))));

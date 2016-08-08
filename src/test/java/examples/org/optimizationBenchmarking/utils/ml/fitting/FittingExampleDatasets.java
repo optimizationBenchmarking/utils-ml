@@ -8,6 +8,7 @@ import org.optimizationBenchmarking.utils.math.matrix.AbstractMatrix;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
 import org.optimizationBenchmarking.utils.math.matrix.impl.MatrixBuilder;
 import org.optimizationBenchmarking.utils.ml.fitting.models.ExponentialDecayModel;
+import org.optimizationBenchmarking.utils.ml.fitting.models.GompertzModel;
 import org.optimizationBenchmarking.utils.ml.fitting.models.LogisticModelWithOffsetOverLogX;
 import org.optimizationBenchmarking.utils.ml.fitting.models.QuadraticModel;
 import org.optimizationBenchmarking.utils.text.TextUtils;
@@ -21,10 +22,14 @@ public final class FittingExampleDatasets {
   public static final FittingExampleDataset A_1FlipHC_uf020_01_FOL;
   /** the example: fes/o decay model */
   public static final FittingExampleDataset A_1FlipHC_uf020_01_FOE;
+  /** the example: fes/o gompertz model */
+  public static final FittingExampleDataset A_1FlipHC_uf020_01_FOG;
   /** the example: t/o logistics model */
   public static final FittingExampleDataset A_1FlipHC_uf020_01_TOL;
   /** the example: t/o decay model */
   public static final FittingExampleDataset A_1FlipHC_uf020_01_TOE;
+  /** the example: t/o gompertz model */
+  public static final FittingExampleDataset A_1FlipHC_uf020_01_TOG;
   /** the example: t/fes quadratic model */
   public static final FittingExampleDataset A_1FlipHC_uf020_01_FTQ;
 
@@ -32,10 +37,14 @@ public final class FittingExampleDatasets {
   public static final FittingExampleDataset B_mFlipHC_uf100_01_FOL;
   /** the example: fes/o decay model */
   public static final FittingExampleDataset B_mFlipHC_uf100_01_FOE;
+  /** the example: fes/o gompertz model */
+  public static final FittingExampleDataset B_mFlipHC_uf100_01_FOG;
   /** the example: t/o logistics model */
   public static final FittingExampleDataset B_mFlipHC_uf100_01_TOL;
   /** the example: t/o decay model */
   public static final FittingExampleDataset B_mFlipHC_uf100_01_TOE;
+  /** the example: t/o gompertz model */
+  public static final FittingExampleDataset B_mFlipHC_uf100_01_TOG;
   /** the example: t/fes quadratic model */
   public static final FittingExampleDataset B_mFlipHC_uf100_01_FTQ;
 
@@ -43,10 +52,14 @@ public final class FittingExampleDatasets {
   public static final FittingExampleDataset C_2FlipHCrs_uf250_01_FOL;
   /** the example: fes/o decay model */
   public static final FittingExampleDataset C_2FlipHCrs_uf250_01_FOE;
+  /** the example: fes/o gompertz model */
+  public static final FittingExampleDataset C_2FlipHCrs_uf250_01_FOG;
   /** the example: t/o logistics model */
   public static final FittingExampleDataset C_2FlipHCrs_uf250_01_TOL;
   /** the example: t/o decay model */
   public static final FittingExampleDataset C_2FlipHCrs_uf250_01_TOE;
+  /** the example: t/o gompertz model */
+  public static final FittingExampleDataset C_2FlipHCrs_uf250_01_TOG;
   /** the example: t/fes quadratic model */
   public static final FittingExampleDataset C_2FlipHCrs_uf250_01_FTQ;
 
@@ -54,10 +67,14 @@ public final class FittingExampleDatasets {
   public static final FittingExampleDataset D_2FlipHC_uf250_01_FOL;
   /** the example: fes/o decay model */
   public static final FittingExampleDataset D_2FlipHC_uf250_01_FOE;
+  /** the example: fes/o gompertz model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_01_FOG;
   /** the example: t/o logistics model */
   public static final FittingExampleDataset D_2FlipHC_uf250_01_TOL;
   /** the example: t/o decay model */
   public static final FittingExampleDataset D_2FlipHC_uf250_01_TOE;
+  /** the example: t/o gompertz model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_01_TOG;
   /** the example: t/fes quadratic model */
   public static final FittingExampleDataset D_2FlipHC_uf250_01_FTQ;
 
@@ -65,10 +82,14 @@ public final class FittingExampleDatasets {
   public static final FittingExampleDataset D_2FlipHC_uf250_02_FOL;
   /** the example: fes/o decay model */
   public static final FittingExampleDataset D_2FlipHC_uf250_02_FOE;
+  /** the example: fes/o gompertz model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_02_FOG;
   /** the example: t/o logistics model */
   public static final FittingExampleDataset D_2FlipHC_uf250_02_TOL;
   /** the example: t/o decay model */
   public static final FittingExampleDataset D_2FlipHC_uf250_02_TOE;
+  /** the example: t/o gompertz model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_02_TOG;
   /** the example: t/fes quadratic model */
   public static final FittingExampleDataset D_2FlipHC_uf250_02_FTQ;
 
@@ -76,10 +97,14 @@ public final class FittingExampleDatasets {
   public static final FittingExampleDataset D_2FlipHC_uf250_03_FOL;
   /** the example: fes/o decay model */
   public static final FittingExampleDataset D_2FlipHC_uf250_03_FOE;
+  /** the example: fes/o gompertz model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_03_FOG;
   /** the example: t/o logistics model */
   public static final FittingExampleDataset D_2FlipHC_uf250_03_TOL;
   /** the example: t/o decay model */
   public static final FittingExampleDataset D_2FlipHC_uf250_03_TOE;
+  /** the example: t/o gompertz model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_03_TOG;
   /** the example: t/fes quadratic model */
   public static final FittingExampleDataset D_2FlipHC_uf250_03_FTQ;
 
@@ -87,10 +112,14 @@ public final class FittingExampleDatasets {
   public static final FittingExampleDataset D_2FlipHC_uf250_04_FOL;
   /** the example: fes/o decay model */
   public static final FittingExampleDataset D_2FlipHC_uf250_04_FOE;
+  /** the example: fes/o gompertz model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_04_FOG;
   /** the example: t/o logistics model */
   public static final FittingExampleDataset D_2FlipHC_uf250_04_TOL;
   /** the example: t/o decay model */
   public static final FittingExampleDataset D_2FlipHC_uf250_04_TOE;
+  /** the example: t/o gompertz model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_04_TOG;
   /** the example: t/fes quadratic model */
   public static final FittingExampleDataset D_2FlipHC_uf250_04_FTQ;
 
@@ -98,10 +127,14 @@ public final class FittingExampleDatasets {
   public static final FittingExampleDataset D_2FlipHC_uf250_05_FOL;
   /** the example: fes/o decay model */
   public static final FittingExampleDataset D_2FlipHC_uf250_05_FOE;
+  /** the example: fes/o gompertz model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_05_FOG;
   /** the example: t/o logistics model */
   public static final FittingExampleDataset D_2FlipHC_uf250_05_TOL;
   /** the example: t/o decay model */
   public static final FittingExampleDataset D_2FlipHC_uf250_05_TOE;
+  /** the example: t/o gompertz model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_05_TOG;
   /** the example: t/fes quadratic model */
   public static final FittingExampleDataset D_2FlipHC_uf250_05_FTQ;
 
@@ -109,10 +142,14 @@ public final class FittingExampleDatasets {
   public static final FittingExampleDataset D_2FlipHC_uf250_06_FOL;
   /** the example: fes/o decay model */
   public static final FittingExampleDataset D_2FlipHC_uf250_06_FOE;
+  /** the example: fes/o gompertz model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_06_FOG;
   /** the example: t/o logistics model */
   public static final FittingExampleDataset D_2FlipHC_uf250_06_TOL;
   /** the example: t/o decay model */
   public static final FittingExampleDataset D_2FlipHC_uf250_06_TOE;
+  /** the example: t/o gompertz model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_06_TOG;
   /** the example: t/fes quadratic model */
   public static final FittingExampleDataset D_2FlipHC_uf250_06_FTQ;
 
@@ -120,10 +157,14 @@ public final class FittingExampleDatasets {
   public static final FittingExampleDataset D_2FlipHC_uf250_07_FOL;
   /** the example: fes/o decay model */
   public static final FittingExampleDataset D_2FlipHC_uf250_07_FOE;
+  /** the example: fes/o gompertz model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_07_FOG;
   /** the example: t/o logistics model */
   public static final FittingExampleDataset D_2FlipHC_uf250_07_TOL;
   /** the example: t/o decay model */
   public static final FittingExampleDataset D_2FlipHC_uf250_07_TOE;
+  /** the example: t/o gompertz model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_07_TOG;
   /** the example: t/fes quadratic model */
   public static final FittingExampleDataset D_2FlipHC_uf250_07_FTQ;
 
@@ -131,10 +172,14 @@ public final class FittingExampleDatasets {
   public static final FittingExampleDataset D_2FlipHC_uf250_08_FOL;
   /** the example: fes/o decay model */
   public static final FittingExampleDataset D_2FlipHC_uf250_08_FOE;
+  /** the example: fes/o gompertz model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_08_FOG;
   /** the example: t/o logistics model */
   public static final FittingExampleDataset D_2FlipHC_uf250_08_TOL;
   /** the example: t/o decay model */
   public static final FittingExampleDataset D_2FlipHC_uf250_08_TOE;
+  /** the example: t/o gompertz model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_08_TOG;
   /** the example: t/fes quadratic model */
   public static final FittingExampleDataset D_2FlipHC_uf250_08_FTQ;
 
@@ -142,10 +187,14 @@ public final class FittingExampleDatasets {
   public static final FittingExampleDataset D_2FlipHC_uf250_09_FOL;
   /** the example: fes/o decay model */
   public static final FittingExampleDataset D_2FlipHC_uf250_09_FOE;
+  /** the example: fes/o gompertz model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_09_FOG;
   /** the example: t/o logistics model */
   public static final FittingExampleDataset D_2FlipHC_uf250_09_TOL;
   /** the example: t/o decay model */
   public static final FittingExampleDataset D_2FlipHC_uf250_09_TOE;
+  /** the example: t/o gompertz model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_09_TOG;
   /** the example: t/fes quadratic model */
   public static final FittingExampleDataset D_2FlipHC_uf250_09_FTQ;
 
@@ -153,10 +202,14 @@ public final class FittingExampleDatasets {
   public static final FittingExampleDataset D_2FlipHC_uf250_10_FOL;
   /** the example: fes/o decay model */
   public static final FittingExampleDataset D_2FlipHC_uf250_10_FOE;
+  /** the example: fes/o gompertz model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_10_FOG;
   /** the example: t/o logistics model */
   public static final FittingExampleDataset D_2FlipHC_uf250_10_TOL;
   /** the example: t/o decay model */
   public static final FittingExampleDataset D_2FlipHC_uf250_10_TOE;
+  /** the example: t/o gompertz model */
+  public static final FittingExampleDataset D_2FlipHC_uf250_10_TOG;
   /** the example: t/fes quadratic model */
   public static final FittingExampleDataset D_2FlipHC_uf250_10_FTQ;
 
@@ -167,92 +220,118 @@ public final class FittingExampleDatasets {
     sets.__loadMatrix("1FlipHC-uf020-01"); //$NON-NLS-1$
     A_1FlipHC_uf020_01_FOL = sets.__fol();
     A_1FlipHC_uf020_01_FOE = sets.__foe();
+    A_1FlipHC_uf020_01_FOG = sets.__fog();
     A_1FlipHC_uf020_01_TOL = sets.__tol();
     A_1FlipHC_uf020_01_TOE = sets.__toe();
+    A_1FlipHC_uf020_01_TOG = sets.__tog();
     A_1FlipHC_uf020_01_FTQ = sets.__ftq();
 
     sets.__loadMatrix("mFlipHC-uf100-01"); //$NON-NLS-1$
     B_mFlipHC_uf100_01_FOL = sets.__fol();
     B_mFlipHC_uf100_01_FOE = sets.__foe();
+    B_mFlipHC_uf100_01_FOG = sets.__fog();
     B_mFlipHC_uf100_01_TOL = sets.__tol();
     B_mFlipHC_uf100_01_TOE = sets.__toe();
+    B_mFlipHC_uf100_01_TOG = sets.__tog();
     B_mFlipHC_uf100_01_FTQ = sets.__ftq();
 
     sets.__loadMatrix("2FlipHCrs-uf250-01"); //$NON-NLS-1$
     C_2FlipHCrs_uf250_01_FOL = sets.__fol();
     C_2FlipHCrs_uf250_01_FOE = sets.__foe();
+    C_2FlipHCrs_uf250_01_FOG = sets.__fog();
     C_2FlipHCrs_uf250_01_TOL = sets.__tol();
     C_2FlipHCrs_uf250_01_TOE = sets.__toe();
+    C_2FlipHCrs_uf250_01_TOG = sets.__tog();
     C_2FlipHCrs_uf250_01_FTQ = sets.__ftq();
 
     sets.__loadMatrix("2FlipHC-uf250-01"); //$NON-NLS-1$
     D_2FlipHC_uf250_01_FOL = sets.__fol();
     D_2FlipHC_uf250_01_FOE = sets.__foe();
+    D_2FlipHC_uf250_01_FOG = sets.__fog();
     D_2FlipHC_uf250_01_TOL = sets.__tol();
     D_2FlipHC_uf250_01_TOE = sets.__toe();
+    D_2FlipHC_uf250_01_TOG = sets.__tog();
     D_2FlipHC_uf250_01_FTQ = sets.__ftq();
 
     sets.__loadMatrix("2FlipHC-uf250-02"); //$NON-NLS-1$
     D_2FlipHC_uf250_02_FOL = sets.__fol();
     D_2FlipHC_uf250_02_FOE = sets.__foe();
+    D_2FlipHC_uf250_02_FOG = sets.__fog();
     D_2FlipHC_uf250_02_TOL = sets.__tol();
     D_2FlipHC_uf250_02_TOE = sets.__toe();
+    D_2FlipHC_uf250_02_TOG = sets.__tog();
     D_2FlipHC_uf250_02_FTQ = sets.__ftq();
 
     sets.__loadMatrix("2FlipHC-uf250-03"); //$NON-NLS-1$
     D_2FlipHC_uf250_03_FOL = sets.__fol();
     D_2FlipHC_uf250_03_FOE = sets.__foe();
+    D_2FlipHC_uf250_03_FOG = sets.__fog();
     D_2FlipHC_uf250_03_TOL = sets.__tol();
     D_2FlipHC_uf250_03_TOE = sets.__toe();
+    D_2FlipHC_uf250_03_TOG = sets.__tog();
     D_2FlipHC_uf250_03_FTQ = sets.__ftq();
 
     sets.__loadMatrix("2FlipHC-uf250-04"); //$NON-NLS-1$
     D_2FlipHC_uf250_04_FOL = sets.__fol();
     D_2FlipHC_uf250_04_FOE = sets.__foe();
+    D_2FlipHC_uf250_04_FOG = sets.__fog();
     D_2FlipHC_uf250_04_TOL = sets.__tol();
     D_2FlipHC_uf250_04_TOE = sets.__toe();
+    D_2FlipHC_uf250_04_TOG = sets.__tog();
     D_2FlipHC_uf250_04_FTQ = sets.__ftq();
 
     sets.__loadMatrix("2FlipHC-uf250-05"); //$NON-NLS-1$
     D_2FlipHC_uf250_05_FOL = sets.__fol();
     D_2FlipHC_uf250_05_FOE = sets.__foe();
+    D_2FlipHC_uf250_05_FOG = sets.__fog();
     D_2FlipHC_uf250_05_TOL = sets.__tol();
     D_2FlipHC_uf250_05_TOE = sets.__toe();
+    D_2FlipHC_uf250_05_TOG = sets.__tog();
     D_2FlipHC_uf250_05_FTQ = sets.__ftq();
 
     sets.__loadMatrix("2FlipHC-uf250-06"); //$NON-NLS-1$
     D_2FlipHC_uf250_06_FOL = sets.__fol();
     D_2FlipHC_uf250_06_FOE = sets.__foe();
+    D_2FlipHC_uf250_06_FOG = sets.__fog();
     D_2FlipHC_uf250_06_TOL = sets.__tol();
     D_2FlipHC_uf250_06_TOE = sets.__toe();
+    D_2FlipHC_uf250_06_TOG = sets.__tog();
     D_2FlipHC_uf250_06_FTQ = sets.__ftq();
 
     sets.__loadMatrix("2FlipHC-uf250-07"); //$NON-NLS-1$
     D_2FlipHC_uf250_07_FOL = sets.__fol();
     D_2FlipHC_uf250_07_FOE = sets.__foe();
+    D_2FlipHC_uf250_07_FOG = sets.__fog();
     D_2FlipHC_uf250_07_TOL = sets.__tol();
     D_2FlipHC_uf250_07_TOE = sets.__toe();
+    D_2FlipHC_uf250_07_TOG = sets.__tog();
     D_2FlipHC_uf250_07_FTQ = sets.__ftq();
 
     sets.__loadMatrix("2FlipHC-uf250-08"); //$NON-NLS-1$
     D_2FlipHC_uf250_08_FOL = sets.__fol();
     D_2FlipHC_uf250_08_FOE = sets.__foe();
+    D_2FlipHC_uf250_08_FOG = sets.__fog();
     D_2FlipHC_uf250_08_TOL = sets.__tol();
     D_2FlipHC_uf250_08_TOE = sets.__toe();
+    D_2FlipHC_uf250_08_TOG = sets.__tog();
     D_2FlipHC_uf250_08_FTQ = sets.__ftq();
 
     sets.__loadMatrix("2FlipHC-uf250-09"); //$NON-NLS-1$
     D_2FlipHC_uf250_09_FOL = sets.__fol();
     D_2FlipHC_uf250_09_FOE = sets.__foe();
+    D_2FlipHC_uf250_09_FOG = sets.__fog();
     D_2FlipHC_uf250_09_TOL = sets.__tol();
     D_2FlipHC_uf250_09_TOE = sets.__toe();
+    D_2FlipHC_uf250_09_TOG = sets.__tog();
     D_2FlipHC_uf250_09_FTQ = sets.__ftq();
 
     sets.__loadMatrix("2FlipHC-uf250-10"); //$NON-NLS-1$
     D_2FlipHC_uf250_10_FOL = sets.__fol();
     D_2FlipHC_uf250_10_FOE = sets.__foe();
+    D_2FlipHC_uf250_10_FOG = sets.__fog();
     D_2FlipHC_uf250_10_TOL = sets.__tol();
     D_2FlipHC_uf250_10_TOE = sets.__toe();
+    D_2FlipHC_uf250_10_TOG = sets.__tog();
     D_2FlipHC_uf250_10_FTQ = sets.__ftq();
   }
 
@@ -260,6 +339,8 @@ public final class FittingExampleDatasets {
   private final LogisticModelWithOffsetOverLogX m_modelLogistic;
   /** the time-objective model 2 */
   private final ExponentialDecayModel m_modelDecay;
+  /** the time-objective model 3 */
+  private final GompertzModel m_modelGompertz;
   /** the time-time model 2 */
   private final QuadraticModel m_modelQuadratic;
 
@@ -281,6 +362,7 @@ public final class FittingExampleDatasets {
     super();
     this.m_modelLogistic = new LogisticModelWithOffsetOverLogX();
     this.m_modelDecay = new ExponentialDecayModel();
+    this.m_modelGompertz = new GompertzModel();
     this.m_modelQuadratic = new QuadraticModel();
   }
 
@@ -358,6 +440,26 @@ public final class FittingExampleDatasets {
   private final FittingExampleDataset __toe() {
     return new FittingExampleDataset(this.m_name + "_toe", //$NON-NLS-1$
         this.__to(), this.m_modelDecay);
+  }
+
+  /**
+   * create the Gompertz model example
+   *
+   * @return the example
+   */
+  private final FittingExampleDataset __fog() {
+    return new FittingExampleDataset(this.m_name + "_fog", //$NON-NLS-1$
+        this.__fo(), this.m_modelGompertz);
+  }
+
+  /**
+   * create the Gompertz decay example
+   *
+   * @return the example
+   */
+  private final FittingExampleDataset __tog() {
+    return new FittingExampleDataset(this.m_name + "_tog", //$NON-NLS-1$
+        this.__to(), this.m_modelGompertz);
   }
 
   /**

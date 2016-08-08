@@ -2,17 +2,20 @@ package org.optimizationBenchmarking.utils.ml.fitting.models;
 
 import java.util.Arrays;
 
+import org.optimizationBenchmarking.utils.document.spec.IComplexText;
 import org.optimizationBenchmarking.utils.document.spec.IMath;
 import org.optimizationBenchmarking.utils.document.spec.IMathRenderable;
 import org.optimizationBenchmarking.utils.document.spec.IParameterRenderer;
 import org.optimizationBenchmarking.utils.hash.HashUtils;
 import org.optimizationBenchmarking.utils.math.functions.UnaryFunction;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
+import org.optimizationBenchmarking.utils.math.text.ABCParameterRenderer;
 import org.optimizationBenchmarking.utils.math.text.DoubleConstantParameters;
 import org.optimizationBenchmarking.utils.math.text.NamedMathRenderable;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.DefaultParameterGuesser;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IParameterGuesser;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.ParametricUnaryFunction;
+import org.optimizationBenchmarking.utils.text.ETextCase;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
 /**
@@ -68,6 +71,25 @@ public abstract class BasicModel extends ParametricUnaryFunction {
   @Override
   public String toString() {
     return this.getClass().getSimpleName();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public ETextCase printLongName(final ITextOutput textOut,
+      final ETextCase textCase) {
+    ETextCase next;
+
+    next = textCase.appendWord("the", textOut); //$NON-NLS-1$
+    textOut.append(' ');
+    next = this.printShortName(textOut, next);
+    if (textOut instanceof IComplexText) {
+      textOut.append(' ');
+      try (final IMath math = ((IComplexText) textOut).inlineMath()) {
+        this.mathRender(math, ABCParameterRenderer.INSTANCE);
+      }
+    }
+
+    return next;
   }
 
   /**

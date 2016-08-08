@@ -95,7 +95,7 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
         // i.e., max+1 in total.
         max = 0;
         for (final ClassifiedSample sample : this.m_knownSamples) {
-          current = ((int) (sample.featureValues[index]));
+          current = ((int) (0.5d + sample.featureValues[index]));
           if (current > max) {
             max = current;
           }

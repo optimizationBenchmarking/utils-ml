@@ -2,6 +2,8 @@ package org.optimizationBenchmarking.utils.ml.fitting.quality;
 
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IFittingQualityMeasure;
+import org.optimizationBenchmarking.utils.text.ETextCase;
+import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
 /** The base class for fitting quality measures */
 public abstract class FittingQualityMeasure
@@ -36,6 +38,33 @@ public abstract class FittingQualityMeasure
   /** {@inheritDoc} */
   @Override
   public String toString() {
+    return this.getClass().getSimpleName();
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public ETextCase printShortName(final ITextOutput textOut,
+      final ETextCase textCase) {
+    return textCase.appendWords(this.toString(), textOut);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public ETextCase printLongName(final ITextOutput textOut,
+      final ETextCase textCase) {
+    return this.printShortName(textOut, textCase);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public ETextCase printDescription(final ITextOutput textOut,
+      final ETextCase textCase) {
+    return this.printLongName(textOut, textCase);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public String getPathComponentSuggestion() {
     return this.getClass().getSimpleName();
   }
 }

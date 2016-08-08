@@ -83,6 +83,12 @@ public class LogisticModelOverLogX extends _ModelBase {
 
   /** {@inheritDoc} */
   @Override
+  public final String toString() {
+    return "generalized logistic model"; //$NON-NLS-1$
+  }
+
+  /** {@inheritDoc} */
+  @Override
   public double value(final double x, final double[] parameters) {
     final double a;
     double res, b;

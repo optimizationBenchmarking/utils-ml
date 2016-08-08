@@ -7,6 +7,8 @@ import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
 import org.optimizationBenchmarking.utils.math.statistics.aggregate.StableSum;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.FittingEvaluation;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.ParametricUnaryFunction;
+import org.optimizationBenchmarking.utils.text.ETextCase;
+import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
 /**
  * A quality measure which attempts to give each point the same influence
@@ -318,6 +320,37 @@ public final class WeightedRootMeanSquareError
   @Override
   public final String toString() {
     return "Weighted Root-Mean-Squared Error"; //$NON-NLS-1$
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public final ETextCase printLongName(final ITextOutput textOut,
+      final ETextCase textCase) {
+    return WeightedRootMeanSquareError.printName(textOut, textCase);
+  }
+
+  /**
+   * Print the name of this fitting quality measure
+   *
+   * @param textOut
+   *          the text output destination
+   * @param textCase
+   *          the text case
+   * @return the next text case
+   */
+  public static final ETextCase printName(final ITextOutput textOut,
+      final ETextCase textCase) {
+    ETextCase next;
+
+    next = textCase.appendWord("weighted", textOut); //$NON-NLS-1$
+    textOut.append(' ');
+    next = next.appendWord("root", textOut); //$NON-NLS-1$
+    textOut.append('-');
+    next = next.appendWord("mean", textOut); //$NON-NLS-1$
+    textOut.append('-');
+    next = next.appendWord("squared", textOut); //$NON-NLS-1$
+    textOut.append(' ');
+    return next.appendWord("error", textOut); //$NON-NLS-1$
   }
 
   /** {@inheritDoc} */

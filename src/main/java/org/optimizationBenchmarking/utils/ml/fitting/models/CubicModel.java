@@ -161,6 +161,12 @@ public class CubicModel extends BasicModel {
     return new __PolynomialGuesser(data);
   }
 
+  /** {@inheritDoc} */
+  @Override
+  public final String toString() {
+    return "cubic polynomial"; //$NON-NLS-1$
+  }
+
   /** A parameter guesser for cubic polynomials */
   private static final class __PolynomialGuesser
       extends SampleBasedParameterGuesser {

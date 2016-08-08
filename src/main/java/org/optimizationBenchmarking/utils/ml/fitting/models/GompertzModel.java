@@ -10,7 +10,6 @@ import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
 import org.optimizationBenchmarking.utils.math.text.INegatableParameterRenderer;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueChecker;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueCheckerMinMax;
-import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueCheckerMinMaxAbs;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.SamplePermutationBasedParameterGuesser;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IParameterGuesser;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
@@ -18,139 +17,152 @@ import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 /**
  * <p>
  * A model describing the relationship of input to output data similar to
- * an "exponential decay" according to the formula {@code a+(b*exp(c*x^d))}
- * .
+ * an Gompertz function (https://en.wikipedia.org/wiki/Gompertz_function)
+ * according to the formula {@code a+(b*exp(c*exp(d*x)))}.
  * </p>
- * <h2>Behavior Occurrences</h2>
- * <p>
- * We encounter this model in two basic forms when modeling optimization
- * processes, either with {@code b} and {@code d} both positive or both
- * negative. Below you can find two examples:
- * </p>
- * <ul>
- * <li>{@code 1.447E-5 +  2.017 ∗ exp(-1.642 ∗ x^ 0.265)}</li>
- * <li>{@code 0.231    + -0.231 ∗ exp(-43.66 ∗ x^-1.685)}</li>
- * </ul>
  * <h2>Derivatives</h2>
  * <p>
  * The derivatives have been obtained with http://www.numberempire.com/.
  * </p>
  * <ol>
- * <li>Original function: {@code a+(b*exp(c*x^d))}</li>
+ * <li>Original function: {@code a+(b*exp(c*exp(d*x)))}</li>
  * <li>{@code d/da}: {@code 1}</li>
- * <li>{@code d/db}: {@code exp(c*x^d)}</li>
- * <li>{@code d/dc}: {@code b*x^d*exp(c*x^d)}</li>
- * <li>{@code d/dd}: {@code b*c*x^d*exp(c*x^d)*log(x)}</li>
+ * <li>{@code d/db}: {@code exp(c*exp(d*x))}</li>
+ * <li>{@code d/dc}: {@code b*exp(c*exp(d*x)+d*x)}</li>
+ * <li>{@code d/dd}: {@code b*c*x*exp(c*exp(d*x)+d*x)}</li>
  * </ol>
  * <h2>Resolution</h2> The resolutions have been obtained with
  * http://www.numberempire.com/ and http://wolframalpha.com/.
  * <h3>Two Known Points</h3>
  * <dl>
  * <dt>a.2.1</dt>
- * <dd>{@code a=-(exp(c*x2^d)*y1-exp(c*x1^d)*y2)/(exp(c*x1^d)-exp(c*x2^d))}
- * <dt>a.2.2</dt>
  * <dd>
- * {@code a=(y2*exp(c*x1^d)-y1*(exp(c*x1^d))^(x2^d*x1^(-d)))/(exp(c*x1^d)-(exp(c*x1^d))^(x2^d*x1^(-d)))}
+ * {@code a=-(exp(c*exp(d*x2))*y1-exp(c*exp(d*x1))*y2)/(exp(c*exp(d*x1))-exp(c*exp(d*x2)))}
  * </dd>
  * <dt>b.2.1</dt>
- * <dd>{@code b=(y1-y2)/(exp(c*x1^d)-exp(c*x2^d))}</dd>
- * <dt>b.2.2</dt>
- * <dd>{@code b=(y1-y2)/(exp(c*x1^d)-(exp(c*x1^d))^(x2^d*x1^(-d)))}</dd>
+ * <dd>{@code b=(y1-y2)/(exp(c*exp(d*x1))-exp(c*exp(d*x2)))}</dd>
  * </dl>
  * <h3>One Known Point</h3>
  * <dl>
  * <dt>a.1.1</dt>
- * <dd>{@code a=y-b*exp(c*x^d)}</dd>
+ * <dd>{@code a=y1-b*exp(c*exp(d*x1))}</dd>
  * <dt>b.1.1</dt>
- * <dd>{@code b=exp(-(c*x^d))*(y-a)}</dd>
+ * <dd>{@code b=exp(-(c*exp(d*x1)))*(y1-a)}</dd>
  * <dt>c.1.1</dt>
- * <dd>{@code c=log(y/b-a/b)/x^d}</dd>
+ * <dd>{@code c=exp(-(d*x1))*log(y1/b-a/b)}</dd>
  * <dt>d.1.1</dt>
- * <dd>{@code d=log(log(y/b-a/b)/c)/log(x)}</dd>
+ * <dd>{@code d=log(log(y1/b-a/b)/c)/x1}</dd>
  * </dl>
  */
-public final class ExponentialDecayModel extends _ModelBase {
+public final class GompertzModel extends _ModelBase {
 
   /** the checker for {@code a} */
   static final ParameterValueCheckerMinMax A = new ParameterValueCheckerMinMax(
       -1e30d, 1e30d);
   /** the checker for {@code b} */
-  static final ParameterValueCheckerMinMax B = ExponentialDecayModel.A;
+  static final ParameterValueCheckerMinMax B = GompertzModel.A;
   /** the checker for {@code c} */
   static final ParameterValueCheckerMinMax C = new ParameterValueCheckerMinMax(
-      -1e5d, -1e-5d);
+      -1e2d, 1e2d);
   /** the checker for {@code d} */
-  static final ParameterValueCheckerMinMaxAbs D = new ParameterValueCheckerMinMaxAbs(
-      1e-5d, 50d);
+  static final ParameterValueCheckerMinMax D = GompertzModel.C;
 
   /** create the exponential decay model */
-  public ExponentialDecayModel() {
+  public GompertzModel() {
     super();
+  }
+
+  /**
+   * compute {@code exp(o*p)} and protect against NaN
+   *
+   * @param o
+   *          the first number
+   * @param p
+   *          the second number
+   * @return the result
+   */
+  private static final double __exp_o_p(final double o, final double p) {
+    final double res;
+    if ((o == 0d) || (p == 0d)) {
+      return 1d; // guard against infinity*0
+    }
+    res = _ModelBase._exp(o * p);
+    return ((res == res) ? res : 0d);// guard against NaN
   }
 
   /** {@inheritDoc} */
   @Override
   public final double value(final double x, final double[] parameters) {
-    final double a, b, c;
+    final double a;
     double res;
 
-    a = parameters[0];
-    b = parameters[1];
-    if (((c = parameters[2]) != 0d) && //
-        (((res = _ModelBase._pow(x, parameters[3])) != 0d)) && //
-        ((res *= c) != 0d)) {
-      if (((res = _ModelBase._exp(res)) != 0d) && //
-          ((res *= b) != 0d)) {
-        if (((res += a) != 0d) && MathUtils.isFinite(res)) {
+    res = GompertzModel.__exp_o_p(
+        GompertzModel.__exp_o_p(parameters[3], x), parameters[2]);
+    if (MathUtils.isFinite(res)) {
+      res *= parameters[1];
+      a = parameters[0];
+      if (MathUtils.isFinite(res)) {
+        res += a;
+        if (MathUtils.isFinite(res)) {
           return res;
         }
-        return 0d;
       }
-      return (MathUtils.isFinite(a) ? a : 0d);
+    } else {
+      a = parameters[0];
     }
-    res = (a + b);
-    return (MathUtils.isFinite(res) ? res : 0d);
+    return (MathUtils.isFinite(a) ? a : 0d);
   }
 
   /** {@inheritDoc} */
   @Override
   public final String toString() {
-    return "generalized exponential decay"; //$NON-NLS-1$
+    return "Gompertz function"; //$NON-NLS-1$
   }
 
   /** {@inheritDoc} */
   @Override
   public final void gradient(final double x, final double[] parameters,
       final double[] gradient) {
-    final double expcxd, xd, cxd, c;
-    double g;
+    final boolean xIsZero;
+    final double b, c, d;
+    double expdx, cexpdx, dx;
 
     gradient[0] = 1d;
+    xIsZero = (x == 0d);
 
-    xd = _ModelBase._pow(x, parameters[3]);
+    d = parameters[3];
     c = parameters[2];
-    if ((xd == 0d) || (c == 0d)) {
-      cxd = 0d;
+    if ((d == 0d) || xIsZero || ((dx = (d * x)) != dx)) {
+      dx = 0d;
+      expdx = 1d;
+      cexpdx = (c == c) ? c : 0d;
     } else {
-      cxd = c * xd;
+      expdx = _ModelBase._exp(dx);
+      if (expdx != expdx) {
+        expdx = 0d;
+        cexpdx = 0d;
+      } else {
+        cexpdx = (c * expdx);
+        if (cexpdx != cexpdx) {
+          cexpdx = 0d;
+        }
+      }
     }
-    expcxd = _ModelBase._exp(cxd);
 
-    if (MathUtils.isFinite(expcxd)) {
-      gradient[1] = expcxd;
-    } else {
+    if (!(MathUtils.isFinite(gradient[1] = _ModelBase._exp(cexpdx)))) {
       gradient[1] = 0d;
     }
-
-    g = parameters[1];
-    if (g != 0d) {
-      g *= xd * expcxd;
-      if (MathUtils.isFinite(g) && (g != 0d)) {
-        gradient[2] = g;
-        gradient[3] = ((((g *= c) != 0d) && //
-            ((g *= _ModelBase._log(x)) != 0d) && //
-            MathUtils.isFinite(g))//
-                ? g : 0d);
+    b = parameters[1];
+    if ((b != 0d) && (b == b)) {
+      cexpdx = (b * _ModelBase._exp(cexpdx + dx));
+      if (MathUtils.isFinite(cexpdx)) {
+        gradient[2] = cexpdx;
+        if ((!xIsZero) && (c != 0d)) {
+          if (MathUtils.isFinite(gradient[3] = (cexpdx * c * x))) {
+            return;
+          }
+        }
+        gradient[3] = 0d;
         return;
       }
     }
@@ -164,7 +176,7 @@ public final class ExponentialDecayModel extends _ModelBase {
   }
 
   /** {@inheritDoc} */
-  @Override
+  @Override // a+(b*exp(c*exp(d*x)))
   public final void mathRender(final ITextOutput out,
       final IParameterRenderer renderer, final IMathRenderable x) {
     renderer.renderParameter(0, out);
@@ -172,10 +184,11 @@ public final class ExponentialDecayModel extends _ModelBase {
     renderer.renderParameter(1, out);
     out.append("*exp("); //$NON-NLS-1$
     renderer.renderParameter(2, out);
+    out.append("*exp("); //$NON-NLS-1$
+    renderer.renderParameter(3, out);
     out.append('*');
     x.mathRender(out, renderer);
-    out.append('^');
-    renderer.renderParameter(3, out);
+    out.append(')');
     out.append(')');
   }
 
@@ -215,10 +228,15 @@ public final class ExponentialDecayModel extends _ModelBase {
           try (final IMath braces = exp.inBraces()) {
             try (final IMath mul2 = braces.mul()) {
               renderer.renderParameter(2, mul2);
-              try (final IMath pow = mul2.pow()) {
-                x.mathRender(pow, renderer);
-                renderer.renderParameter(3, pow);
+              try (final IMath exp2 = mul2.exp()) {
+                try (final IMath braces2 = exp2.inBraces()) {
+                  try (final IMath mul3 = braces2.mul()) {
+                    renderer.renderParameter(3, mul3);
+                    x.mathRender(mul3, renderer);
+                  }
+                }
               }
+
             }
           }
         }
@@ -232,162 +250,7 @@ public final class ExponentialDecayModel extends _ModelBase {
   /** {@inheritDoc} */
   @Override
   public IParameterGuesser createParameterGuesser(final IMatrix data) {
-    return new __DecayModelParameterGuesser(data);
-  }
-
-  /**
-   * compute {@code a} based on two points and {@code c} and {@code d}.
-   *
-   * @param x1
-   *          the {@code x}-coordinate of the first point
-   * @param y1
-   *          the {@code y}-coordinate of the first point
-   * @param x2
-   *          the {@code x}-coordinate of the second point
-   * @param y2
-   *          the {@code y}-coordinate of the second point
-   * @param c
-   *          the {@code c} value
-   * @param d
-   *          the {@code d} value
-   * @return the guess for {@code a}
-   */
-  static final double _a_x1y1x2y2cd(final double x1, final double y1,
-      final double x2, final double y2, final double c, final double d) {
-    final double x1d, x2d, ecx1d, ecx2d, pp;
-
-    x1d = _ModelBase._pow(x1, d);
-    ecx1d = _ModelBase._exp(c * x1d);
-    x2d = _ModelBase._pow(x2, d);
-    ecx2d = _ModelBase._exp(c * x2d);
-    pp = _ModelBase._pow((ecx1d), (x2d / x1d));
-
-    return ParameterValueChecker.choose(//
-        -((ecx2d * y1) - (ecx1d * y2)) / (ecx1d - ecx2d), //
-        ((y2 * ecx1d) - (y1 * pp)) / (ecx1d - pp), //
-        ExponentialDecayModel.A);
-  }
-
-  /**
-   * compute {@code b} based on two points and {@code c} and {@code d}.
-   *
-   * @param x1
-   *          the {@code x}-coordinate of the first point
-   * @param y1
-   *          the {@code y}-coordinate of the first point
-   * @param x2
-   *          the {@code x}-coordinate of the second point
-   * @param y2
-   *          the {@code y}-coordinate of the second point
-   * @param c
-   *          the {@code c} value
-   * @param d
-   *          the {@code d} value
-   * @return the guess for {@code b}
-   */
-  static final double _b_x1y1x2y2cd(final double x1, final double y1,
-      final double x2, final double y2, final double c, final double d) {
-    final double x1d, x2d, ecx1d, ecx2d;
-
-    x1d = _ModelBase._pow(x1, d);
-    x2d = _ModelBase._pow(x2, d);
-    ecx1d = _ModelBase._exp(c * x1d);
-    ecx2d = _ModelBase._exp(c * x2d);
-
-    return ParameterValueChecker.choose(//
-        (y1 - y2) / (ecx1d - ecx2d), //
-        (y1 - y2) / (ecx1d - _ModelBase._pow((ecx1d), (x2d / x1d))), //
-        ExponentialDecayModel.B);
-  }
-
-  /**
-   * Compute {@code a} from one point and {@code b}, {@code c}, and
-   * {@code d}.
-   *
-   * @param x1
-   *          the point's {@code x}-coordinate
-   * @param y1
-   *          the point's {@code y}-coordinate
-   * @param b
-   *          the value of {@code b}
-   * @param c
-   *          the value of {@code c}
-   * @param d
-   *          the value of {@code d}
-   * @return the value of {@code a}
-   */
-  static final double _a_x1y1bcd(final double x1, final double y1,
-      final double b, final double c, final double d) {
-    return y1 - (b * _ModelBase._exp(c * _ModelBase._pow(x1, d)));
-  }
-
-  /**
-   * Compute {@code b} from one point and {@code a}, {@code c}, and
-   * {@code d}.
-   *
-   * @param x1
-   *          the point's {@code x}-coordinate
-   * @param y1
-   *          the point's {@code y}-coordinate
-   * @param a
-   *          the value of {@code a}
-   * @param c
-   *          the value of {@code c}
-   * @param d
-   *          the value of {@code d}
-   * @return the value of {@code b}
-   */
-  static final double _b_x1y1acd(final double x1, final double y1,
-      final double a, final double c, final double d) {
-    return _ModelBase._exp(-(c * _ModelBase._pow(x1, d))) * (y1 - a);
-  }
-
-  /**
-   * Compute {@code c} from one point and {@code a}, {@code b}, and
-   * {@code d}.
-   *
-   * @param x1
-   *          the point's {@code x}-coordinate
-   * @param y1
-   *          the point's {@code y}-coordinate
-   * @param a
-   *          the value of {@code a}
-   * @param b
-   *          the value of {@code b}
-   * @param d
-   *          the value of {@code d}
-   * @return the value of {@code c}
-   */
-  static final double _c_x1y1abd(final double x1, final double y1,
-      final double a, final double b, final double d) {
-    final double l;
-
-    l = _ModelBase._log((y1 / b) - (a / b));
-    return ParameterValueChecker.choose(//
-        l / _ModelBase._pow(x1, d), //
-        l * _ModelBase._pow(x1, -d), ExponentialDecayModel.C);
-  }
-
-  /**
-   * Compute {@code d} from one point and {@code a}, {@code b}, and
-   * {@code c}.
-   *
-   * @param x1
-   *          the point's {@code x}-coordinate
-   * @param y1
-   *          the point's {@code y}-coordinate
-   * @param a
-   *          the value of {@code a}
-   * @param b
-   *          the value of {@code b}
-   * @param c
-   *          the value of {@code c}
-   * @return the value of {@code d}
-   */
-  static final double _d_x1y1abc(final double x1, final double y1,
-      final double a, final double b, final double c) {
-    return _ModelBase._log(_ModelBase._log((y1 / b) - (a / b)) / c)
-        / _ModelBase._log(x1);
+    return new __GompertzModelParameterGuesser(data);
   }
 
   /**
@@ -407,37 +270,177 @@ public final class ExponentialDecayModel extends _ModelBase {
     double trialA, trialB;
     int trials;
 
-    if (random.nextBoolean()) {
-      trials = 100;
-      do {
-        trialA = (minY * (1d + (0.05d * random.nextGaussian())));
-      } while ((((minY > 0d) && (trialA < 0d)) || (trialA >= maxY))
-          && ((--trials) >= 0));
-      dest[0] = trialA;
+    trials = 100;
+    do {
+      trialA = (minY * (1d + (0.05d * random.nextGaussian())));
+    } while ((((minY > 0d) && (trialA < 0d)) || (trialA >= maxY))
+        && ((--trials) >= 0));
 
-      trials = 100;
-      do {
-        trialB = ((maxY - trialA) * ((1d + //
-            Math.abs(0.05d * random.nextGaussian()))));
-      } while (((minY > 0d) && ((maxY - trialB) < 0d))
-          && ((--trials) >= 0));
-      dest[1] = trialB;
+    trials = 100;
+    do {
+      trialB = ((maxY - trialA) * ((1d + //
+          Math.abs(0.05d * random.nextGaussian()))));
+    } while (((minY > 0d) && ((maxY - trialB) < 0d)) && ((--trials) >= 0));
 
-      dest[2] = -(random.nextDouble() + random.nextInt(5));
-      dest[3] = (1e-5d + random.nextDouble());
-    } else {
-      dest[0] = trialB = (maxY
-          * (1d + Math.abs(0.05d * random.nextGaussian())));
-      dest[1] = ((minY - trialB)
-          * (1d + Math.abs(0.05d * random.nextGaussian())));
-      dest[2] = -1d - (random.nextDouble() + random.nextInt(5));
-      dest[3] = -(random.nextDouble()
-          + (random.nextInt(3) * random.nextDouble()));
-    }
+    dest[0] = trialA + trialB;
+    dest[1] = -trialB;
+
+    dest[2] = -(random.nextDouble() + random.nextInt(5));
+    dest[3] = -(random.nextDouble() + random.nextInt(5));
+  }
+
+  /**
+   * compute {@code a} from {@code c} and {@code d} and two points
+   * according to
+   * {@code a=-(exp(c*exp(d*x2))*y1-exp(c*exp(d*x1))*y2)/(exp(c*exp(d*x1))-exp(c*exp(d*x2)))}
+   *
+   * @param x1
+   *          the {@code x}-coordinate of the first point
+   * @param y1
+   *          the {@code y}-coordinate of the first point
+   * @param x2
+   *          the {@code x}-coordinate of the second point
+   * @param y2
+   *          the {@code y}-coordinate of the second point
+   * @param c
+   *          the value of {@code c}
+   * @param d
+   *          the value of {@code d}
+   * @return
+   */
+  static final double _a_x1y1x2y2cd(final double x1, final double y1,
+      final double x2, final double y2, final double c, final double d) {
+    final double expcexpdx1, expcexpdx2;
+
+    expcexpdx1 = GompertzModel.__exp_o_p(c,
+        GompertzModel.__exp_o_p(d, x1));
+    expcexpdx2 = GompertzModel.__exp_o_p(c,
+        GompertzModel.__exp_o_p(d, x2));
+
+    return (((y2 * expcexpdx1) - (y1 * expcexpdx2))
+        / (expcexpdx1 - expcexpdx2));
+  }
+
+  /**
+   * compute {@code b} from {@code c} and {@code d} and two points
+   * according to {@code b=(y1-y2)/(exp(c*exp(d*x1))-exp(c*exp(d*x2)))}
+   *
+   * @param x1
+   *          the {@code x}-coordinate of the first point
+   * @param y1
+   *          the {@code y}-coordinate of the first point
+   * @param x2
+   *          the {@code x}-coordinate of the second point
+   * @param y2
+   *          the {@code y}-coordinate of the second point
+   * @param c
+   *          the value of {@code c}
+   * @param d
+   *          the value of {@code d}
+   * @return
+   */
+  static final double _b_x1y1x2y2cd(final double x1, final double y1,
+      final double x2, final double y2, final double c, final double d) {
+    return (y1 - y2)
+        / (GompertzModel.__exp_o_p(c, GompertzModel.__exp_o_p(d, x1))
+            - GompertzModel.__exp_o_p(c, GompertzModel.__exp_o_p(d, x2)));
+  }
+
+  /**
+   * compute {@code a} from {@code b}, {@code c}, and {@code d} and two
+   * points according to {@code a=y1-b*exp(c*exp(d*x1))}
+   *
+   * @param x1
+   *          the {@code x}-coordinate of the first point
+   * @param y1
+   *          the {@code y}-coordinate of the first point
+   * @param b
+   *          the value of {@code b}
+   * @param c
+   *          the value of {@code c}
+   * @param d
+   *          the value of {@code d}
+   * @return
+   */
+  static final double _a_x1y1bcd(final double x1, final double y1,
+      final double b, final double c, final double d) {
+    return (y1 - (b
+        * GompertzModel.__exp_o_p(c, GompertzModel.__exp_o_p(d, x1))));
+  }
+
+  /**
+   * compute {@code b} from {@code a}, {@code c}, and {@code d} and two
+   * points according to {@code b=exp(-(c*exp(d*x1)))*(y1-a)}
+   *
+   * @param x1
+   *          the {@code x}-coordinate of the first point
+   * @param y1
+   *          the {@code y}-coordinate of the first point
+   * @param a
+   *          the value of {@code a}
+   * @param c
+   *          the value of {@code c}
+   * @param d
+   *          the value of {@code d}
+   * @return
+   */
+  static final double _b_x1y1acd(final double x1, final double y1,
+      final double a, final double c, final double d) {
+    return GompertzModel.__exp_o_p(-c, GompertzModel.__exp_o_p(d, x1))
+        * (y1 - a);
+  }
+
+  /**
+   * compute {@code c} from {@code a}, {@code b}, and {@code d} and two
+   * points according to {@code c=exp(-(d*x1))*log(y1/b-a/b)}
+   *
+   * @param x1
+   *          the {@code x}-coordinate of the first point
+   * @param y1
+   *          the {@code y}-coordinate of the first point
+   * @param a
+   *          the value of {@code a}
+   * @param b
+   *          the value of {@code b}
+   * @param d
+   *          the value of {@code d}
+   * @return
+   */
+  static final double _c_x1y1abd(final double x1, final double y1,
+      final double a, final double b, final double d) {
+    return ParameterValueChecker.choose(//
+        GompertzModel.__exp_o_p(-d, x1) * _ModelBase._ln((y1 - a) / b), //
+        GompertzModel.__exp_o_p(-d, x1)
+            * _ModelBase._ln((y1 / b) - (a / b)), //
+        GompertzModel.C);
+  }
+
+  /**
+   * compute {@code c} from {@code a}, {@code b}, and {@code c} and two
+   * points according to {@code d=log(log(y1/b-a/b)/c)/x1)}
+   *
+   * @param x1
+   *          the {@code x}-coordinate of the first point
+   * @param y1
+   *          the {@code y}-coordinate of the first point
+   * @param a
+   *          the value of {@code a}
+   * @param b
+   *          the value of {@code b}
+   * @param c
+   *          the value of {@code c}
+   * @return
+   */
+  static final double _d_x1y1abc(final double x1, final double y1,
+      final double a, final double b, final double c) {
+    return ParameterValueChecker.choose(//
+        (_ModelBase._ln(_ModelBase._ln((y1 - a) / b) / c) / x1), //
+        (_ModelBase._ln(_ModelBase._ln((y1 / b) - (a / b)) / c) / x1), //
+        GompertzModel.D);
   }
 
   /** the parameter guesser */
-  private class __DecayModelParameterGuesser
+  private class __GompertzModelParameterGuesser
       extends SamplePermutationBasedParameterGuesser {
 
     /**
@@ -446,16 +449,16 @@ public final class ExponentialDecayModel extends _ModelBase {
      * @param data
      *          the data
      */
-    __DecayModelParameterGuesser(final IMatrix data) {
-      super(data, ExponentialDecayModel.this.getParameterCount(),
-          ExponentialDecayModel.this.getParameterCount() - 1);
+    __GompertzModelParameterGuesser(final IMatrix data) {
+      super(data, GompertzModel.this.getParameterCount(),
+          GompertzModel.this.getParameterCount() - 1);
     }
 
     /** {@inheritDoc} */
     @Override
     protected final double value(final double x,
         final double[] parameters) {
-      return ExponentialDecayModel.this.value(x, parameters);
+      return GompertzModel.this.value(x, parameters);
     }
 
     /** {@inheritDoc} */
@@ -491,7 +494,7 @@ public final class ExponentialDecayModel extends _ModelBase {
         }
       }
 
-      ExponentialDecayModel._fallback(minY, maxY, dest, random);
+      GompertzModel._fallback(minY, maxY, dest, random);
       return true;
     }
 
@@ -506,7 +509,7 @@ public final class ExponentialDecayModel extends _ModelBase {
       maxY = (random.nextBoolean() ? this.m_maxY
           : (minY
               + Math.abs(random.nextInt(1000) * random.nextGaussian())));
-      ExponentialDecayModel._fallback(minY, maxY, dest, random);
+      GompertzModel._fallback(minY, maxY, dest, random);
     }
 
     /** {@inheritDoc} */
@@ -530,18 +533,18 @@ public final class ExponentialDecayModel extends _ModelBase {
         findA: {
           if (!hasA) {
 
-            newA = ExponentialDecayModel._a_x1y1x2y2cd(points[0],
-                points[1], points[2], points[3], (hasC ? newC : oldC),
+            newA = GompertzModel._a_x1y1x2y2cd(points[0], points[1],
+                points[2], points[3], (hasC ? newC : oldC),
                 (hasD ? newD : oldD));
-            if (ExponentialDecayModel.A.check(newA)) {
+            if (GompertzModel.A.check(newA)) {
               changed = hasA = true;
               break findA;
             }
 
-            newA = ExponentialDecayModel._a_x1y1bcd(points[0], points[1],
+            newA = GompertzModel._a_x1y1bcd(points[0], points[1],
                 (hasB ? newB : oldB), (hasC ? newC : oldC),
                 (hasD ? newD : oldD));
-            if (ExponentialDecayModel.A.check(newA)) {
+            if (GompertzModel.A.check(newA)) {
               changed = hasA = true;
               break findA;
             }
@@ -551,18 +554,18 @@ public final class ExponentialDecayModel extends _ModelBase {
         // find B
         findB: {
           if (!hasB) {
-            newB = ExponentialDecayModel._b_x1y1x2y2cd(points[0],
-                points[1], points[2], points[3], (hasC ? newC : oldC),
+            newB = GompertzModel._b_x1y1x2y2cd(points[0], points[1],
+                points[2], points[3], (hasC ? newC : oldC),
                 (hasD ? newD : oldD));
-            if (ExponentialDecayModel.B.check(newB)) {
+            if (GompertzModel.B.check(newB)) {
               changed = hasB = true;
               break findB;
             }
 
-            newB = ExponentialDecayModel._b_x1y1acd(points[0], points[1],
+            newB = GompertzModel._b_x1y1acd(points[0], points[1],
                 (hasA ? newA : oldA), (hasC ? newC : oldC),
                 (hasD ? newD : oldD));
-            if (ExponentialDecayModel.B.check(newB)) {
+            if (GompertzModel.B.check(newB)) {
               changed = hasB = true;
               break findB;
             }
@@ -572,10 +575,10 @@ public final class ExponentialDecayModel extends _ModelBase {
         // find C
         findC: {
           if (!hasC) {
-            newC = ExponentialDecayModel._c_x1y1abd(points[0], points[1],
+            newC = GompertzModel._c_x1y1abd(points[0], points[1],
                 (hasA ? newA : oldA), (hasB ? newB : oldB),
                 (hasD ? newD : oldD));
-            if (ExponentialDecayModel.C.check(newC)) {
+            if (GompertzModel.C.check(newC)) {
               changed = hasC = true;
               break findC;
             }
@@ -585,10 +588,10 @@ public final class ExponentialDecayModel extends _ModelBase {
         // find D
         findD: {
           if (!hasD) {
-            newD = ExponentialDecayModel._d_x1y1abc(points[0], points[1],
+            newD = GompertzModel._d_x1y1abc(points[0], points[1],
                 (hasA ? newA : oldA), (hasB ? newB : oldB),
                 (hasC ? newC : oldC));
-            if (ExponentialDecayModel.D.check(newD)) {
+            if (GompertzModel.D.check(newD)) {
               changed = hasD = true;
               break findD;
             }
@@ -601,18 +604,17 @@ public final class ExponentialDecayModel extends _ModelBase {
 
             if (!(hasA)) {
               newA = Math.min(points[1], Math.min(points[3], points[5]));
-              if (ExponentialDecayModel.A.check(newA)) {
+              if (GompertzModel.A.check(newA)) {
                 hasA = changed = true;
                 break emergency;
               }
             }
 
             if (!(hasB)) {
-              newB = (Math.max(points[1], Math.max(points[3], points[5])) - //
-                  (hasA ? newA
-                      : Math.min(points[1],
-                          Math.min(points[3], points[5]))));
-              if (ExponentialDecayModel.B.check(newB)) {
+              newB = ((hasA ? newA
+                  : Math.min(points[1], Math.min(points[3], points[5]))) - //
+                  Math.max(points[1], Math.max(points[3], points[5])));
+              if (GompertzModel.B.check(newB)) {
                 hasB = changed = true;
                 break emergency;
               }

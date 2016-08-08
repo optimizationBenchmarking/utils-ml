@@ -21,118 +21,144 @@ public final class MultiFittingExampleDatasets {
 
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.A_1FlipHC_uf020_01_FOL, //
-        FittingExampleDatasets.A_1FlipHC_uf020_01_FOE));
+        FittingExampleDatasets.A_1FlipHC_uf020_01_FOE, //
+        FittingExampleDatasets.A_1FlipHC_uf020_01_FOG));
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.A_1FlipHC_uf020_01_TOL, //
-        FittingExampleDatasets.A_1FlipHC_uf020_01_TOE));
+        FittingExampleDatasets.A_1FlipHC_uf020_01_TOE, //
+        FittingExampleDatasets.A_1FlipHC_uf020_01_TOG));
     list.add(MultiFittingExampleDatasets
         .__make(FittingExampleDatasets.A_1FlipHC_uf020_01_FTQ));
 
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.B_mFlipHC_uf100_01_FOL, //
-        FittingExampleDatasets.B_mFlipHC_uf100_01_FOE));
+        FittingExampleDatasets.B_mFlipHC_uf100_01_FOE, //
+        FittingExampleDatasets.B_mFlipHC_uf100_01_FOG));
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.B_mFlipHC_uf100_01_TOL, //
-        FittingExampleDatasets.B_mFlipHC_uf100_01_TOE));
+        FittingExampleDatasets.B_mFlipHC_uf100_01_TOE, //
+        FittingExampleDatasets.B_mFlipHC_uf100_01_TOG));
     list.add(MultiFittingExampleDatasets
         .__make(FittingExampleDatasets.B_mFlipHC_uf100_01_FTQ));
 
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.C_2FlipHCrs_uf250_01_FOL, //
-        FittingExampleDatasets.C_2FlipHCrs_uf250_01_FOE));
+        FittingExampleDatasets.C_2FlipHCrs_uf250_01_FOE, //
+        FittingExampleDatasets.C_2FlipHCrs_uf250_01_FOG));
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.C_2FlipHCrs_uf250_01_TOL, //
-        FittingExampleDatasets.C_2FlipHCrs_uf250_01_TOE));
+        FittingExampleDatasets.C_2FlipHCrs_uf250_01_TOE, //
+        FittingExampleDatasets.C_2FlipHCrs_uf250_01_TOG));
     list.add(MultiFittingExampleDatasets
         .__make(FittingExampleDatasets.C_2FlipHCrs_uf250_01_FTQ));
 
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.D_2FlipHC_uf250_01_FOL, //
-        FittingExampleDatasets.D_2FlipHC_uf250_01_FOE));
+        FittingExampleDatasets.D_2FlipHC_uf250_01_FOE, //
+        FittingExampleDatasets.D_2FlipHC_uf250_01_FOG));
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.D_2FlipHC_uf250_01_TOL, //
-        FittingExampleDatasets.D_2FlipHC_uf250_01_TOE));
+        FittingExampleDatasets.D_2FlipHC_uf250_01_TOE, //
+        FittingExampleDatasets.D_2FlipHC_uf250_01_TOG));
     list.add(MultiFittingExampleDatasets
         .__make(FittingExampleDatasets.D_2FlipHC_uf250_01_FTQ));
 
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.D_2FlipHC_uf250_02_FOL, //
-        FittingExampleDatasets.D_2FlipHC_uf250_02_FOE));
+        FittingExampleDatasets.D_2FlipHC_uf250_02_FOE, //
+        FittingExampleDatasets.D_2FlipHC_uf250_02_FOG));
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.D_2FlipHC_uf250_02_TOL, //
-        FittingExampleDatasets.D_2FlipHC_uf250_02_TOE));
+        FittingExampleDatasets.D_2FlipHC_uf250_02_TOE, //
+        FittingExampleDatasets.D_2FlipHC_uf250_02_TOG));
     list.add(MultiFittingExampleDatasets
         .__make(FittingExampleDatasets.D_2FlipHC_uf250_02_FTQ));
 
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.D_2FlipHC_uf250_03_FOL, //
-        FittingExampleDatasets.D_2FlipHC_uf250_03_FOE));
+        FittingExampleDatasets.D_2FlipHC_uf250_03_FOE, //
+        FittingExampleDatasets.D_2FlipHC_uf250_03_FOG));
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.D_2FlipHC_uf250_03_TOL, //
-        FittingExampleDatasets.D_2FlipHC_uf250_03_TOE));
+        FittingExampleDatasets.D_2FlipHC_uf250_03_TOE, //
+        FittingExampleDatasets.D_2FlipHC_uf250_03_TOG));
     list.add(MultiFittingExampleDatasets
         .__make(FittingExampleDatasets.D_2FlipHC_uf250_03_FTQ));
 
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.D_2FlipHC_uf250_04_FOL, //
-        FittingExampleDatasets.D_2FlipHC_uf250_04_FOE));
+        FittingExampleDatasets.D_2FlipHC_uf250_04_FOE, //
+        FittingExampleDatasets.D_2FlipHC_uf250_04_FOG));
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.D_2FlipHC_uf250_04_TOL, //
-        FittingExampleDatasets.D_2FlipHC_uf250_04_TOE));
+        FittingExampleDatasets.D_2FlipHC_uf250_04_TOE, //
+        FittingExampleDatasets.D_2FlipHC_uf250_04_TOG));
     list.add(MultiFittingExampleDatasets
         .__make(FittingExampleDatasets.D_2FlipHC_uf250_04_FTQ));
 
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.D_2FlipHC_uf250_05_FOL, //
-        FittingExampleDatasets.D_2FlipHC_uf250_05_FOE));
+        FittingExampleDatasets.D_2FlipHC_uf250_05_FOE, //
+        FittingExampleDatasets.D_2FlipHC_uf250_05_FOG));
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.D_2FlipHC_uf250_05_TOL, //
-        FittingExampleDatasets.D_2FlipHC_uf250_05_TOE));
+        FittingExampleDatasets.D_2FlipHC_uf250_05_TOE, //
+        FittingExampleDatasets.D_2FlipHC_uf250_05_TOG));
     list.add(MultiFittingExampleDatasets
         .__make(FittingExampleDatasets.D_2FlipHC_uf250_05_FTQ));
 
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.D_2FlipHC_uf250_06_FOL, //
-        FittingExampleDatasets.D_2FlipHC_uf250_06_FOE));
+        FittingExampleDatasets.D_2FlipHC_uf250_06_FOE, //
+        FittingExampleDatasets.D_2FlipHC_uf250_06_FOG));
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.D_2FlipHC_uf250_06_TOL, //
-        FittingExampleDatasets.D_2FlipHC_uf250_06_TOE));
+        FittingExampleDatasets.D_2FlipHC_uf250_06_TOE, //
+        FittingExampleDatasets.D_2FlipHC_uf250_06_TOG));
     list.add(MultiFittingExampleDatasets
         .__make(FittingExampleDatasets.D_2FlipHC_uf250_06_FTQ));
 
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.D_2FlipHC_uf250_07_FOL, //
-        FittingExampleDatasets.D_2FlipHC_uf250_07_FOE));
+        FittingExampleDatasets.D_2FlipHC_uf250_07_FOE, //
+        FittingExampleDatasets.D_2FlipHC_uf250_07_FOG));
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.D_2FlipHC_uf250_07_TOL, //
-        FittingExampleDatasets.D_2FlipHC_uf250_07_TOE));
+        FittingExampleDatasets.D_2FlipHC_uf250_07_TOE, //
+        FittingExampleDatasets.D_2FlipHC_uf250_07_TOG));
     list.add(MultiFittingExampleDatasets
         .__make(FittingExampleDatasets.D_2FlipHC_uf250_07_FTQ));
 
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.D_2FlipHC_uf250_08_FOL, //
-        FittingExampleDatasets.D_2FlipHC_uf250_08_FOE));
+        FittingExampleDatasets.D_2FlipHC_uf250_08_FOE, //
+        FittingExampleDatasets.D_2FlipHC_uf250_08_FOG));
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.D_2FlipHC_uf250_08_TOL, //
-        FittingExampleDatasets.D_2FlipHC_uf250_08_TOE));
+        FittingExampleDatasets.D_2FlipHC_uf250_08_TOE, //
+        FittingExampleDatasets.D_2FlipHC_uf250_08_TOG));
     list.add(MultiFittingExampleDatasets
         .__make(FittingExampleDatasets.D_2FlipHC_uf250_08_FTQ));
 
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.D_2FlipHC_uf250_09_FOL, //
-        FittingExampleDatasets.D_2FlipHC_uf250_09_FOE));
+        FittingExampleDatasets.D_2FlipHC_uf250_09_FOE, //
+        FittingExampleDatasets.D_2FlipHC_uf250_09_FOG));
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.D_2FlipHC_uf250_09_TOL, //
-        FittingExampleDatasets.D_2FlipHC_uf250_09_TOE));
+        FittingExampleDatasets.D_2FlipHC_uf250_09_TOE, //
+        FittingExampleDatasets.D_2FlipHC_uf250_09_TOG));
     list.add(MultiFittingExampleDatasets
         .__make(FittingExampleDatasets.D_2FlipHC_uf250_09_FTQ));
 
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.D_2FlipHC_uf250_10_FOL, //
-        FittingExampleDatasets.D_2FlipHC_uf250_10_FOE));
+        FittingExampleDatasets.D_2FlipHC_uf250_10_FOE, //
+        FittingExampleDatasets.D_2FlipHC_uf250_10_FOG));
     list.add(MultiFittingExampleDatasets.__make(//
         FittingExampleDatasets.D_2FlipHC_uf250_10_TOL, //
-        FittingExampleDatasets.D_2FlipHC_uf250_10_TOE));
+        FittingExampleDatasets.D_2FlipHC_uf250_10_TOE, //
+        FittingExampleDatasets.D_2FlipHC_uf250_10_TOG));
     list.add(MultiFittingExampleDatasets
         .__make(FittingExampleDatasets.D_2FlipHC_uf250_10_FTQ));
 
