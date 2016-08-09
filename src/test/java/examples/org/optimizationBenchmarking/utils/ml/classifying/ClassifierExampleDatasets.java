@@ -1,5 +1,8 @@
 package examples.org.optimizationBenchmarking.utils.ml.classifying;
 
+import org.optimizationBenchmarking.utils.ml.classification.spec.ClassifiedSample;
+import org.optimizationBenchmarking.utils.ml.classification.spec.EFeatureType;
+
 import examples.org.optimizationBenchmarking.utils.ml.clustering.ClusteringExampleDatasets;
 import shared.junit.org.optimizationBenchmarking.utils.ml.classification.ClassifierExampleDataset;
 
@@ -39,4 +42,15 @@ public final class ClassifierExampleDatasets {
   /** the iris example */
   public static final ClassifierExampleDataset IRIS = new ClassifierExampleDataset(
       ClusteringExampleDatasets.IRIS);
+  /** the nominal example */
+  public static final ClassifierExampleDataset NOMINAL = new ClassifierExampleDataset(//
+      new EFeatureType[] { EFeatureType.NOMINAL, EFeatureType.NOMINAL }, //
+      new ClassifiedSample[] { //
+          new ClassifiedSample(0, 0, 0), //
+          new ClassifiedSample(0, 1, 0), //
+          new ClassifiedSample(0, 2, 0), //
+          new ClassifiedSample(1, 0, 1), //
+          new ClassifiedSample(1, 1, 1), //
+          new ClassifiedSample(1, 2, 1),//
+  });
 }

@@ -37,7 +37,7 @@ public final class MCC extends ConfusionMatrixBasedMeasure {
 
   /** The article for citing multi-class MCC */
   private static final BibArticle MCC_REFERENCE_1 = new BibArticle(
-      new BibAuthors(new BibAuthor[] { new BibAuthor("Mark", "Hall"), //$NON-NLS-1$//$NON-NLS-2$
+      new BibAuthors(new BibAuthor[] { //
           new BibAuthor("Jan", "Gorodkin"), //$NON-NLS-1$//$NON-NLS-2$
   }), "Comparing Two K-Category Assignments by a K-Category Correlation Coefficient", //$NON-NLS-1$
       new BibDate(2004, EBibMonth.DECEMBER),
@@ -54,7 +54,7 @@ public final class MCC extends ConfusionMatrixBasedMeasure {
 
   /** The article for citing MCC */
   private static final BibArticle MCC_REFERENCE_2 = new BibArticle(
-      new BibAuthors(new BibAuthor[] { new BibAuthor("Mark", "Hall"), //$NON-NLS-1$//$NON-NLS-2$
+      new BibAuthors(new BibAuthor[] { //
           new BibAuthor("B. W.", "Matthews"), //$NON-NLS-1$//$NON-NLS-2$
   }), "Comparison of the Predicted and Observed Secondary Structure of T4 Phage Lysozyme", //$NON-NLS-1$
       new BibDate(195, EBibMonth.OCTOBER, 20),

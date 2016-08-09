@@ -23,7 +23,8 @@ abstract class _WekaClassifier<CT extends Classifier> extends
 
   /** The article for citing weka */
   static final BibArticle WEKA = new BibArticle(
-      new BibAuthors(new BibAuthor[] { new BibAuthor("Mark", "Hall"), //$NON-NLS-1$//$NON-NLS-2$
+      new BibAuthors(new BibAuthor[] { //
+          new BibAuthor("Mark", "Hall"), //$NON-NLS-1$//$NON-NLS-2$
           new BibAuthor("Eibe", "Frank"), //$NON-NLS-1$//$NON-NLS-2$
           new BibAuthor("Geoffrey", "Holmes"), //$NON-NLS-1$//$NON-NLS-2$
           new BibAuthor("Bernhard", "Pfahringer"), //$NON-NLS-1$//$NON-NLS-2$
