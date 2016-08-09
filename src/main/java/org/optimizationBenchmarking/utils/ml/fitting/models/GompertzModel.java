@@ -10,6 +10,7 @@ import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
 import org.optimizationBenchmarking.utils.math.text.INegatableParameterRenderer;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueChecker;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueCheckerMinMax;
+import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueCheckerMinMaxAbs;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.SamplePermutationBasedParameterGuesser;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IParameterGuesser;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
@@ -62,10 +63,10 @@ public final class GompertzModel extends _ModelBase {
   /** the checker for {@code b} */
   static final ParameterValueCheckerMinMax B = GompertzModel.A;
   /** the checker for {@code c} */
-  static final ParameterValueCheckerMinMax C = new ParameterValueCheckerMinMax(
-      -1e2d, 1e2d);
+  static final ParameterValueCheckerMinMaxAbs C = new ParameterValueCheckerMinMaxAbs(
+      1e-6d, 1e2d);
   /** the checker for {@code d} */
-  static final ParameterValueCheckerMinMax D = GompertzModel.C;
+  static final ParameterValueCheckerMinMaxAbs D = GompertzModel.C;
 
   /** create the exponential decay model */
   public GompertzModel() {
