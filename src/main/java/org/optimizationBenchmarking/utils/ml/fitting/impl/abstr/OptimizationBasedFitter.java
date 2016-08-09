@@ -346,6 +346,7 @@ public abstract class OptimizationBasedFitter extends FunctionFitter {
     ETextCase next;
 
     textOut.append(OptimizationBasedFitter.NAME_NELDER_MEAD);
+    textOut.append(' ');
     next = textCase.nextCase()
         .appendWord(OptimizationBasedFitter.NAME_ALGORITHM, textOut);
 
