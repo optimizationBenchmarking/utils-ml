@@ -9,6 +9,7 @@ import org.optimizationBenchmarking.utils.bibliography.data.BibAuthors;
 import org.optimizationBenchmarking.utils.bibliography.data.BibDate;
 import org.optimizationBenchmarking.utils.bibliography.data.BibOrganization;
 import org.optimizationBenchmarking.utils.bibliography.data.EBibMonth;
+import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.SimplifyingClassifier;
 
 import weka.classifiers.Classifier;
 
@@ -18,8 +19,8 @@ import weka.classifiers.Classifier;
  * @param <CT>
  *          the classifier type
  */
-abstract class _WekaClassifier<CT extends Classifier> extends
-    org.optimizationBenchmarking.utils.ml.classification.impl.abstr.Classifier {
+abstract class _WekaClassifier<CT extends Classifier>
+    extends SimplifyingClassifier {
 
   /** The article for citing weka */
   static final BibArticle WEKA = new BibArticle(
@@ -53,13 +54,16 @@ abstract class _WekaClassifier<CT extends Classifier> extends
   /**
    * Create the weka classifier wrapper
    *
+   * @param selectedAttributes
+   *          the selected attributes
    * @param classifier
    *          the classifier
    * @param instance
    *          to use
    */
-  _WekaClassifier(final CT classifier, final _InternalInstance instance) {
-    super();
+  _WekaClassifier(final int[] selectedAttributes, final CT classifier,
+      final _InternalInstance instance) {
+    super(selectedAttributes);
     if (classifier == null) {
       throw new IllegalArgumentException("Classifier must not be null."); //$NON-NLS-1$
     }
@@ -74,7 +78,7 @@ abstract class _WekaClassifier<CT extends Classifier> extends
   /** {@inheritDoc} */
   @Override
   public final int classify(final double[] features) {
-    this.m_instance._assign(features);
+    this.m_instance._assign(features, this.m_selectedAttributes);
 
     try {
       return ((int) (0.5d

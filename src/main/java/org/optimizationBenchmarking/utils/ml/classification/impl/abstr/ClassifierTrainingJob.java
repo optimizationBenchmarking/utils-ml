@@ -49,6 +49,15 @@ public abstract class ClassifierTrainingJob extends ToolJob
    */
   protected abstract IClassifierTrainingResult doCall();
 
+  /**
+   * a small intermediate package-private hook to invoke {@link #doCall()}.
+   * 
+   * @return the result
+   */
+  IClassifierTrainingResult _invokeDoCall() {
+    return this.doCall();
+  }
+
   /** {@inheritDoc} */
   @Override
   public final IClassifierTrainingResult call()
@@ -67,7 +76,7 @@ public abstract class ClassifierTrainingJob extends ToolJob
 
     result = null;
     try {
-      result = this.doCall();
+      result = this._invokeDoCall();
       if ((logger != null) && (logger.isLoggable(Level.FINER))) {
         if (use == null) {
           use = this.toString();

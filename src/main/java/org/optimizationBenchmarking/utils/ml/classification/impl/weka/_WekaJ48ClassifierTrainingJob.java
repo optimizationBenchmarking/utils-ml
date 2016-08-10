@@ -92,7 +92,8 @@ class _WekaJ48ClassifierTrainingJob
   @Override
   final _WekaClassifier<J48> _createClassifier(final J48 classifier,
       final _InternalInstance instance) {
-    return new _WekaJ48Classifier(classifier, instance);
+    return new _WekaJ48Classifier(this.m_selectedAttributes, classifier,
+        instance);
   }
 
   /** {@inheritDoc} */

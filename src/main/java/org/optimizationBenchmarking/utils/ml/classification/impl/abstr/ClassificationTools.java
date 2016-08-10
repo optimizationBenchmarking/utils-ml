@@ -30,6 +30,10 @@ public final class ClassificationTools {
       final ClassifiedSample[] samples) {
     int minClass, maxClass;
 
+    if ((samples == null) || (samples.length <= 0)) {
+      return new _AllTheSameClass(0);
+    }
+
     // check whether there is more than one class
     maxClass = (-1);
     minClass = Integer.MAX_VALUE;
@@ -50,16 +54,59 @@ public final class ClassificationTools {
   }
 
   /**
-   * Can we cluster the given samples trivially? If so, return a job which
-   * just directly returns a fixed result. Otherwise return {@code null}.
+   * Convert the index of a nominal value in the sorted list of values to a
+   * {@code double}
+   *
+   * @param nominal
+   *          the nominal value
+   * @return the {@code double}
+   */
+  public static final double featureNominalToDouble(final int nominal) {
+    return nominal;
+  }
+
+  /**
+   * Convert a {@code double} to the index of a nominal value in the sorted
+   * list of values
+   *
+   * @param nominal
+   *          the {@code double} value
+   * @return the nominal value index
+   */
+  public static final int featureDoubleToNominal(final double nominal) {
+    return ((int) (0.5d + nominal));
+  }
+
+  /**
+   * Convert the {@code boolean} value to a {@code double}
+   *
+   * @param bool
+   *          the {@code boolean} value
+   * @return the {@code double}
+   */
+  public static final double featureBooleanToDouble(final boolean bool) {
+    return (bool ? 1d : 0d);
+  }
+
+  /**
+   * Convert a {@code double} to the {@code boolean} value
+   *
+   * @param bool
+   *          the {@code double} value
+   * @return the {@code boolean} value index
+   */
+  public static final boolean featureDoubleToBoolean(final double bool) {
+    return (Math.abs(bool) > 1e-12d);
+  }
+
+  /**
+   * Find the total number of classes.
    *
    * @param samples
    *          the samples
-   * @return the job if classification can be done trivially, or
-   *         {@code null} if trivial classifying is not possible
+   * @return the number of classes
    */
   public static final int getClassCount(final ClassifiedSample[] samples) {
-
     int maxClass;
 
     maxClass = (-1);
@@ -70,6 +117,36 @@ public final class ClassificationTools {
     }
 
     return (maxClass + 1);
+  }
+
+  /**
+   * Get the most frequently occurring class.
+   *
+   * @param samples
+   *          the training samples
+   * @return the most frequent class
+   */
+  public static final int getMostFrequentClass(
+      final ClassifiedSample[] samples) {
+    final int classCount;
+    final int[] counts;
+    int max, difference;
+
+    classCount = ClassificationTools.getClassCount(samples);
+    if (classCount <= 1) {
+      return 0;
+    }
+
+    max = 0;
+    counts = new int[classCount];
+    for (final ClassifiedSample sample : samples) {
+      difference = ((++counts[sample.sampleClass]) - counts[max]);
+      if ((difference > 0)
+          || ((difference == 0) && (sample.sampleClass < max))) {
+        max = sample.sampleClass;
+      }
+    }
+    return max;
   }
 
   /**

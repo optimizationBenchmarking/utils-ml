@@ -25,6 +25,7 @@ public final class WekaJ48Accessor {
    *
    * @param name
    *          the classifier's name
+   *          @param selectedAttributes the selected attributes
    * @param tree
    *          the tree to render
    * @param renderer
@@ -37,7 +38,7 @@ public final class WekaJ48Accessor {
    *          , in which case you should do something cool...)
    */
   public static final void renderJ48Classifier(
-      final ISemanticComponent name, final J48 tree,
+      final ISemanticComponent name,final int[] selectedAttributes, final J48 tree,
       final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
     final ILabel label;
@@ -58,7 +59,7 @@ public final class WekaJ48Accessor {
           caption.append('.');
         }
         try (final IText codeBody = code.body()) {
-          WekaJ48Accessor.__renderJ48Classifier(tree, renderer, codeBody);
+          WekaJ48Accessor.__renderJ48Classifier(selectedAttributes,tree, renderer, codeBody);
         }
       }
     } else {
@@ -67,13 +68,13 @@ public final class WekaJ48Accessor {
           textOutput, ETextCase.IN_SENTENCE);
       textOutput.append('.');
       textOutput.appendLineBreak();
-      WekaJ48Accessor.__renderJ48Classifier(tree, renderer, textOutput);
+      WekaJ48Accessor.__renderJ48Classifier(selectedAttributes,tree, renderer, textOutput);
     }
   }
 
   /**
    * Render the J48 classifier tree to a given text output destination.
-   *
+   *          @param selectedAttributes the selected attributes
    * @param tree
    *          the tree to render
    * @param renderer
@@ -81,10 +82,10 @@ public final class WekaJ48Accessor {
    * @param textOutput
    *          the text output destination
    */
-  private static final void __renderJ48Classifier(final J48 tree,
+  private static final void __renderJ48Classifier(final int[] selectedAttributes, final J48 tree,
       final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
-    WekaClassifierTreeAccessor.renderClassifierTree(tree.m_root, renderer,
+    WekaClassifierTreeAccessor.renderClassifierTree(selectedAttributes,tree.m_root, renderer,
         textOutput, 0);
   }
 }

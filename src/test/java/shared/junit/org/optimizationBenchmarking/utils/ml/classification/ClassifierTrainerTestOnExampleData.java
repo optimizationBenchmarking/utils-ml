@@ -253,18 +253,16 @@ public abstract class ClassifierTrainerTestOnExampleData
         ClassifierExampleDatasets.NOMINAL_5);
   }
 
-  // The following tests do currently not work with Weka:
-  //
-  // /** test on the NOMINAL_6 data by using MCC */
-  // @Test(timeout = 3600000)
-  // public void test_NOMINAL_6_MCC() {
-  // this.applyClassifierTrainerMCC(ClassifierExampleDatasets.NOMINAL_6);
-  // }
-  //
-  // /** test on the NOMINAL_6 data by using MCC */
-  // @Test(timeout = 3600000)
-  // public void test_NOMINAL_6_Accuracy() {
-  // this.applyClassifierTrainerAccuracy(
-  // ClassifierExampleDatasets.NOMINAL_6);
-  // }
+  /** test on the NOMINAL_6 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_NOMINAL_6_MCC() {
+    this.applyClassifierTrainerMCC(ClassifierExampleDatasets.NOMINAL_6);
+  }
+
+  /** test on the NOMINAL_6 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_NOMINAL_6_Accuracy() {
+    this.applyClassifierTrainerAccuracy(
+        ClassifierExampleDatasets.NOMINAL_6);
+  }
 }
