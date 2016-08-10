@@ -188,15 +188,83 @@ public abstract class ClassifierTrainerTestOnExampleData
         ClassifierExampleDatasets.EXP_5_10);
   }
 
-  /** test on the NOMINAL data by using MCC */
+  /** test on the NOMINAL_1 data by using MCC */
   @Test(timeout = 3600000)
-  public void test_NOMINAL_MCC() {
-    this.applyClassifierTrainerMCC(ClassifierExampleDatasets.NOMINAL);
+  public void test_NOMINAL_1_MCC() {
+    this.applyClassifierTrainerMCC(ClassifierExampleDatasets.NOMINAL_1);
   }
 
-  /** test on the NOMINAL data by using MCC */
+  /** test on the NOMINAL_1 data by using MCC */
   @Test(timeout = 3600000)
-  public void test_NOMINAL_Accuracy() {
-    this.applyClassifierTrainerAccuracy(ClassifierExampleDatasets.NOMINAL);
+  public void test_NOMINAL_1_Accuracy() {
+    this.applyClassifierTrainerAccuracy(
+        ClassifierExampleDatasets.NOMINAL_1);
   }
+
+  /** test on the NOMINAL_2 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_NOMINAL_2_MCC() {
+    this.applyClassifierTrainerMCC(ClassifierExampleDatasets.NOMINAL_2);
+  }
+
+  /** test on the NOMINAL_2 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_NOMINAL_2_Accuracy() {
+    this.applyClassifierTrainerAccuracy(
+        ClassifierExampleDatasets.NOMINAL_2);
+  }
+
+  /** test on the NOMINAL_3 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_NOMINAL_3_MCC() {
+    this.applyClassifierTrainerMCC(ClassifierExampleDatasets.NOMINAL_3);
+  }
+
+  /** test on the NOMINAL_3 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_NOMINAL_3_Accuracy() {
+    this.applyClassifierTrainerAccuracy(
+        ClassifierExampleDatasets.NOMINAL_3);
+  }
+
+  /** test on the NOMINAL_4 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_NOMINAL_4_MCC() {
+    this.applyClassifierTrainerMCC(ClassifierExampleDatasets.NOMINAL_4);
+  }
+
+  /** test on the NOMINAL_4 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_NOMINAL_4_Accuracy() {
+    this.applyClassifierTrainerAccuracy(
+        ClassifierExampleDatasets.NOMINAL_4);
+  }
+
+  /** test on the NOMINAL_5 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_NOMINAL_5_MCC() {
+    this.applyClassifierTrainerMCC(ClassifierExampleDatasets.NOMINAL_5);
+  }
+
+  /** test on the NOMINAL_5 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_NOMINAL_5_Accuracy() {
+    this.applyClassifierTrainerAccuracy(
+        ClassifierExampleDatasets.NOMINAL_5);
+  }
+
+  // The following tests do currently not work with Weka:
+  //
+  // /** test on the NOMINAL_6 data by using MCC */
+  // @Test(timeout = 3600000)
+  // public void test_NOMINAL_6_MCC() {
+  // this.applyClassifierTrainerMCC(ClassifierExampleDatasets.NOMINAL_6);
+  // }
+  //
+  // /** test on the NOMINAL_6 data by using MCC */
+  // @Test(timeout = 3600000)
+  // public void test_NOMINAL_6_Accuracy() {
+  // this.applyClassifierTrainerAccuracy(
+  // ClassifierExampleDatasets.NOMINAL_6);
+  // }
 }

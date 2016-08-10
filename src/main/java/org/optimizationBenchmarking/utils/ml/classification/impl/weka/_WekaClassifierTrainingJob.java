@@ -2,6 +2,7 @@ package org.optimizationBenchmarking.utils.ml.classification.impl.weka;
 
 import java.util.ArrayList;
 
+import org.optimizationBenchmarking.utils.collections.lists.ArrayListView;
 import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.ClassifierTrainingJob;
 import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.ClassifierTrainingJobBuilder;
 import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.ClassifierTrainingResult;
@@ -61,7 +62,7 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
   protected final IClassifierTrainingResult doCall()
       throws IllegalArgumentException {
     ArrayList<Attribute> attributes;
-    ArrayList<String> values;
+    ArrayList<String> baseValues;
     Instances instances;
     String name;
     int index, index2, max, current;
@@ -71,15 +72,20 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
     ClassifierTrainingResult result;
     double quality;
     CT wekaClassifier;
+    String[] values;
 
     attributes = new ArrayList<>();
     index = 0;
-    values = null;
     name = null;
+    baseValues = new ArrayList<>();
 
     // Create the attribute sets.
     for (index = 0; index <= this.m_featureTypes.length; index++) {
-      name = Integer.toString(index, Character.MAX_RADIX);
+
+      for (index2 = baseValues.size(); index2 <= index; index2++) {
+        baseValues.add(Integer.toString(index2, Character.MAX_RADIX));
+      }
+      name = baseValues.get(index);
 
       if (index < this.m_featureTypes.length) {
         // OK, this is a normal attribute
@@ -113,17 +119,17 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
       }
 
       // find create the list
-      if (values == null) {
-        values = new ArrayList<>();
+      values = new String[max + 1];
+      current = baseValues.size();
+      for (index2 = baseValues.size(); index2 <= max; index2++) {
+        baseValues.add(values[index2] = Integer.toString(index2,
+            Character.MAX_RADIX));
+      }
+      for (index2 = Math.min(current, values.length); (--index2) >= 0;) {
+        values[index2] = baseValues.get(index2);
       }
 
-      for (index2 = values.size(); index2 <= max; index2++) {
-        values.add(Integer.toString(index2, Character.MAX_RADIX));
-      }
-
-      ++max;
-      attributes.add(new Attribute(name,
-          (values.size() != max) ? values.subList(0, max) : values));
+      attributes.add(new Attribute(name, new ArrayListView<>(values)));
     }
 
     // Now build the instances set.

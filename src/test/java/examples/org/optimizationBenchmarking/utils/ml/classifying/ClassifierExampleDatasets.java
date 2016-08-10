@@ -42,8 +42,8 @@ public final class ClassifierExampleDatasets {
   /** the iris example */
   public static final ClassifierExampleDataset IRIS = new ClassifierExampleDataset(
       ClusteringExampleDatasets.IRIS);
-  /** the nominal example */
-  public static final ClassifierExampleDataset NOMINAL = new ClassifierExampleDataset(//
+  /** the nominal example 1 */
+  public static final ClassifierExampleDataset NOMINAL_1 = new ClassifierExampleDataset(//
       new EFeatureType[] { EFeatureType.NOMINAL, EFeatureType.NOMINAL }, //
       new ClassifiedSample[] { //
           new ClassifiedSample(0, 0, 0), //
@@ -52,5 +52,69 @@ public final class ClassifierExampleDatasets {
           new ClassifiedSample(1, 0, 1), //
           new ClassifiedSample(1, 1, 1), //
           new ClassifiedSample(1, 2, 1),//
+  });
+  /** the nominal example 2 */
+  public static final ClassifierExampleDataset NOMINAL_2 = new ClassifierExampleDataset(//
+      new EFeatureType[] { EFeatureType.NOMINAL, EFeatureType.NOMINAL }, //
+      new ClassifiedSample[] { //
+          new ClassifiedSample(0, 0, 0), //
+          new ClassifiedSample(0, 0, 1), //
+          new ClassifiedSample(0, 0, 2), //
+          new ClassifiedSample(1, 1, 0), //
+          new ClassifiedSample(1, 1, 1), //
+          new ClassifiedSample(1, 1, 2),//
+  });
+
+  /** the nominal example 3 */
+  public static final ClassifierExampleDataset NOMINAL_3 = new ClassifierExampleDataset(//
+      new EFeatureType[] { EFeatureType.NOMINAL, EFeatureType.NOMINAL }, //
+      new ClassifiedSample[] { //
+          new ClassifiedSample(0, 1, 0), //
+          new ClassifiedSample(0, 1, 1), //
+          new ClassifiedSample(0, 1, 2), //
+          new ClassifiedSample(1, 0, 0), //
+          new ClassifiedSample(1, 0, 1), //
+          new ClassifiedSample(1, 0, 2),//
+  });
+
+  /** the nominal example 4 */
+  public static final ClassifierExampleDataset NOMINAL_4 = new ClassifierExampleDataset(//
+      new EFeatureType[] { EFeatureType.NOMINAL, EFeatureType.NOMINAL }, //
+      new ClassifiedSample[] { //
+          new ClassifiedSample(0, 1, 0), //
+          new ClassifiedSample(0, 1, 0), //
+          new ClassifiedSample(0, 1, 0), //
+          new ClassifiedSample(1, 0, 1), //
+          new ClassifiedSample(1, 0, 1), //
+          new ClassifiedSample(1, 0, 1),//
+  });
+
+  /** the nominal example 5 */
+  public static final ClassifierExampleDataset NOMINAL_5 = new ClassifierExampleDataset(//
+      new EFeatureType[] { EFeatureType.NOMINAL, EFeatureType.NOMINAL,
+          EFeatureType.NOMINAL }, //
+      new ClassifiedSample[] { //
+          new ClassifiedSample(0, 1, 0, 1), //
+          new ClassifiedSample(0, 1, 0, 2), //
+          new ClassifiedSample(0, 1, 0, 3), //
+          new ClassifiedSample(1, 0, 1, 4), //
+          new ClassifiedSample(1, 0, 1, 5), //
+          new ClassifiedSample(1, 0, 1, 6),//
+  });
+
+  /**
+   * the nominal example 6: Warning: This currently does not work with
+   * Weka!
+   */
+  public static final ClassifierExampleDataset NOMINAL_6 = new ClassifierExampleDataset(//
+      new EFeatureType[] { EFeatureType.NOMINAL, EFeatureType.NOMINAL,
+          EFeatureType.NOMINAL, EFeatureType.NOMINAL }, //
+      new ClassifiedSample[] { //
+          new ClassifiedSample(0, 1, 0, 1, 0), //
+          new ClassifiedSample(0, 1, 0, 2, 0), //
+          new ClassifiedSample(0, 1, 0, 3, 0), //
+          new ClassifiedSample(1, 0, 1, 4, 0), //
+          new ClassifiedSample(1, 0, 1, 5, 0), //
+          new ClassifiedSample(1, 0, 1, 6, 0),//
   });
 }
