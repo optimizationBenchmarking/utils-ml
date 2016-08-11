@@ -1,4 +1,4 @@
-package test.junit.org.optimizationBenchmarking.utils.ml.classification;
+package test.junit.org.optimizationBenchmarking.utils.ml.classification.weka;
 
 import org.optimizationBenchmarking.utils.ml.classification.impl.weka.WekaJ48TrainerPruned;
 
@@ -12,5 +12,4 @@ public class WekaJ48TrainerPrunedTest
   public WekaJ48TrainerPrunedTest() {
     super(WekaJ48TrainerPruned.getInstance());
   }
-
 }

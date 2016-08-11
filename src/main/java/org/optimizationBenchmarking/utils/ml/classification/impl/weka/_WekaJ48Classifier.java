@@ -14,7 +14,7 @@ import org.optimizationBenchmarking.utils.text.ETextCase;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
 import weka.classifiers.trees.J48;
-import weka.classifiers.trees.WekaJ48Accessor;
+import weka.classifiers.trees.WekaTreeAccessor;
 
 /**
  * The wrapper for Weka's {@link weka.classifiers.trees.J48} classifiers
@@ -56,7 +56,7 @@ final class _WekaJ48Classifier extends _WekaClassifier<J48> {
   @Override
   public final void render(final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
-    WekaJ48Accessor.renderJ48Classifier(this, this.m_selectedAttributes,
+    WekaTreeAccessor.renderJ48Classifier(this, this.m_selectedAttributes,
         this.m_classifier, renderer, textOutput);
   }
 

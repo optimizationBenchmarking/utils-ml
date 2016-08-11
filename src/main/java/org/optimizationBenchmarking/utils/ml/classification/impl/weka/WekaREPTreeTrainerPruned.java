@@ -5,16 +5,17 @@ import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrai
 import org.optimizationBenchmarking.utils.text.ETextCase;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
-/** A classifier trainer for error-reduced pruned J48 trees in Weka. */
-public final class WekaJ48TrainerReducedErrorPruned
-    extends _WekaJ48Trainer {
+/**
+ * A classifier trainer for error-reducing pruned REPTree trees in Weka.
+ */
+public final class WekaREPTreeTrainerPruned extends _WekaREPTreeTrainer {
 
   /** The fitting method name */
-  static final String METHOD = _WekaJ48Trainer.BASE_METHOD
-      + " (Reduced-Error Pruned)"; //$NON-NLS-1$
+  static final String METHOD = _WekaREPTreeTrainer.BASE_METHOD
+      + " (Pruned)"; //$NON-NLS-1$
 
   /** create */
-  WekaJ48TrainerReducedErrorPruned() {
+  WekaREPTreeTrainerPruned() {
     super();
   }
 
@@ -22,22 +23,21 @@ public final class WekaJ48TrainerReducedErrorPruned
   @Override
   protected final IClassifierTrainingJob create(
       final ClassifierTrainingJobBuilder builder) {
-    return new _WekaJ48ClassifierTrainingJob(builder,
-        _WekaJ48ClassifierTrainingJob.PRUNING_REDUCED_ERROR, false);
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public final String toString() {
-    return WekaJ48TrainerReducedErrorPruned.METHOD;
+    return new _WekaREPTreeClassifierTrainingJob(builder, true);
   }
 
   /** {@inheritDoc} */
   @Override
   public ETextCase printDescription(final ITextOutput textOut,
       final ETextCase textCase) {
-    return _WekaJ48Classifier._printDescription(textOut, textCase,
-        _WekaJ48ClassifierTrainingJob.PRUNING_REDUCED_ERROR, false, true);
+    return _WekaREPTreeClassifier._printDescription(textOut, textCase,
+        true, true);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public final String toString() {
+    return WekaREPTreeTrainerPruned.METHOD;
   }
 
   /**
@@ -45,13 +45,13 @@ public final class WekaJ48TrainerReducedErrorPruned
    *
    * @return the globally shared instance of this trainer
    */
-  public static final WekaJ48TrainerReducedErrorPruned getInstance() {
+  public static final WekaREPTreeTrainerPruned getInstance() {
     return __InstanceHolder.INSTANCE;
   }
 
   /** the instance holder */
   private static final class __InstanceHolder {
     /** the shared instance */
-    static final WekaJ48TrainerReducedErrorPruned INSTANCE = new WekaJ48TrainerReducedErrorPruned();
+    static final WekaREPTreeTrainerPruned INSTANCE = new WekaREPTreeTrainerPruned();
   }
 }

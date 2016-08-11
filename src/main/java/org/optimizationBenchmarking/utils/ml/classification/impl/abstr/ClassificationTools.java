@@ -4,15 +4,30 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
+import org.optimizationBenchmarking.utils.comparison.EComparison;
 import org.optimizationBenchmarking.utils.error.ErrorUtils;
 import org.optimizationBenchmarking.utils.math.combinatorics.Shuffle;
 import org.optimizationBenchmarking.utils.math.functions.numeric.CeilDiv;
 import org.optimizationBenchmarking.utils.ml.classification.spec.ClassifiedSample;
+import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierParameterRenderer;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrainingJob;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrainingResult;
+import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
 /** Some simple tools for classification. */
 public final class ClassificationTools {
+
+  /** the text for an {@code if}, followed by a space */
+  public static final char[] RULE_IF = { 'i', 'f', ' ' };
+  /** the text for an {@code else if}, followed by a space */
+  public static final char[] RULE_ELSE_IF = { 'e', 'l', 's', 'e', ' ', 'i',
+      'f', ' ' };
+  /** the text for an {@code else}, followed by a space */
+  public static final char[] RULE_ELSE = { 'e', 'l', 's', 'e', ' ' };
+  /** the text for an {@code then}, preceeded by a space */
+  public static final char[] RULE_THEN = { ' ', 't', 'h', 'e', 'n' };
+  /** the text for a condition which is always true */
+  public static final char[] RULE_ALWAYS_TRUE = { 't', 'r', 'u', 'e' };
 
   /** the default number of cross validation elements */
   private static final int DEFAULT_CROSSVALIDATION_FOLDS = 10;
@@ -75,6 +90,28 @@ public final class ClassificationTools {
    */
   public static final int featureDoubleToNominal(final double nominal) {
     return ((int) (0.5d + nominal));
+  }
+
+  /**
+   * Convert the index of a class to a {@code double}
+   *
+   * @param clazz
+   *          the class value
+   * @return the {@code double}
+   */
+  public static final double classToDouble(final int clazz) {
+    return ClassificationTools.featureNominalToDouble(clazz);
+  }
+
+  /**
+   * Convert the index of a class to a {@code double}
+   *
+   * @param clazz
+   *          the class value
+   * @return the {@code double}
+   */
+  public static final int doubleToClass(final double clazz) {
+    return ClassificationTools.featureDoubleToNominal(clazz);
   }
 
   /**
@@ -350,6 +387,83 @@ public final class ClassificationTools {
       throw new IllegalArgumentException(
           "Invalid classifier quality:" + quality); //$NON-NLS-1$
     }
+  }
+
+  /**
+   * Print the name of a class
+   *
+   * @param clazz
+   *          the class
+   * @param renderer
+   *          the renderer
+   * @param textOutput
+   *          the text output destination
+   */
+  public static final void printClass(final int clazz,
+      final IClassifierParameterRenderer renderer,
+      final ITextOutput textOutput) {
+    textOutput.append("class = "); //$NON-NLS-1$
+    renderer.renderShortClassName(clazz, textOutput);
+  }
+
+  /**
+   * Print an expression which compares a the value of an feature with a
+   * specified value.
+   *
+   * @param feature
+   *          the feature
+   * @param comparison
+   *          the comparison
+   * @param value
+   *          the value to compare with
+   * @param renderer
+   *          the renderer
+   * @param textOutput
+   *          the text output destination
+   */
+  public static final void printFeatureExpression(final int feature,
+      final EComparison comparison, final double value,
+      final IClassifierParameterRenderer renderer,
+      final ITextOutput textOutput) {
+    renderer.renderShortFeatureName(feature, textOutput);
+    textOutput.append(' ');
+
+    switch (comparison) {
+      case LESS: {
+        textOutput.append('<');
+        break;
+      }
+      case LESS_OR_EQUAL: {
+        textOutput.append('<');
+        textOutput.append('=');
+        break;
+      }
+      case EQUAL: {
+        textOutput.append('=');
+        break;
+      }
+      case GREATER_OR_EQUAL: {
+        textOutput.append('>');
+        textOutput.append('=');
+        break;
+      }
+      case GREATER: {
+        textOutput.append('>');
+        break;
+      }
+      case NOT_EQUAL: {
+        textOutput.append('!');
+        textOutput.append('=');
+        break;
+      }
+      default: {
+        throw new IllegalArgumentException(
+            "Unsupported comparison: " + comparison); //$NON-NLS-1$
+      }
+    }
+
+    textOutput.append(' ');
+    renderer.renderFeatureValue(feature, value, textOutput);
   }
 
   /** do not call */

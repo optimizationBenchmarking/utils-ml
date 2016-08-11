@@ -11,6 +11,8 @@ import org.optimizationBenchmarking.utils.ml.classification.impl.weka.WekaJ48Tra
 import org.optimizationBenchmarking.utils.ml.classification.impl.weka.WekaJ48TrainerReducedErrorPrunedBinary;
 import org.optimizationBenchmarking.utils.ml.classification.impl.weka.WekaJ48TrainerUnpruned;
 import org.optimizationBenchmarking.utils.ml.classification.impl.weka.WekaJ48TrainerUnprunedBinary;
+import org.optimizationBenchmarking.utils.ml.classification.impl.weka.WekaREPTreeTrainerPruned;
+import org.optimizationBenchmarking.utils.ml.classification.impl.weka.WekaREPTreeTrainerUnpruned;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrainer;
 
 /**
@@ -118,7 +120,7 @@ public final class DefaultClassifierTrainer {
     /** {@inheritDoc} */
     @Override
     public final boolean hasNext() {
-      return (this.m_index <= 5);
+      return (this.m_index <= 7);
     }
 
     /** {@inheritDoc} */
@@ -142,6 +144,12 @@ public final class DefaultClassifierTrainer {
         }
         case 5: {
           return WekaJ48TrainerUnprunedBinary.getInstance();
+        }
+        case 6: {
+          return WekaREPTreeTrainerPruned.getInstance();
+        }
+        case 7: {
+          return WekaREPTreeTrainerUnpruned.getInstance();
         }
         default: {
           return super.next();

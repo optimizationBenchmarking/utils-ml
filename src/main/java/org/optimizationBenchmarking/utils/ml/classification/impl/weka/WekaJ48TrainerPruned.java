@@ -5,7 +5,7 @@ import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrai
 import org.optimizationBenchmarking.utils.text.ETextCase;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
-/** A classifier trainer for error-reducing pruned J48 trees in Weka. */
+/** A classifier trainer for pruned J48 trees in Weka. */
 public final class WekaJ48TrainerPruned extends _WekaJ48Trainer {
 
   /** The fitting method name */

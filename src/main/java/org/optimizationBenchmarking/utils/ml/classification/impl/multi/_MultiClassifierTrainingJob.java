@@ -148,7 +148,7 @@ final class _MultiClassifierTrainingJob extends ClassifierTrainingJob {
           // OK, we have computed the median, so we can now check if the
           // median is sufficiently good.
           currentMedian = median.doubleValue();
-          if ((useTrainers.isEmpty()) || ((currentMedian >= 0)
+          if ((useTrainers.isEmpty()) || ((currentMedian >= 0d)
               && (currentMedian < Double.POSITIVE_INFINITY))) {
             add: {
               if (currentMedian > bestMedian) {

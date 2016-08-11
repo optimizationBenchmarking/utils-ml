@@ -1,5 +1,7 @@
 package weka.classifiers.trees.j48;
 
+import org.optimizationBenchmarking.utils.comparison.EComparison;
+import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.ClassificationTools;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierParameterRenderer;
 import org.optimizationBenchmarking.utils.text.TextUtils;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
@@ -14,7 +16,7 @@ public final class WekaClassifierTreeAccessor {
 
   /**
    * Render the classifier tree to a given text output destination.
-   * 
+   *
    * @param selectedAttributes
    *          the selected attributes
    * @param tree
@@ -36,7 +38,7 @@ public final class WekaClassifierTreeAccessor {
 
   /**
    * Render the classifier tree to a given text output destination.
-   * 
+   *
    * @param selectedAttributes
    *          the selected attributes
    * @param tree
@@ -64,9 +66,9 @@ public final class WekaClassifierTreeAccessor {
       } else {
         textOutput.append(' ');
       }
-      textOutput.append("class = "); //$NON-NLS-1$
-      renderer.renderShortClassName(
-          tree.m_localModel.distribution().maxClass(0), textOutput);
+      ClassificationTools.printClass(
+          tree.m_localModel.distribution().maxClass(0), renderer,
+          textOutput);
       return;
     }
 
@@ -77,17 +79,19 @@ public final class WekaClassifierTreeAccessor {
       }
       TextUtils.appendNonBreakingSpaces(depth, textOutput);
 
-      textOutput.append(((index <= 0) ? "if " : ((index < end) //$NON-NLS-1$
-          ? "else if " : "else ")));//$NON-NLS-1$//$NON-NLS-2$
+      textOutput.append(((index <= 0) ? ClassificationTools.RULE_IF
+          : ((index < end) ? ClassificationTools.RULE_ELSE_IF
+              : ClassificationTools.RULE_ELSE)));
       if (index < end) {
         WekaClassifierTreeAccessor.__renderExpression(selectedAttributes,
             tree.m_localModel, index, tree.m_train, renderer, textOutput);
-        textOutput.append(" then");//$NON-NLS-1$
+        textOutput.append(ClassificationTools.RULE_THEN);
       }
       if (tree.m_sons[index].m_isLeaf) {
-        textOutput.append(" class = "); //$NON-NLS-1$
-        renderer.renderShortClassName(
-            tree.m_localModel.distribution().maxClass(index), textOutput);
+        textOutput.append(' ');
+        ClassificationTools.printClass(
+            tree.m_localModel.distribution().maxClass(index), renderer,
+            textOutput);
       } else {
         WekaClassifierTreeAccessor.__renderClassifierTree(
             selectedAttributes, tree.m_sons[index], renderer, textOutput,
@@ -98,7 +102,7 @@ public final class WekaClassifierTreeAccessor {
 
   /**
    * render the expression
-   * 
+   *
    * @param selectedAttributes
    *          the selected attributes
    * @param model
@@ -151,7 +155,7 @@ public final class WekaClassifierTreeAccessor {
 
   /**
    * render the expression
-   * 
+   *
    * @param selectedAttributes
    *          the selected attributes
    * @param model
@@ -170,34 +174,24 @@ public final class WekaClassifierTreeAccessor {
       final int index, final Instances trainingData,
       final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
-    renderer.renderShortFeatureName(selectedAttributes[model.m_attIndex],
-        textOutput);
-    textOutput.append(' ');
 
     if (trainingData.attribute(model.m_attIndex).isNominal()) {
-      if (index <= 0) {
-        textOutput.append('=');
-      } else {
-        textOutput.append('!');
-        textOutput.append('=');
-      }
+      ClassificationTools.printFeatureExpression(
+          selectedAttributes[model.m_attIndex],
+          ((index <= 0) ? EComparison.EQUAL : EComparison.NOT_EQUAL),
+          model.m_splitPoint, renderer, textOutput);
     } else {
-      if (index <= 0) {
-        textOutput.append('<');
-        textOutput.append('=');
-      } else {
-        textOutput.append('>');
-      }
+      ClassificationTools
+          .printFeatureExpression(selectedAttributes[model.m_attIndex],
+              ((index <= 0) ? EComparison.LESS_OR_EQUAL
+                  : EComparison.GREATER),
+              model.m_splitPoint, renderer, textOutput);
     }
-
-    textOutput.append(' ');
-    renderer.renderFeatureValue(selectedAttributes[model.m_attIndex],
-        model.m_splitPoint, textOutput);
   }
 
   /**
    * render the expression
-   * 
+   *
    * @param selectedAttributes
    *          the selected attributes
    * @param model
@@ -217,29 +211,22 @@ public final class WekaClassifierTreeAccessor {
       final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
 
-    renderer.renderShortFeatureName(selectedAttributes[model.m_attIndex],
-        textOutput);
-    textOutput.append(' ');
-
     if (trainingData.attribute(model.m_attIndex).isNominal()) {
-      textOutput.append('=');
+      ClassificationTools.printFeatureExpression(
+          selectedAttributes[model.m_attIndex], EComparison.EQUAL,
+          model.m_splitPoint, renderer, textOutput);
     } else {
-      if (index <= 0) {
-        textOutput.append('<');
-        textOutput.append('=');
-      } else {
-        textOutput.append('>');
-      }
+      ClassificationTools
+          .printFeatureExpression(selectedAttributes[model.m_attIndex],
+              ((index <= 0) ? EComparison.LESS_OR_EQUAL
+                  : EComparison.GREATER),
+              model.m_splitPoint, renderer, textOutput);
     }
-
-    textOutput.append(' ');
-    renderer.renderFeatureValue(selectedAttributes[model.m_attIndex],
-        model.m_splitPoint, textOutput);
   }
 
   /**
    * render the expression
-   * 
+   *
    * @param model
    *          the model
    * @param index
@@ -255,12 +242,12 @@ public final class WekaClassifierTreeAccessor {
       final int index, final Instances trainingData,
       final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
-    textOutput.append("true"); //$NON-NLS-1$
+    textOutput.append(ClassificationTools.RULE_ALWAYS_TRUE);
   }
 
   /**
    * render the expression
-   * 
+   *
    * @param selectedAttributes
    *          the selected attributes
    * @param model
@@ -285,7 +272,7 @@ public final class WekaClassifierTreeAccessor {
 
   /**
    * render the expression
-   * 
+   *
    * @param model
    *          the model
    * @param index
@@ -301,6 +288,6 @@ public final class WekaClassifierTreeAccessor {
       final int index, final Instances trainingData,
       final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
-    textOutput.append("true"); //$NON-NLS-1$
+    textOutput.append(ClassificationTools.RULE_ALWAYS_TRUE);
   }
 }

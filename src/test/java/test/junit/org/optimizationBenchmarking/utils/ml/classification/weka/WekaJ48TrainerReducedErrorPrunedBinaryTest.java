@@ -1,4 +1,4 @@
-package test.junit.org.optimizationBenchmarking.utils.ml.classification;
+package test.junit.org.optimizationBenchmarking.utils.ml.classification.weka;
 
 import org.optimizationBenchmarking.utils.ml.classification.impl.weka.WekaJ48TrainerReducedErrorPrunedBinary;
 
@@ -12,5 +12,4 @@ public class WekaJ48TrainerReducedErrorPrunedBinaryTest
   public WekaJ48TrainerReducedErrorPrunedBinaryTest() {
     super(WekaJ48TrainerReducedErrorPrunedBinary.getInstance());
   }
-
 }

@@ -6,8 +6,7 @@ import org.optimizationBenchmarking.utils.text.ETextCase;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
 /**
- * A classifier trainer for error-reducing pruned J48 trees with binary
- * splits in Weka.
+ * A classifier trainer for pruned J48 trees with binary splits in Weka.
  */
 public final class WekaJ48TrainerPrunedBinary extends _WekaJ48Trainer {
 
