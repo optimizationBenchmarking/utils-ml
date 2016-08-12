@@ -17,8 +17,8 @@ public final class WekaClassifierTreeAccessor {
   /**
    * Render the classifier tree to a given text output destination.
    *
-   * @param selectedAttributes
-   *          the selected attributes
+   * @param selectedFeatures
+   *          the selected features
    * @param tree
    *          the tree to render
    * @param renderer
@@ -29,18 +29,18 @@ public final class WekaClassifierTreeAccessor {
    *          the current depth
    */
   public static final void renderClassifierTree(
-      final int[] selectedAttributes, final ClassifierTree tree,
+      final int[] selectedFeatures, final ClassifierTree tree,
       final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput, final int depth) {
-    WekaClassifierTreeAccessor.__renderClassifierTree(selectedAttributes,
+    WekaClassifierTreeAccessor.__renderClassifierTree(selectedFeatures,
         tree, renderer, textOutput, depth, true);
   }
 
   /**
    * Render the classifier tree to a given text output destination.
    *
-   * @param selectedAttributes
-   *          the selected attributes
+   * @param selectedFeatures
+   *          the selected features
    * @param tree
    *          the tree to render
    * @param renderer
@@ -53,7 +53,7 @@ public final class WekaClassifierTreeAccessor {
    *          is the current line new?
    */
   private static final void __renderClassifierTree(
-      final int[] selectedAttributes, final ClassifierTree tree,
+      final int[] selectedFeatures, final ClassifierTree tree,
       final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput, final int depth,
       final boolean isNewLine) {
@@ -83,7 +83,7 @@ public final class WekaClassifierTreeAccessor {
           : ((index < end) ? ClassificationTools.RULE_ELSE_IF
               : ClassificationTools.RULE_ELSE)));
       if (index < end) {
-        WekaClassifierTreeAccessor.__renderExpression(selectedAttributes,
+        WekaClassifierTreeAccessor.__renderExpression(selectedFeatures,
             tree.m_localModel, index, tree.m_train, renderer, textOutput);
         textOutput.append(ClassificationTools.RULE_THEN);
       }
@@ -93,9 +93,8 @@ public final class WekaClassifierTreeAccessor {
             tree.m_localModel.distribution().maxClass(index), renderer,
             textOutput);
       } else {
-        WekaClassifierTreeAccessor.__renderClassifierTree(
-            selectedAttributes, tree.m_sons[index], renderer, textOutput,
-            (depth + 2), false);
+        WekaClassifierTreeAccessor.__renderClassifierTree(selectedFeatures,
+            tree.m_sons[index], renderer, textOutput, (depth + 2), false);
       }
     }
   }
@@ -103,8 +102,8 @@ public final class WekaClassifierTreeAccessor {
   /**
    * render the expression
    *
-   * @param selectedAttributes
-   *          the selected attributes
+   * @param selectedFeatures
+   *          the selected features
    * @param model
    *          the model
    * @param index
@@ -117,18 +116,18 @@ public final class WekaClassifierTreeAccessor {
    *          the destination
    */
   private static final void __renderExpression(
-      final int[] selectedAttributes, final ClassifierSplitModel model,
+      final int[] selectedFeatures, final ClassifierSplitModel model,
       final int index, final Instances trainingData,
       final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
     if (model instanceof BinC45Split) {
-      WekaClassifierTreeAccessor.__renderExpression(selectedAttributes,
+      WekaClassifierTreeAccessor.__renderExpression(selectedFeatures,
           ((BinC45Split) model), index, trainingData, renderer,
           textOutput);
       return;
     }
     if (model instanceof C45Split) {
-      WekaClassifierTreeAccessor.__renderExpression(selectedAttributes,
+      WekaClassifierTreeAccessor.__renderExpression(selectedFeatures,
           ((C45Split) model), index, trainingData, renderer, textOutput);
       return;
     }
@@ -138,7 +137,7 @@ public final class WekaClassifierTreeAccessor {
       return;
     }
     if (model instanceof NBTreeSplit) {
-      WekaClassifierTreeAccessor.__renderExpression(selectedAttributes,
+      WekaClassifierTreeAccessor.__renderExpression(selectedFeatures,
           ((NBTreeSplit) model), index, trainingData, renderer,
           textOutput);
       return;
@@ -156,8 +155,8 @@ public final class WekaClassifierTreeAccessor {
   /**
    * render the expression
    *
-   * @param selectedAttributes
-   *          the selected attributes
+   * @param selectedFeatures
+   *          the selected features
    * @param model
    *          the model
    * @param index
@@ -170,19 +169,19 @@ public final class WekaClassifierTreeAccessor {
    *          the destination
    */
   private static final void __renderExpression(
-      final int[] selectedAttributes, final BinC45Split model,
+      final int[] selectedFeatures, final BinC45Split model,
       final int index, final Instances trainingData,
       final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
 
     if (trainingData.attribute(model.m_attIndex).isNominal()) {
       ClassificationTools.printFeatureExpression(
-          selectedAttributes[model.m_attIndex],
+          selectedFeatures[model.m_attIndex],
           ((index <= 0) ? EComparison.EQUAL : EComparison.NOT_EQUAL),
           model.m_splitPoint, renderer, textOutput);
     } else {
       ClassificationTools
-          .printFeatureExpression(selectedAttributes[model.m_attIndex],
+          .printFeatureExpression(selectedFeatures[model.m_attIndex],
               ((index <= 0) ? EComparison.LESS_OR_EQUAL
                   : EComparison.GREATER),
               model.m_splitPoint, renderer, textOutput);
@@ -192,8 +191,8 @@ public final class WekaClassifierTreeAccessor {
   /**
    * render the expression
    *
-   * @param selectedAttributes
-   *          the selected attributes
+   * @param selectedFeatures
+   *          the selected features
    * @param model
    *          the model
    * @param index
@@ -206,18 +205,18 @@ public final class WekaClassifierTreeAccessor {
    *          the destination
    */
   private static final void __renderExpression(
-      final int[] selectedAttributes, final C45Split model,
-      final int index, final Instances trainingData,
+      final int[] selectedFeatures, final C45Split model, final int index,
+      final Instances trainingData,
       final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
 
     if (trainingData.attribute(model.m_attIndex).isNominal()) {
       ClassificationTools.printFeatureExpression(
-          selectedAttributes[model.m_attIndex], EComparison.EQUAL,
+          selectedFeatures[model.m_attIndex], EComparison.EQUAL,
           model.m_splitPoint, renderer, textOutput);
     } else {
       ClassificationTools
-          .printFeatureExpression(selectedAttributes[model.m_attIndex],
+          .printFeatureExpression(selectedFeatures[model.m_attIndex],
               ((index <= 0) ? EComparison.LESS_OR_EQUAL
                   : EComparison.GREATER),
               model.m_splitPoint, renderer, textOutput);
@@ -248,8 +247,8 @@ public final class WekaClassifierTreeAccessor {
   /**
    * render the expression
    *
-   * @param selectedAttributes
-   *          the selected attributes
+   * @param selectedFeatures
+   *          the selected features
    * @param model
    *          the model
    * @param index
@@ -262,11 +261,11 @@ public final class WekaClassifierTreeAccessor {
    *          the destination
    */
   private static final void __renderExpression(
-      final int[] selectedAttributes, final NBTreeSplit model,
+      final int[] selectedFeatures, final NBTreeSplit model,
       final int index, final Instances trainingData,
       final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
-    WekaClassifierTreeAccessor.__renderExpression(selectedAttributes,
+    WekaClassifierTreeAccessor.__renderExpression(selectedFeatures,
         model.m_c45S, index, trainingData, renderer, textOutput);
   }
 

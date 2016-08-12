@@ -7,6 +7,11 @@ import weka.core.DenseInstance;
 /** the internal instance class */
 final class _InternalInstance extends DenseInstance {
 
+  /** the maximum allowed value */
+  private static final double FEATURE_MAX = Double.MAX_VALUE;
+  /** the minimum allowed value */
+  private static final double FEATURE_MIN = (-_InternalInstance.FEATURE_MAX);
+
   /** the serial version UID */
   private static final long serialVersionUID = 1L;
 
@@ -20,12 +25,8 @@ final class _InternalInstance extends DenseInstance {
    */
   _InternalInstance(final ClassifiedSample sample, final int[] selection) {
     super(1, new double[selection.length + 1]);
-    int index;
-    index = (-1);
-    for (final int chosen : selection) {
-      this.m_AttValues[++index] = sample.featureValues[chosen];
-    }
-    this.m_AttValues[++index] = sample.sampleClass;
+    this._assign(sample.featureValues, selection);
+    this.m_AttValues[selection.length] = sample.sampleClass;
   }
 
   /**
@@ -45,6 +46,20 @@ final class _InternalInstance extends DenseInstance {
   }
 
   /**
+   * format a feature value for assignment
+   *
+   * @param value
+   *          the feature value
+   * @return the assignment
+   */
+  private static final double __format(final double value) {
+    return ((value <= _InternalInstance.FEATURE_MIN)
+        ? _InternalInstance.FEATURE_MIN
+        : ((value >= _InternalInstance.FEATURE_MAX)
+            ? _InternalInstance.FEATURE_MAX : value));
+  }
+
+  /**
    * copy the given data into this array
    *
    * @param data
@@ -53,16 +68,10 @@ final class _InternalInstance extends DenseInstance {
    *          the selection
    */
   final void _assign(final double[] data, final int[] selection) {
-    final int length;
     int index;
-
-    if ((length = this.m_AttValues.length) >= selection.length) {
-      System.arraycopy(data, 0, this.m_AttValues, 0, length);
-    } else {
-      index = (-1);
-      for (final int chosen : selection) {
-        this.m_AttValues[++index] = data[chosen];
-      }
+    index = (-1);
+    for (final int chosen : selection) {
+      this.m_AttValues[++index] = _InternalInstance.__format(data[chosen]);
     }
   }
 }

@@ -20,25 +20,24 @@ final class _WekaREPTreeClassifier extends _WekaClassifier<REPTree> {
   /**
    * Create the Weka J48 classifier wrapper
    *
-   * @param selectedAttributes
-   *          the selected attributes
+   * @param selectedFeatures
+   *          the selected features
    * @param classifier
    *          the classifier
    * @param instance
    *          to use
    */
-  _WekaREPTreeClassifier(final int[] selectedAttributes,
+  _WekaREPTreeClassifier(final int[] selectedFeatures,
       final REPTree classifier, final _InternalInstance instance) {
-    super(selectedAttributes, classifier, instance);
+    super(selectedFeatures, classifier, instance);
   }
 
   /** {@inheritDoc} */
   @Override
   public final void render(final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
-    WekaTreeAccessor.renderREPTreeClassifier(this,
-        this.m_selectedAttributes, this.m_classifier, renderer,
-        textOutput);
+    WekaTreeAccessor.renderREPTreeClassifier(this, this.m_selectedFeatures,
+        this.m_classifier, renderer, textOutput);
   }
 
   /**

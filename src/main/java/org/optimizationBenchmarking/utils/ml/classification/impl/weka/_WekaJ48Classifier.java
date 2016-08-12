@@ -40,23 +40,23 @@ final class _WekaJ48Classifier extends _WekaClassifier<J48> {
   /**
    * Create the Weka J48 classifier wrapper
    *
-   * @param selectedAttributes
-   *          the selected attributes
+   * @param selectedFeatures
+   *          the selected features
    * @param classifier
    *          the classifier
    * @param instance
    *          to use
    */
-  _WekaJ48Classifier(final int[] selectedAttributes, final J48 classifier,
+  _WekaJ48Classifier(final int[] selectedFeatures, final J48 classifier,
       final _InternalInstance instance) {
-    super(selectedAttributes, classifier, instance);
+    super(selectedFeatures, classifier, instance);
   }
 
   /** {@inheritDoc} */
   @Override
   public final void render(final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
-    WekaTreeAccessor.renderJ48Classifier(this, this.m_selectedAttributes,
+    WekaTreeAccessor.renderJ48Classifier(this, this.m_selectedFeatures,
         this.m_classifier, renderer, textOutput);
   }
 

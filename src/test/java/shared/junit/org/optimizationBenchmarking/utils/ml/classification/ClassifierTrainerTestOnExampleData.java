@@ -265,4 +265,17 @@ public abstract class ClassifierTrainerTestOnExampleData
     this.applyClassifierTrainerAccuracy(
         ClassifierExampleDatasets.NOMINAL_6);
   }
+
+  /** test on the NOMINAL_7 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_NOMINAL_7_MCC() {
+    this.applyClassifierTrainerMCC(ClassifierExampleDatasets.NOMINAL_7);
+  }
+
+  /** test on the NOMINAL_7 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_NOMINAL_7_Accuracy() {
+    this.applyClassifierTrainerAccuracy(
+        ClassifierExampleDatasets.NOMINAL_7);
+  }
 }

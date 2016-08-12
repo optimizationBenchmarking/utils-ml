@@ -52,8 +52,8 @@ class _WekaREPTreeClassifierTrainingJob
   @Override
   final _WekaClassifier<REPTree> _createClassifier(
       final REPTree classifier, final _InternalInstance instance) {
-    return new _WekaREPTreeClassifier(this.m_selectedAttributes,
-        classifier, instance);
+    return new _WekaREPTreeClassifier(this.m_selectedFeatures, classifier,
+        instance);
   }
 
   /** {@inheritDoc} */

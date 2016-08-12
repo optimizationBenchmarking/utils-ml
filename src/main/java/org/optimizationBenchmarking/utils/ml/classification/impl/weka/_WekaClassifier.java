@@ -54,16 +54,16 @@ abstract class _WekaClassifier<CT extends Classifier>
   /**
    * Create the weka classifier wrapper
    *
-   * @param selectedAttributes
-   *          the selected attributes
+   * @param selectedFeatures
+   *          the selected features
    * @param classifier
    *          the classifier
    * @param instance
    *          to use
    */
-  _WekaClassifier(final int[] selectedAttributes, final CT classifier,
+  _WekaClassifier(final int[] selectedFeatures, final CT classifier,
       final _InternalInstance instance) {
-    super(selectedAttributes);
+    super(selectedFeatures);
     if (classifier == null) {
       throw new IllegalArgumentException("Classifier must not be null."); //$NON-NLS-1$
     }
@@ -78,7 +78,7 @@ abstract class _WekaClassifier<CT extends Classifier>
   /** {@inheritDoc} */
   @Override
   public final int classify(final double[] features) {
-    this.m_instance._assign(features, this.m_selectedAttributes);
+    this.m_instance._assign(features, this.m_selectedFeatures);
 
     try {
       return ((int) (0.5d

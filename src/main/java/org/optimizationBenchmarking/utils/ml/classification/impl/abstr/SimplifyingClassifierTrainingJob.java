@@ -11,8 +11,8 @@ import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrai
  */
 public abstract class SimplifyingClassifierTrainingJob
     extends ClassifierTrainingJob {
-  /** the selected attributes */
-  protected int[] m_selectedAttributes;
+  /** the selected features */
+  protected int[] m_selectedFeatures;
 
   /**
    * Create the classifier training job
@@ -29,15 +29,15 @@ public abstract class SimplifyingClassifierTrainingJob
   @Override
   final IClassifierTrainingResult _invokeDoCall() {
     final IClassifierTrainingResult result;
-    int index, attributeSize;
-    int[] attributes;
+    int index, featureSize;
+    int[] features;
     int intValue;
     boolean booleanValue;
     double doubleValue;
 
-    attributes = new int[this.m_featureTypes.length];
+    features = new int[this.m_featureTypes.length];
     index = (-1);
-    attributeSize = 0;
+    featureSize = 0;
     outer: for (final EFeatureType type : this.m_featureTypes) {
       ++index;
 
@@ -82,23 +82,23 @@ public abstract class SimplifyingClassifierTrainingJob
         }
       }
 
-      attributes[attributeSize++] = index;
+      features[featureSize++] = index;
     }
 
-    if (attributeSize < attributes.length) {
-      if (attributeSize <= 0) {
+    if (featureSize < features.length) {
+      if (featureSize <= 0) {
         return new _AllTheSameClass(
             ClassificationTools.getMostFrequentClass(this.m_knownSamples));
       }
-      this.m_selectedAttributes = new int[attributeSize];
-      System.arraycopy(attributes, 0, this.m_selectedAttributes, 0,
-          attributeSize);
+      this.m_selectedFeatures = new int[featureSize];
+      System.arraycopy(features, 0, this.m_selectedFeatures, 0,
+          featureSize);
     } else {
-      this.m_selectedAttributes = attributes;
+      this.m_selectedFeatures = features;
     }
 
     result = super._invokeDoCall();
-    this.m_selectedAttributes = null;
+    this.m_selectedFeatures = null;
     return result;
   }
 }

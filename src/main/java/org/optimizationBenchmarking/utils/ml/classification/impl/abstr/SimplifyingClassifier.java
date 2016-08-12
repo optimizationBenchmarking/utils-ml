@@ -7,18 +7,22 @@ import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 /** A base class for simplifying classifiers. */
 public abstract class SimplifyingClassifier extends Classifier {
 
-  /** the selected attribute indexes */
-  protected final int[] m_selectedAttributes;
+  /** the selected feature indexes */
+  protected final int[] m_selectedFeatures;
 
   /**
    * create
    *
-   * @param selectedAttributes
-   *          the selected attributes
+   * @param selectedFeatures
+   *          the selected features
    */
-  protected SimplifyingClassifier(final int[] selectedAttributes) {
+  protected SimplifyingClassifier(final int[] selectedFeatures) {
     super();
-    this.m_selectedAttributes = selectedAttributes;
+    if ((selectedFeatures == null) || (selectedFeatures.length <= 0)) {
+      throw new IllegalArgumentException(//
+          "Selected features cannot be null or empty."); //$NON-NLS-1$
+    }
+    this.m_selectedFeatures = selectedFeatures;
   }
 
   /** {@inheritDoc} */

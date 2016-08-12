@@ -73,7 +73,7 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
   @Override
   protected final IClassifierTrainingResult doCall()
       throws IllegalArgumentException {
-    ArrayList<Attribute> attributes;
+    ArrayList<Attribute> features;
     ArrayList<String> baseValues;
     Instances instances;
     String name;
@@ -85,42 +85,42 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
     CT wekaClassifier;
     String[] values;
 
-    attributes = new ArrayList<>();
+    features = new ArrayList<>();
     index = 0;
     name = null;
     baseValues = new ArrayList<>();
 
-    // Create the attribute sets.
-    for (index = 0; index <= this.m_selectedAttributes.length; index++) {
+    // Create the feature sets.
+    for (index = 0; index <= this.m_selectedFeatures.length; index++) {
 
       for (index2 = baseValues.size(); index2 <= index; index2++) {
         baseValues.add(_WekaClassifierTrainingJob.__name(index2));
       }
       name = baseValues.get(index);
 
-      if (index < this.m_selectedAttributes.length) {
-        // OK, this is a normal attribute
-        if (this.m_featureTypes[this.m_selectedAttributes[index]] == EFeatureType.NUMERICAL) {
-          // Numerical attributes just need a name, nothing else
-          attributes.add(new Attribute(name));
+      if (index < this.m_selectedFeatures.length) {
+        // OK, this is a normal feature
+        if (this.m_featureTypes[this.m_selectedFeatures[index]] == EFeatureType.NUMERICAL) {
+          // Numerical features just need a name, nothing else
+          features.add(new Attribute(name));
           continue;
         }
 
         // Find the number of different values of the binary or nominal
-        // attribute. Such attributes are index values starting at zero. If
+        // feature. Such features are index values starting at zero. If
         // the maximum value is "max", then there are values like 0...max,
         // i.e., max+1 in total.
         max = 0;
         for (final ClassifiedSample sample : this.m_knownSamples) {
           current = ClassificationTools.featureDoubleToNominal(
-              sample.featureValues[this.m_selectedAttributes[index]]);
+              sample.featureValues[this.m_selectedFeatures[index]]);
           if (current > max) {
             max = current;
           }
         }
       } else {
-        // OK, we have class attribute: This is basically a nominal
-        // attribute, with values starting at 0 and going to max,
+        // OK, we have class feature: This is basically a nominal
+        // feature, with values starting at 0 and going to max,
         // indicating max+1 classes.
         max = 0;
         for (final ClassifiedSample sample : this.m_knownSamples) {
@@ -141,23 +141,22 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
         values[index2] = baseValues.get(index2);
       }
 
-      attributes.add(new Attribute(name, new ArrayListView<>(values)));
+      features.add(new Attribute(name, new ArrayListView<>(values)));
     }
 
     // Now build the instances set.
-    instances = new Instances(name, attributes,
-        this.m_knownSamples.length);
-    instances.setClassIndex(this.m_selectedAttributes.length);
+    instances = new Instances(name, features, this.m_knownSamples.length);
+    instances.setClassIndex(this.m_selectedFeatures.length);
     for (final ClassifiedSample sample : this.m_knownSamples) {
-      instances
-          .add(new _InternalInstance(sample, this.m_selectedAttributes));
+      instances.add(//
+          new _InternalInstance(sample, this.m_selectedFeatures));
     }
 
     // Having built all the data, we can train the classifier.
     wekaClassifier = this._train(instances);
     instances.clear();
 
-    instances.add(new _InternalInstance(this.m_selectedAttributes.length));
+    instances.add(new _InternalInstance(this.m_selectedFeatures.length));
     classifier = this._createClassifier(wekaClassifier,
         ((_InternalInstance) (instances.get(0))));
 

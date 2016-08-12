@@ -29,8 +29,8 @@ public final class WekaTreeAccessor {
    *
    * @param name
    *          the classifier's name
-   * @param selectedAttributes
-   *          the selected attributes
+   * @param selectedFeatures
+   *          the selected features
    * @param tree
    *          the tree to render
    * @param renderer
@@ -43,7 +43,7 @@ public final class WekaTreeAccessor {
    *          , in which case you should do something cool...)
    */
   public static final void renderJ48Classifier(
-      final ISemanticComponent name, final int[] selectedAttributes,
+      final ISemanticComponent name, final int[] selectedFeatures,
       final J48 tree, final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
     final ILabel label;
@@ -64,7 +64,7 @@ public final class WekaTreeAccessor {
           caption.append('.');
         }
         try (final IText codeBody = code.body()) {
-          WekaTreeAccessor.__renderJ48Classifier(selectedAttributes, tree,
+          WekaTreeAccessor.__renderJ48Classifier(selectedFeatures, tree,
               renderer, codeBody);
         }
       }
@@ -74,7 +74,7 @@ public final class WekaTreeAccessor {
           textOutput, ETextCase.IN_SENTENCE);
       textOutput.append('.');
       textOutput.appendLineBreak();
-      WekaTreeAccessor.__renderJ48Classifier(selectedAttributes, tree,
+      WekaTreeAccessor.__renderJ48Classifier(selectedFeatures, tree,
           renderer, textOutput);
     }
   }
@@ -82,8 +82,8 @@ public final class WekaTreeAccessor {
   /**
    * Render the J48 classifier tree to a given text output destination.
    *
-   * @param selectedAttributes
-   *          the selected attributes
+   * @param selectedFeatures
+   *          the selected features
    * @param tree
    *          the tree to render
    * @param renderer
@@ -92,10 +92,10 @@ public final class WekaTreeAccessor {
    *          the text output destination
    */
   private static final void __renderJ48Classifier(
-      final int[] selectedAttributes, final J48 tree,
+      final int[] selectedFeatures, final J48 tree,
       final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
-    WekaClassifierTreeAccessor.renderClassifierTree(selectedAttributes,
+    WekaClassifierTreeAccessor.renderClassifierTree(selectedFeatures,
         tree.m_root, renderer, textOutput, 0);
   }
 
@@ -104,8 +104,8 @@ public final class WekaTreeAccessor {
    *
    * @param name
    *          the classifier's name
-   * @param selectedAttributes
-   *          the selected attributes
+   * @param selectedFeatures
+   *          the selected features
    * @param tree
    *          the tree to render
    * @param renderer
@@ -118,7 +118,7 @@ public final class WekaTreeAccessor {
    *          , in which case you should do something cool...)
    */
   public static final void renderREPTreeClassifier(
-      final ISemanticComponent name, final int[] selectedAttributes,
+      final ISemanticComponent name, final int[] selectedFeatures,
       final REPTree tree, final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
     final ILabel label;
@@ -139,7 +139,7 @@ public final class WekaTreeAccessor {
           caption.append('.');
         }
         try (final IText codeBody = code.body()) {
-          WekaTreeAccessor.__renderREPTreeClassifier(selectedAttributes,
+          WekaTreeAccessor.__renderREPTreeClassifier(selectedFeatures,
               tree, renderer, codeBody);
         }
       }
@@ -149,7 +149,7 @@ public final class WekaTreeAccessor {
           textOutput, ETextCase.IN_SENTENCE);
       textOutput.append('.');
       textOutput.appendLineBreak();
-      WekaTreeAccessor.__renderREPTreeClassifier(selectedAttributes, tree,
+      WekaTreeAccessor.__renderREPTreeClassifier(selectedFeatures, tree,
           renderer, textOutput);
     }
   }
@@ -157,8 +157,8 @@ public final class WekaTreeAccessor {
   /**
    * Render the REPTree classifier tree to a given text output destination.
    *
-   * @param selectedAttributes
-   *          the selected attributes
+   * @param selectedFeatures
+   *          the selected features
    * @param tree
    *          the tree to render
    * @param renderer
@@ -167,18 +167,18 @@ public final class WekaTreeAccessor {
    *          the text output destination
    */
   private static final void __renderREPTreeClassifier(
-      final int[] selectedAttributes, final REPTree tree,
+      final int[] selectedFeatures, final REPTree tree,
       final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
-    WekaTreeAccessor.__renderREPTreeClassifier(selectedAttributes,
+    WekaTreeAccessor.__renderREPTreeClassifier(selectedFeatures,
         tree.m_Tree, tree.m_Tree, renderer, textOutput, 0, true);
   }
 
   /**
    * Render the REPTree classifier tree to a given text output destination.
    *
-   * @param selectedAttributes
-   *          the selected attributes
+   * @param selectedFeatures
+   *          the selected features
    * @param tree
    *          the tree to render
    * @param parent
@@ -193,7 +193,7 @@ public final class WekaTreeAccessor {
    *          is the current line new?
    */
   private static final void __renderREPTreeClassifier(
-      final int[] selectedAttributes, final REPTree.Tree tree,
+      final int[] selectedFeatures, final REPTree.Tree tree,
       final REPTree.Tree parent,
       final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput, final int depth,
@@ -233,14 +233,14 @@ public final class WekaTreeAccessor {
         textOutput.append(((index <= 0) ? ClassificationTools.RULE_IF
             : ClassificationTools.RULE_ELSE_IF));
         ClassificationTools.printFeatureExpression(
-            selectedAttributes[tree.m_Attribute], EComparison.EQUAL, index,
+            selectedFeatures[tree.m_Attribute], EComparison.EQUAL, index,
             renderer, textOutput);
         textOutput.append(ClassificationTools.RULE_THEN);
       } else {
         if (index <= 0) {
           textOutput.append(ClassificationTools.RULE_IF);
           ClassificationTools.printFeatureExpression(
-              selectedAttributes[tree.m_Attribute], EComparison.LESS,
+              selectedFeatures[tree.m_Attribute], EComparison.LESS,
               tree.m_SplitPoint, renderer, textOutput);
           textOutput.append(ClassificationTools.RULE_THEN);
         } else {
@@ -263,7 +263,7 @@ public final class WekaTreeAccessor {
                 renderer, textOutput);
 
       } else {
-        WekaTreeAccessor.__renderREPTreeClassifier(selectedAttributes,
+        WekaTreeAccessor.__renderREPTreeClassifier(selectedFeatures,
             tree.m_Successors[index], tree, renderer, textOutput,
             (depth + 2), false);
       }

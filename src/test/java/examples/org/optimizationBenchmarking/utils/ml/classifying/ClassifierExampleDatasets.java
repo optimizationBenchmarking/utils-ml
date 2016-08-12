@@ -102,10 +102,7 @@ public final class ClassifierExampleDatasets {
           new ClassifiedSample(1, 0, 1, 6),//
   });
 
-  /**
-   * the nominal example 6: Warning: This currently does not work with
-   * Weka!
-   */
+  /** the nominal example 6 */
   public static final ClassifierExampleDataset NOMINAL_6 = new ClassifierExampleDataset(//
       new EFeatureType[] { EFeatureType.NOMINAL, EFeatureType.NOMINAL,
           EFeatureType.NOMINAL, EFeatureType.NOMINAL }, //
@@ -116,5 +113,19 @@ public final class ClassifierExampleDatasets {
           new ClassifiedSample(1, 0, 1, 4, 0), //
           new ClassifiedSample(1, 0, 1, 5, 0), //
           new ClassifiedSample(1, 0, 1, 6, 0),//
+  });
+
+  /** the nominal example 7 */
+  public static final ClassifierExampleDataset NOMINAL_7 = new ClassifierExampleDataset(//
+      new EFeatureType[] { EFeatureType.NOMINAL, EFeatureType.NOMINAL,
+          EFeatureType.NOMINAL, EFeatureType.NOMINAL,
+          EFeatureType.NOMINAL }, //
+      new ClassifiedSample[] { //
+          new ClassifiedSample(0, 0, 1, 0, 1, 0), //
+          new ClassifiedSample(0, 0, 1, 0, 2, 0), //
+          new ClassifiedSample(0, 0, 1, 0, 3, 0), //
+          new ClassifiedSample(1, 0, 0, 1, 4, 0), //
+          new ClassifiedSample(1, 0, 0, 1, 5, 0), //
+          new ClassifiedSample(1, 0, 0, 1, 6, 0),//
   });
 }
