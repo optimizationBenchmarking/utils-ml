@@ -92,7 +92,7 @@ public final class ESLSFitter extends OptimizationBasedFitter {
     next = OptimizationBasedFitter.printLevenbergMarcquardt(next, textOut,
         true);
     textOut.append('/');
-    next = OptimizationBasedFitter.printGaussNewton(next, textOut, false);
+    next = OptimizationBasedFitter.printGaussNewton(next, textOut, true);
     textOut.append(' ');
     return next.appendWord("hybrid", textOut); //$NON-NLS-1$
   }
@@ -103,7 +103,7 @@ public final class ESLSFitter extends OptimizationBasedFitter {
    * @return the instance of the ES/LS-based curve fitter
    */
   public static final ESLSFitter getInstance() {
-    return _DECurveFitterHolder.INSTANCE;
+    return __ESLSCurveFitterHolder.INSTANCE;
   }
 
   /** {@inheritDoc} */
@@ -113,7 +113,7 @@ public final class ESLSFitter extends OptimizationBasedFitter {
   }
 
   /** the instance holder */
-  private static final class _DECurveFitterHolder {
+  private static final class __ESLSCurveFitterHolder {
     /** the shared instance */
     static final ESLSFitter INSTANCE = new ESLSFitter();
   }

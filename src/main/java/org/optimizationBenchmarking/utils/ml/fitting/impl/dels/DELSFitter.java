@@ -73,9 +73,9 @@ public final class DELSFitter extends OptimizationBasedFitter {
     next = OptimizationBasedFitter.printLevenbergMarcquardt(next, textOut,
         true);
     textOut.append('/');
-    next = OptimizationBasedFitter.printGaussNewton(next, textOut, false);
+    next = OptimizationBasedFitter.printGaussNewton(next, textOut, true);
     textOut.append('-');
-    next = OptimizationBasedFitter.printNelderMead(next, textOut);
+    next = OptimizationBasedFitter.printNelderMead(next, textOut, true);
     textOut.append(' ');
     return next.appendWord("hybrid", textOut); //$NON-NLS-1$
   }
@@ -86,7 +86,7 @@ public final class DELSFitter extends OptimizationBasedFitter {
    * @return the instance of the DE/LS-based curve fitter
    */
   public static final DELSFitter getInstance() {
-    return _DECurveFitterHolder.INSTANCE;
+    return __DECurveFitterHolder.INSTANCE;
   }
 
   /** {@inheritDoc} */
@@ -96,7 +96,7 @@ public final class DELSFitter extends OptimizationBasedFitter {
   }
 
   /** the instance holder */
-  private static final class _DECurveFitterHolder {
+  private static final class __DECurveFitterHolder {
     /** the shared instance */
     static final DELSFitter INSTANCE = new DELSFitter();
   }

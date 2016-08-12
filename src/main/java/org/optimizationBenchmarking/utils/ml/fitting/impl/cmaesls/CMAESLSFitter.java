@@ -32,7 +32,7 @@ public final class CMAESLSFitter extends OptimizationBasedFitter {
    * @return the instance of the CMA-ES/LS-based curve fitter
    */
   public static final CMAESLSFitter getInstance() {
-    return _DECurveFitterHolder.INSTANCE;
+    return __CMAESLSCurveFitterHolder.INSTANCE;
   }
 
   /** {@inheritDoc} */
@@ -56,7 +56,7 @@ public final class CMAESLSFitter extends OptimizationBasedFitter {
   }
 
   /** the instance holder */
-  private static final class _DECurveFitterHolder {
+  private static final class __CMAESLSCurveFitterHolder {
     /** the shared instance */
     static final CMAESLSFitter INSTANCE = new CMAESLSFitter();
   }

@@ -39,7 +39,7 @@ public final class LSSimplexFitter extends OptimizationBasedFitter {
    * @return the instance of the LS-Simplex-based curve fitter
    */
   public static final LSSimplexFitter getInstance() {
-    return _DECurveFitterHolder.INSTANCE;
+    return __LSSimplexCurveFitterHolder.INSTANCE;
   }
 
   /** {@inheritDoc} */
@@ -51,9 +51,9 @@ public final class LSSimplexFitter extends OptimizationBasedFitter {
     next = OptimizationBasedFitter.printLevenbergMarcquardt(textCase,
         textOut, true);
     textOut.append('/');
-    next = OptimizationBasedFitter.printGaussNewton(next, textOut, false);
+    next = OptimizationBasedFitter.printGaussNewton(next, textOut, true);
     textOut.append('-');
-    next = OptimizationBasedFitter.printNelderMead(next, textOut);
+    next = OptimizationBasedFitter.printNelderMead(next, textOut, true);
     textOut.append('-');
     next = OptimizationBasedFitter.printBOBYQA(next, textOut, true);
     textOut.append(' ');
@@ -67,7 +67,7 @@ public final class LSSimplexFitter extends OptimizationBasedFitter {
   }
 
   /** the instance holder */
-  private static final class _DECurveFitterHolder {
+  private static final class __LSSimplexCurveFitterHolder {
     /** the shared instance */
     static final LSSimplexFitter INSTANCE = new LSSimplexFitter();
   }

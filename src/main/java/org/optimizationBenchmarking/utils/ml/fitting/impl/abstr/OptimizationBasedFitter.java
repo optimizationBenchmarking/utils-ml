@@ -139,7 +139,7 @@ public abstract class OptimizationBasedFitter extends FunctionFitter {
       "10.1093/comjnl/7.4.308"); //$NON-NLS-1$
 
   /** the name of the Levenberg–Marquardt algorithm */
-  protected static final String NAME_LEVENBERG_MARCQUARDT = "Levenberg–Marquardt"; //$NON-NLS-1$
+  protected static final String NAME_LEVENBERG_MARCQUARDT = "Levenberg-Marquardt"; //$NON-NLS-1$
   /** the name of the Gauss-Newton algorithm */
   protected static final String NAME_GAUSS_NEWTON = "Gauss-Newton"; //$NON-NLS-1$
   /** the name of the BOBYQA algorithm in short */
@@ -319,8 +319,8 @@ public abstract class OptimizationBasedFitter extends FunctionFitter {
    */
   protected static final ETextCase printCMAES(final ETextCase textCase,
       final ITextOutput textOut, final boolean useShortName) {
-    textOut.append(useShortName ? OptimizationBasedFitter.NAME_BOBYQA_SHORT
-        : OptimizationBasedFitter.NAME_BOBYQA_LONG);
+    textOut.append(useShortName ? OptimizationBasedFitter.NAME_CMAES_SHORT
+        : OptimizationBasedFitter.NAME_CMAES_LONG);
 
     if (textOut instanceof IComplexText) {
       try (final BibliographyBuilder builder = ((IComplexText) textOut)
@@ -339,16 +339,23 @@ public abstract class OptimizationBasedFitter extends FunctionFitter {
    *          the text case
    * @param textOut
    *          the text output destination
+   * @param useShortName
+   *          use the short name?
    * @return the next case
    */
   protected static final ETextCase printNelderMead(
-      final ETextCase textCase, final ITextOutput textOut) {
+      final ETextCase textCase, final ITextOutput textOut,
+      final boolean useShortName) {
     ETextCase next;
 
     textOut.append(OptimizationBasedFitter.NAME_NELDER_MEAD);
-    textOut.append(' ');
-    next = textCase.nextCase()
-        .appendWord(OptimizationBasedFitter.NAME_ALGORITHM, textOut);
+    if (!useShortName) {
+      textOut.append(' ');
+      next = textCase.nextCase()
+          .appendWord(OptimizationBasedFitter.NAME_ALGORITHM, textOut);
+    } else {
+      next = textCase.nextCase();
+    }
 
     if (textOut instanceof IComplexText) {
       try (final BibliographyBuilder builder = ((IComplexText) textOut)
@@ -371,7 +378,8 @@ public abstract class OptimizationBasedFitter extends FunctionFitter {
    */
   protected static final ETextCase printSimplex(final ETextCase textCase,
       final ITextOutput textOut) {
-    return OptimizationBasedFitter.printNelderMead(textCase, textOut);
+    return OptimizationBasedFitter.printNelderMead(textCase, textOut,
+        true);
   }
 
   /** {@inheritDoc} */
