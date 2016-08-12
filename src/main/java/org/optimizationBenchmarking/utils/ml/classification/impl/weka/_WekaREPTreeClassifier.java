@@ -75,14 +75,9 @@ final class _WekaREPTreeClassifier extends _WekaClassifier<REPTree> {
       final ETextCase textCase, final boolean pruningOff,
       final boolean addInfos) {
     ETextCase nextCase;
-    if (pruningOff) {
-      nextCase = textCase.appendWord("unpruned", textOut); //$NON-NLS-1$
-    } else {
-      nextCase = textCase;
-    }
 
     textOut.append("Weka's REPTree"); //$NON-NLS-1$
-    nextCase = nextCase.appendWord(" classifier", textOut); //$NON-NLS-1$
+    nextCase = textCase.appendWord(" classifier", textOut); //$NON-NLS-1$
 
     if (addInfos) {
       if (textOut instanceof IComplexText) {
@@ -99,7 +94,9 @@ final class _WekaREPTreeClassifier extends _WekaClassifier<REPTree> {
       textOut.append("3.8)");//$NON-NLS-1$
     }
 
-    if (!pruningOff) {
+    if (pruningOff) {
+      textOut.append(" without pruning");//$NON-NLS-1$
+    } else {
       textOut.append(" with pruning");//$NON-NLS-1$
     }
 

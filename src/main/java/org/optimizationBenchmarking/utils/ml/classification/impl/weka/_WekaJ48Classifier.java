@@ -102,7 +102,7 @@ final class _WekaJ48Classifier extends _WekaClassifier<J48> {
       final boolean isBinary, final boolean addInfos) {
     ETextCase nextCase;
     if (pruningMode == _WekaJ48ClassifierTrainingJob.PRUNING_OFF) {
-      nextCase = textCase.appendWord("unpruned", textOut); //$NON-NLS-1$
+      nextCase = textCase.appendWord("unpruned ", textOut); //$NON-NLS-1$
     } else {
       nextCase = textCase;
     }
