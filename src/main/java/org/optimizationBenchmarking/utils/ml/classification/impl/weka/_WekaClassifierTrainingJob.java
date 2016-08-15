@@ -65,7 +65,7 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
    * @return the name
    */
   private static final String __name(final int index) {
-    return ('v' + Integer.toString(index, Character.MAX_RADIX));
+    return Integer.toString(index, Character.MAX_RADIX);
   }
 
   /** {@inheritDoc} */

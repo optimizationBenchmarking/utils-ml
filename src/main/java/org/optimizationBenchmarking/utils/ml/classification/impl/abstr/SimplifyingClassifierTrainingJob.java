@@ -85,7 +85,7 @@ public abstract class SimplifyingClassifierTrainingJob
       features[featureSize++] = index;
     }
 
-    if (featureSize < features.length) {
+    if ((featureSize < features.length) || (featureSize <= 0)) {
       if (featureSize <= 0) {
         return new _AllTheSameClass(
             ClassificationTools.getMostFrequentClass(this.m_knownSamples));

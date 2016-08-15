@@ -39,10 +39,22 @@ final class _InternalInstance extends DenseInstance {
     super(1, new double[length]);
   }
 
+  /**
+   * create
+   *
+   * @param copy
+   *          the instance to copy
+   */
+  _InternalInstance(final _InternalInstance copy) {
+    super(copy.m_Weight, copy.m_AttValues);
+  }
+
   /** {@inheritDoc} */
   @Override
   public final _InternalInstance copy() {
-    return this;
+    final _InternalInstance result = new _InternalInstance(this);
+    result.m_Dataset = this.m_Dataset;
+    return result;
   }
 
   /**
@@ -53,6 +65,10 @@ final class _InternalInstance extends DenseInstance {
    * @return the assignment
    */
   private static final double __format(final double value) {
+    if (value != value) {
+      throw new IllegalArgumentException(
+          "Feature value cannot be " + value); //$NON-NLS-1$
+    }
     return ((value <= _InternalInstance.FEATURE_MIN)
         ? _InternalInstance.FEATURE_MIN
         : ((value >= _InternalInstance.FEATURE_MAX)

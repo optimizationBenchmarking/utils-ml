@@ -215,10 +215,11 @@ public final class WekaTreeAccessor {
       } else {
         textOutput.append(' ');
       }
-      ClassificationTools
-          .printClass(((tree.m_Info.classAttribute().isNumeric())
-              ? ClassificationTools.doubleToClass(currentProbs[0])
-              : Utils.maxIndex(currentProbs)), renderer, textOutput);
+      ClassificationTools.printClass(//
+          ((tree.m_Info.classAttribute().isNumeric())//
+              ? ClassificationTools.doubleToClass(currentProbs[0])//
+              : Utils.maxIndex(currentProbs)),
+          renderer, textOutput);
       return;
     }
 
@@ -232,14 +233,14 @@ public final class WekaTreeAccessor {
       if (tree.m_Info.attribute(tree.m_Attribute).isNominal()) {
         textOutput.append(((index <= 0) ? ClassificationTools.RULE_IF
             : ClassificationTools.RULE_ELSE_IF));
-        ClassificationTools.printFeatureExpression(
-            selectedFeatures[tree.m_Attribute], EComparison.EQUAL, index,
-            renderer, textOutput);
+        ClassificationTools.printFeatureExpression(//
+            selectedFeatures[tree.m_Attribute], //
+            EComparison.EQUAL, index, renderer, textOutput);
         textOutput.append(ClassificationTools.RULE_THEN);
       } else {
         if (index <= 0) {
           textOutput.append(ClassificationTools.RULE_IF);
-          ClassificationTools.printFeatureExpression(
+          ClassificationTools.printFeatureExpression(//
               selectedFeatures[tree.m_Attribute], EComparison.LESS,
               tree.m_SplitPoint, renderer, textOutput);
           textOutput.append(ClassificationTools.RULE_THEN);
@@ -256,9 +257,9 @@ public final class WekaTreeAccessor {
         }
 
         ClassificationTools
-            .printClass(
-                ((tree.m_Info.classAttribute().isNumeric())
-                    ? ClassificationTools.doubleToClass(successorProbs[0])
+            .printClass(//
+                ((tree.m_Info.classAttribute().isNumeric())//
+                    ? ClassificationTools.doubleToClass(successorProbs[0])//
                     : Utils.maxIndex(successorProbs)),
                 renderer, textOutput);
 

@@ -6,6 +6,7 @@ import java.util.Random;
 
 import org.optimizationBenchmarking.utils.comparison.EComparison;
 import org.optimizationBenchmarking.utils.error.ErrorUtils;
+import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.math.combinatorics.Shuffle;
 import org.optimizationBenchmarking.utils.math.functions.numeric.CeilDiv;
 import org.optimizationBenchmarking.utils.ml.classification.spec.ClassifiedSample;
@@ -31,6 +32,12 @@ public final class ClassificationTools {
 
   /** the default number of cross validation elements */
   private static final int DEFAULT_CROSSVALIDATION_FOLDS = 10;
+
+  /**
+   * the maximum value a nominal feature is allowed to take on:
+   * {@value} (the minimum is {@code 0})
+   */
+  public static final int MAX_NOMINAL = ClassifiedSample.MAX_CLASS;
 
   /**
    * Can we cluster the given samples trivially? If so, return a job which
@@ -69,6 +76,17 @@ public final class ClassificationTools {
   }
 
   /**
+   * convert a {@code double} value to {@code int}
+   *
+   * @param value
+   *          the value
+   * @return the integer
+   */
+  private static final int __toInt(final double value) {
+    return ((int) (0.5d + value));
+  }
+
+  /**
    * Convert the index of a nominal value in the sorted list of values to a
    * {@code double}
    *
@@ -77,6 +95,10 @@ public final class ClassificationTools {
    * @return the {@code double}
    */
   public static final double featureNominalToDouble(final int nominal) {
+    if ((nominal <= 0) || (nominal > ClassificationTools.MAX_NOMINAL)) {
+      throw new IllegalArgumentException(
+          "Nominal feature cannot be " + nominal); //$NON-NLS-1$
+    }
     return nominal;
   }
 
@@ -89,7 +111,12 @@ public final class ClassificationTools {
    * @return the nominal value index
    */
   public static final int featureDoubleToNominal(final double nominal) {
-    return ((int) (0.5d + nominal));
+    if ((nominal != nominal) || (nominal < 0d)
+        || (nominal > ClassificationTools.MAX_NOMINAL)) {
+      throw new IllegalArgumentException("Nominal feature cannot be " //$NON-NLS-1$
+          + nominal);
+    }
+    return ClassificationTools.__toInt(nominal);
   }
 
   /**
@@ -100,7 +127,10 @@ public final class ClassificationTools {
    * @return the {@code double}
    */
   public static final double classToDouble(final int clazz) {
-    return ClassificationTools.featureNominalToDouble(clazz);
+    if ((clazz <= 0) || (clazz > ClassifiedSample.MAX_CLASS)) {
+      throw new IllegalArgumentException("Class value cannot be " + clazz); //$NON-NLS-1$
+    }
+    return clazz;
   }
 
   /**
@@ -111,7 +141,13 @@ public final class ClassificationTools {
    * @return the {@code double}
    */
   public static final int doubleToClass(final double clazz) {
-    return ClassificationTools.featureDoubleToNominal(clazz);
+    if ((clazz != clazz) || (clazz < 0d)
+        || (clazz > ClassifiedSample.MAX_CLASS)) {
+      throw new IllegalArgumentException("Class feature cannot be " //$NON-NLS-1$
+          + clazz);
+    }
+
+    return ClassificationTools.__toInt(clazz);
   }
 
   /**
@@ -133,6 +169,10 @@ public final class ClassificationTools {
    * @return the {@code boolean} value index
    */
   public static final boolean featureDoubleToBoolean(final double bool) {
+    if (!(MathUtils.isFinite(bool))) {
+      throw new IllegalArgumentException("Boolean feature cannot be " //$NON-NLS-1$
+          + bool);
+    }
     return (Math.abs(bool) > 1e-12d);
   }
 

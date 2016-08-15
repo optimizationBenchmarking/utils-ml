@@ -128,4 +128,98 @@ public final class ClassifierExampleDatasets {
           new ClassifiedSample(1, 0, 0, 1, 5, 0), //
           new ClassifiedSample(1, 0, 0, 1, 6, 0),//
   });
+
+  /** the mixed example 1.1 */
+  public static final ClassifierExampleDataset MIXED_1_1 = new ClassifierExampleDataset(//
+      new EFeatureType[] { EFeatureType.NUMERICAL, EFeatureType.NOMINAL }, //
+      new ClassifiedSample[] { //
+          new ClassifiedSample(0, 0, 0), //
+          new ClassifiedSample(0, 1, 0), //
+          new ClassifiedSample(0, 2, 0), //
+          new ClassifiedSample(1, 0, 1), //
+          new ClassifiedSample(1, 1, 1), //
+          new ClassifiedSample(1, 2, 1),//
+  });
+
+  /** the mixed example 1.2 */
+  public static final ClassifierExampleDataset MIXED_1_2 = new ClassifierExampleDataset(//
+      new EFeatureType[] { EFeatureType.NOMINAL, EFeatureType.NUMERICAL }, //
+      new ClassifiedSample[] { //
+          new ClassifiedSample(0, 0, 0), //
+          new ClassifiedSample(0, 1, 0), //
+          new ClassifiedSample(0, 2, 0), //
+          new ClassifiedSample(1, 0, 1), //
+          new ClassifiedSample(1, 1, 1), //
+          new ClassifiedSample(1, 2, 1),//
+  });
+
+  /** the mixed example 7.1 */
+  public static final ClassifierExampleDataset MIXED_7_1 = new ClassifierExampleDataset(//
+      new EFeatureType[] { EFeatureType.NUMERICAL, EFeatureType.NOMINAL,
+          EFeatureType.NOMINAL, EFeatureType.NOMINAL,
+          EFeatureType.NOMINAL }, //
+      new ClassifiedSample[] { //
+          new ClassifiedSample(0, 0, 1, 0, 1, 0), //
+          new ClassifiedSample(0, 0, 1, 0, 2, 0), //
+          new ClassifiedSample(0, 0, 1, 0, 3, 0), //
+          new ClassifiedSample(1, 0, 0, 1, 4, 0), //
+          new ClassifiedSample(1, 0, 0, 1, 5, 0), //
+          new ClassifiedSample(1, 0, 0, 1, 6, 0),//
+  });
+
+  /** the mixed example 7.2 */
+  public static final ClassifierExampleDataset MIXED_7_2 = new ClassifierExampleDataset(//
+      new EFeatureType[] { EFeatureType.NOMINAL, EFeatureType.NUMERICAL,
+          EFeatureType.NOMINAL, EFeatureType.NOMINAL,
+          EFeatureType.NOMINAL }, //
+      new ClassifiedSample[] { //
+          new ClassifiedSample(0, 0, 1, 0, 1, 0), //
+          new ClassifiedSample(0, 0, 1, 0, 2, 0), //
+          new ClassifiedSample(0, 0, 1, 0, 3, 0), //
+          new ClassifiedSample(1, 0, 0, 1, 4, 0), //
+          new ClassifiedSample(1, 0, 0, 1, 5, 0), //
+          new ClassifiedSample(1, 0, 0, 1, 6, 0),//
+  });
+
+  /** the mixed example 7.3 */
+  public static final ClassifierExampleDataset MIXED_7_3 = new ClassifierExampleDataset(//
+      new EFeatureType[] { EFeatureType.NOMINAL, EFeatureType.NOMINAL,
+          EFeatureType.NUMERICAL, EFeatureType.NOMINAL,
+          EFeatureType.NOMINAL }, //
+      new ClassifiedSample[] { //
+          new ClassifiedSample(0, 0, 1, 0, 1, 0), //
+          new ClassifiedSample(0, 0, 1, 0, 2, 0), //
+          new ClassifiedSample(0, 0, 1, 0, 3, 0), //
+          new ClassifiedSample(1, 0, 0, 1, 4, 0), //
+          new ClassifiedSample(1, 0, 0, 1, 5, 0), //
+          new ClassifiedSample(1, 0, 0, 1, 6, 0),//
+  });
+
+  /** the mixed example 7.4 */
+  public static final ClassifierExampleDataset MIXED_7_4 = new ClassifierExampleDataset(//
+      new EFeatureType[] { EFeatureType.NOMINAL, EFeatureType.NOMINAL,
+          EFeatureType.NOMINAL, EFeatureType.NUMERICAL,
+          EFeatureType.NOMINAL }, //
+      new ClassifiedSample[] { //
+          new ClassifiedSample(0, 0, 1, 0, 1, 0), //
+          new ClassifiedSample(0, 0, 1, 0, 2, 0), //
+          new ClassifiedSample(0, 0, 1, 0, 3, 0), //
+          new ClassifiedSample(1, 0, 0, 1, 4, 0), //
+          new ClassifiedSample(1, 0, 0, 1, 5, 0), //
+          new ClassifiedSample(1, 0, 0, 1, 6, 0),//
+  });
+
+  /** the mixed example 7.5 */
+  public static final ClassifierExampleDataset MIXED_7_5 = new ClassifierExampleDataset(//
+      new EFeatureType[] { EFeatureType.NOMINAL, EFeatureType.NOMINAL,
+          EFeatureType.NOMINAL, EFeatureType.NOMINAL,
+          EFeatureType.NUMERICAL }, //
+      new ClassifiedSample[] { //
+          new ClassifiedSample(0, 0, 1, 0, 1, 0), //
+          new ClassifiedSample(0, 0, 1, 0, 2, 0), //
+          new ClassifiedSample(0, 0, 1, 0, 3, 0), //
+          new ClassifiedSample(1, 0, 0, 1, 4, 0), //
+          new ClassifiedSample(1, 0, 0, 1, 5, 0), //
+          new ClassifiedSample(1, 0, 0, 1, 6, 0),//
+  });
 }

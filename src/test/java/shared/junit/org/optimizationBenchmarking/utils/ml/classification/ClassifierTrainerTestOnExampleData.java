@@ -278,4 +278,95 @@ public abstract class ClassifierTrainerTestOnExampleData
     this.applyClassifierTrainerAccuracy(
         ClassifierExampleDatasets.NOMINAL_7);
   }
+
+  /** test on the MIXED_1_1 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_MIXED_1_1_MCC() {
+    this.applyClassifierTrainerMCC(ClassifierExampleDatasets.MIXED_1_1);
+  }
+
+  /** test on the MIXED_1_1 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_MIXED_1_1_Accuracy() {
+    this.applyClassifierTrainerAccuracy(
+        ClassifierExampleDatasets.MIXED_1_1);
+  }
+
+  /** test on the MIXED_1_2 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_MIXED_1_2_MCC() {
+    this.applyClassifierTrainerMCC(ClassifierExampleDatasets.MIXED_1_2);
+  }
+
+  /** test on the MIXED_1_2 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_MIXED_1_2_Accuracy() {
+    this.applyClassifierTrainerAccuracy(
+        ClassifierExampleDatasets.MIXED_1_2);
+  }
+
+  /** test on the MIXED_7_1 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_MIXED_7_1_MCC() {
+    this.applyClassifierTrainerMCC(ClassifierExampleDatasets.MIXED_7_1);
+  }
+
+  /** test on the MIXED_7_1 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_MIXED_7_1_Accuracy() {
+    this.applyClassifierTrainerAccuracy(
+        ClassifierExampleDatasets.MIXED_7_1);
+  }
+
+  /** test on the MIXED_7_2 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_MIXED_7_2_MCC() {
+    this.applyClassifierTrainerMCC(ClassifierExampleDatasets.MIXED_7_2);
+  }
+
+  /** test on the MIXED_7_2 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_MIXED_7_2_Accuracy() {
+    this.applyClassifierTrainerAccuracy(
+        ClassifierExampleDatasets.MIXED_7_2);
+  }
+
+  /** test on the MIXED_7_3 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_MIXED_7_3_MCC() {
+    this.applyClassifierTrainerMCC(ClassifierExampleDatasets.MIXED_7_3);
+  }
+
+  /** test on the MIXED_7_3 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_MIXED_7_3_Accuracy() {
+    this.applyClassifierTrainerAccuracy(
+        ClassifierExampleDatasets.MIXED_7_3);
+  }
+
+  /** test on the MIXED_7_4 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_MIXED_7_4_MCC() {
+    this.applyClassifierTrainerMCC(ClassifierExampleDatasets.MIXED_7_4);
+  }
+
+  /** test on the MIXED_7_4 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_MIXED_7_4_Accuracy() {
+    this.applyClassifierTrainerAccuracy(
+        ClassifierExampleDatasets.MIXED_7_4);
+  }
+
+  /** test on the MIXED_7_5 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_MIXED_7_5_MCC() {
+    this.applyClassifierTrainerMCC(ClassifierExampleDatasets.MIXED_7_5);
+  }
+
+  /** test on the MIXED_7_5 data by using MCC */
+  @Test(timeout = 3600000)
+  public void test_MIXED_7_5_Accuracy() {
+    this.applyClassifierTrainerAccuracy(
+        ClassifierExampleDatasets.MIXED_7_5);
+  }
 }
