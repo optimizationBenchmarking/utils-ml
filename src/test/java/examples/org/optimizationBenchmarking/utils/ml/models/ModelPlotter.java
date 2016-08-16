@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.ProcessBuilder.Redirect;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -449,8 +450,8 @@ public class ModelPlotter {
 
     dest = Paths.get(args[0]);
     scriptPath = dest.resolve("gnuplot.script");//$NON-NLS-1$
-    try (final BufferedWriter writer = Files
-        .newBufferedWriter(scriptPath)) {
+    try (final BufferedWriter writer = Files.newBufferedWriter(scriptPath,
+        Charset.forName("UTF-8"))) {//$NON-NLS-1$
       script = AbstractTextOutput.wrap(writer);
 
       script.append("set terminal eps size 5,3");//$NON-NLS-1$
