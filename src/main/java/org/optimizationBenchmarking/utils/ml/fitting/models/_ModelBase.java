@@ -48,17 +48,6 @@ abstract class _ModelBase extends BasicModel {
   }
 
   /**
-   * compute the natural logarithm
-   *
-   * @param a
-   *          the number
-   * @return the result
-   */
-  static final double _ln(final double a) {
-    return Ln.INSTANCE.computeAsDouble(a);
-  }
-
-  /**
    * compute the power
    *
    * @param a
@@ -74,6 +63,24 @@ abstract class _ModelBase extends BasicModel {
   }
 
   /**
+   * compute {@code exp(o*p)} and protect against NaN
+   *
+   * @param o
+   *          the first number
+   * @param p
+   *          the second number
+   * @return the result
+   */
+  static final double _exp_o_p(final double o, final double p) {
+    final double res;
+    if ((o == 0d) || (p == 0d)) {
+      return 1d; // guard against infinity*0
+    }
+    res = _ModelBase._exp(o * p);
+    return ((res == res) ? res : 0d);// guard against NaN
+  }
+
+  /**
    * compute the natural logarithm
    *
    * @param a
@@ -81,7 +88,8 @@ abstract class _ModelBase extends BasicModel {
    * @return the logarithm
    */
   static final double _log(final double a) {
-    return Ln.INSTANCE.computeAsDouble(a);
+    return ((a <= 0d) ? Double.NEGATIVE_INFINITY
+        : Ln.INSTANCE.computeAsDouble(a));
   }
 
   /**
@@ -93,5 +101,38 @@ abstract class _ModelBase extends BasicModel {
    */
   static final double _add(final double... summands) {
     return AddN.destructiveSum(summands);
+  }
+
+  /**
+   * Format a gradient
+   *
+   * @param gradient
+   *          the gradient to format
+   * @param original
+   *          the original parameter value used to determine gradients in
+   *          dodgy situations
+   * @return the formatted gradient value
+   */
+  static final double _gradient(final double gradient,
+      final double original) {
+    final double res;
+    if ((gradient != gradient) || (gradient == 0d)) {
+      return 0d;// return positive 0 on NaN, 0, and -0
+    }
+    if (gradient <= Double.NEGATIVE_INFINITY) {
+      res = Math.ulp(original);
+      if ((res == res) && (res < Double.POSITIVE_INFINITY)) {
+        return (-res);
+      }
+      return (-1d);
+    }
+    if (gradient >= Double.POSITIVE_INFINITY) {
+      res = Math.ulp(original);
+      if ((res == res) && (res < Double.POSITIVE_INFINITY)) {
+        return res;
+      }
+      return 1d;
+    }
+    return gradient;
   }
 }

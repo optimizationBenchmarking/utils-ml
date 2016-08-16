@@ -64,7 +64,7 @@ public final class GompertzModel extends _ModelBase {
   static final ParameterValueCheckerMinMax B = GompertzModel.A;
   /** the checker for {@code c} */
   static final ParameterValueCheckerMinMaxAbs C = new ParameterValueCheckerMinMaxAbs(
-      1e-6d, 1e2d);
+      1e-6d, 1e4d);
   /** the checker for {@code d} */
   static final ParameterValueCheckerMinMaxAbs D = GompertzModel.C;
 
@@ -73,45 +73,15 @@ public final class GompertzModel extends _ModelBase {
     super();
   }
 
-  /**
-   * compute {@code exp(o*p)} and protect against NaN
-   *
-   * @param o
-   *          the first number
-   * @param p
-   *          the second number
-   * @return the result
-   */
-  private static final double __exp_o_p(final double o, final double p) {
-    final double res;
-    if ((o == 0d) || (p == 0d)) {
-      return 1d; // guard against infinity*0
-    }
-    res = _ModelBase._exp(o * p);
-    return ((res == res) ? res : 0d);// guard against NaN
-  }
-
   /** {@inheritDoc} */
   @Override
   public final double value(final double x, final double[] parameters) {
-    final double a;
-    double res;
+    final double a, res;
 
-    res = GompertzModel.__exp_o_p(
-        GompertzModel.__exp_o_p(parameters[3], x), parameters[2]);
-    if (MathUtils.isFinite(res)) {
-      res *= parameters[1];
-      a = parameters[0];
-      if (MathUtils.isFinite(res)) {
-        res += a;
-        if (MathUtils.isFinite(res)) {
-          return res;
-        }
-      }
-    } else {
-      a = parameters[0];
-    }
-    return (MathUtils.isFinite(a) ? a : 0d);
+    res = ((_ModelBase._exp_o_p(_ModelBase._exp_o_p(parameters[3], x),
+        parameters[2]) * parameters[1]) + (a = parameters[0]));
+    return (MathUtils.isFinite(res) ? res//
+        : (MathUtils.isFinite(a) ? a : 0d));
   }
 
   /** {@inheritDoc} */
@@ -150,22 +120,12 @@ public final class GompertzModel extends _ModelBase {
       }
     }
 
-    if (!(MathUtils.isFinite(gradient[1] = _ModelBase._exp(cexpdx)))) {
-      gradient[1] = 0d;
-    }
     b = parameters[1];
+    gradient[1] = _ModelBase._gradient(_ModelBase._exp(cexpdx), b);
     if ((b != 0d) && (b == b)) {
       cexpdx = (b * _ModelBase._exp(cexpdx + dx));
-      if (MathUtils.isFinite(cexpdx)) {
-        gradient[2] = cexpdx;
-        if ((!xIsZero) && (c != 0d)) {
-          if (MathUtils.isFinite(gradient[3] = (cexpdx * c * x))) {
-            return;
-          }
-        }
-        gradient[3] = 0d;
-        return;
-      }
+      gradient[2] = _ModelBase._gradient(cexpdx, c);
+      gradient[3] = _ModelBase._gradient((cexpdx * c * x), d);
     }
     gradient[2] = gradient[3] = 0d;
   }
@@ -313,10 +273,8 @@ public final class GompertzModel extends _ModelBase {
       final double x2, final double y2, final double c, final double d) {
     final double expcexpdx1, expcexpdx2;
 
-    expcexpdx1 = GompertzModel.__exp_o_p(c,
-        GompertzModel.__exp_o_p(d, x1));
-    expcexpdx2 = GompertzModel.__exp_o_p(c,
-        GompertzModel.__exp_o_p(d, x2));
+    expcexpdx1 = _ModelBase._exp_o_p(c, _ModelBase._exp_o_p(d, x1));
+    expcexpdx2 = _ModelBase._exp_o_p(c, _ModelBase._exp_o_p(d, x2));
 
     return (((y2 * expcexpdx1) - (y1 * expcexpdx2))
         / (expcexpdx1 - expcexpdx2));
@@ -342,9 +300,8 @@ public final class GompertzModel extends _ModelBase {
    */
   static final double _b_x1y1x2y2cd(final double x1, final double y1,
       final double x2, final double y2, final double c, final double d) {
-    return (y1 - y2)
-        / (GompertzModel.__exp_o_p(c, GompertzModel.__exp_o_p(d, x1))
-            - GompertzModel.__exp_o_p(c, GompertzModel.__exp_o_p(d, x2)));
+    return (y1 - y2) / (_ModelBase._exp_o_p(c, _ModelBase._exp_o_p(d, x1))
+        - _ModelBase._exp_o_p(c, _ModelBase._exp_o_p(d, x2)));
   }
 
   /**
@@ -365,8 +322,7 @@ public final class GompertzModel extends _ModelBase {
    */
   static final double _a_x1y1bcd(final double x1, final double y1,
       final double b, final double c, final double d) {
-    return (y1 - (b
-        * GompertzModel.__exp_o_p(c, GompertzModel.__exp_o_p(d, x1))));
+    return (y1 - (b * _ModelBase._exp_o_p(c, _ModelBase._exp_o_p(d, x1))));
   }
 
   /**
@@ -387,8 +343,7 @@ public final class GompertzModel extends _ModelBase {
    */
   static final double _b_x1y1acd(final double x1, final double y1,
       final double a, final double c, final double d) {
-    return GompertzModel.__exp_o_p(-c, GompertzModel.__exp_o_p(d, x1))
-        * (y1 - a);
+    return _ModelBase._exp_o_p(-c, _ModelBase._exp_o_p(d, x1)) * (y1 - a);
   }
 
   /**
@@ -410,9 +365,8 @@ public final class GompertzModel extends _ModelBase {
   static final double _c_x1y1abd(final double x1, final double y1,
       final double a, final double b, final double d) {
     return ParameterValueChecker.choose(//
-        GompertzModel.__exp_o_p(-d, x1) * _ModelBase._ln((y1 - a) / b), //
-        GompertzModel.__exp_o_p(-d, x1)
-            * _ModelBase._ln((y1 / b) - (a / b)), //
+        _ModelBase._exp_o_p(-d, x1) * _ModelBase._log((y1 - a) / b), //
+        _ModelBase._exp_o_p(-d, x1) * _ModelBase._log((y1 / b) - (a / b)), //
         GompertzModel.C);
   }
 
@@ -435,8 +389,8 @@ public final class GompertzModel extends _ModelBase {
   static final double _d_x1y1abc(final double x1, final double y1,
       final double a, final double b, final double c) {
     return ParameterValueChecker.choose(//
-        (_ModelBase._ln(_ModelBase._ln((y1 - a) / b) / c) / x1), //
-        (_ModelBase._ln(_ModelBase._ln((y1 / b) - (a / b)) / c) / x1), //
+        (_ModelBase._log(_ModelBase._log((y1 - a) / b) / c) / x1), //
+        (_ModelBase._log(_ModelBase._log((y1 / b) - (a / b)) / c) / x1), //
         GompertzModel.D);
   }
 

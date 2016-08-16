@@ -122,12 +122,12 @@ public final class ExponentialDecayModel extends _ModelBase {
   @Override
   public final void gradient(final double x, final double[] parameters,
       final double[] gradient) {
-    final double expcxd, xd, cxd, c;
+    final double expcxd, xd, cxd, c, b, d;
     double g;
 
     gradient[0] = 1d;
-
-    xd = _ModelBase._pow(x, parameters[3]);
+    d = parameters[3];
+    xd = _ModelBase._pow(x, d);
     c = parameters[2];
     if ((xd == 0d) || (c == 0d)) {
       cxd = 0d;
@@ -136,23 +136,15 @@ public final class ExponentialDecayModel extends _ModelBase {
     }
     expcxd = _ModelBase._exp(cxd);
 
-    if (MathUtils.isFinite(expcxd)) {
-      gradient[1] = expcxd;
-    } else {
-      gradient[1] = 0d;
-    }
+    b = parameters[1];
+    gradient[1] = _ModelBase._gradient(expcxd, b);
 
-    g = parameters[1];
-    if (g != 0d) {
-      g *= xd * expcxd;
-      if (MathUtils.isFinite(g) && (g != 0d)) {
-        gradient[2] = g;
-        gradient[3] = ((((g *= c) != 0d) && //
-            ((g *= _ModelBase._log(x)) != 0d) && //
-            MathUtils.isFinite(g))//
-                ? g : 0d);
-        return;
-      }
+    if (b != 0d) {
+      g = b * xd * expcxd;
+      gradient[2] = _ModelBase._gradient(g, c);
+      gradient[3] = (((g *= c) != 0d)
+          ? _ModelBase._gradient(g * _ModelBase._log(x), d) : 0d);
+      return;
     }
     gradient[2] = gradient[3] = 0d;
   }

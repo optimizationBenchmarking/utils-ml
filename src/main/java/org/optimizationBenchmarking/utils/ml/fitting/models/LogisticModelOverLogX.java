@@ -112,10 +112,10 @@ public class LogisticModelOverLogX extends _ModelBase {
   @Override
   public void gradient(final double x, final double[] parameters,
       final double[] gradient) {
-    final double b, xc, bxc, axc, div;
-    double g0;
+    final double a, b, c, xc, bxc, axc, div;
 
-    xc = _ModelBase._pow(x, parameters[2]);
+    c = parameters[2];
+    xc = _ModelBase._pow(x, c);
 
     if (Math.abs(xc) <= 0d) {
       gradient[0] = 1d;
@@ -131,39 +131,19 @@ public class LogisticModelOverLogX extends _ModelBase {
       return;
     }
 
-    g0 = (1d + bxc);
-    if ((g0 != 0d) && MathUtils.isFinite(g0)
-        && MathUtils.isFinite(g0 = (1d / g0))) {
-      gradient[0] = g0;
-    } else {
-      gradient[0] = 0d;
-    }
+    a = parameters[0];
+    gradient[0] = _ModelBase._gradient((1d / (1d + bxc)), a);
 
-    axc = (parameters[0] * xc);
+    axc = (a * xc);
     if (axc == 0d) {
       gradient[1] = gradient[2] = 0d;
       return;
     }
 
-    // div = _add(1d, 2d * bxc, xc * xc * b * b);
     div = _ModelBase._add(1d, 2d * bxc, bxc * bxc);
-    if ((div != 0d) && MathUtils.isFinite(div)) {
-      g0 = ((-axc) / div);
-      if (MathUtils.isFinite(g0)) {
-        gradient[1] = g0;
-      } else {
-        gradient[1] = 0d;
-      }
-      g0 = ((-(b * axc * _ModelBase._log(x))) / div);
-      if (MathUtils.isFinite(g0)) {
-        gradient[2] = g0;
-      } else {
-        gradient[2] = 0d;
-      }
-      return;
-    }
-
-    gradient[1] = gradient[2] = 0d;
+    gradient[1] = _ModelBase._gradient(((-axc) / div), b);
+    gradient[2] = _ModelBase
+        ._gradient(((-(b * axc * _ModelBase._log(x))) / div), c);
   }
 
   /** {@inheritDoc} */
