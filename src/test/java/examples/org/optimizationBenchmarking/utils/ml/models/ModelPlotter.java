@@ -30,6 +30,7 @@ import org.optimizationBenchmarking.utils.text.ETextCase;
 import org.optimizationBenchmarking.utils.text.numbers.SimpleNumberAppender;
 import org.optimizationBenchmarking.utils.text.textOutput.AbstractTextOutput;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
+import org.optimizationBenchmarking.utils.text.textOutput.MemoryTextOutput;
 
 /** plot the model */
 public class ModelPlotter {
@@ -317,7 +318,7 @@ public class ModelPlotter {
     double[] parameters, use, A, B, C, D;
 
     model = new ExponentialDecayModel();
-    name = ((model.getClass().getSimpleName() + '_') + '1');
+    name = __name(model, index);
 
     parameters = new double[] { 0, 100, -0.01, 0.8d };
 
@@ -369,7 +370,7 @@ public class ModelPlotter {
     double[] parameters, use, A, B, C, D;
 
     model = new ExponentialDecayModel();
-    name = ((model.getClass().getSimpleName() + '_') + '2');
+    name = __name(model, index);
 
     parameters = new double[] { 100, -100, 1d / -0.01, -0.8d };
 
@@ -422,18 +423,18 @@ public class ModelPlotter {
     double[] parameters, use, A, B, C, D;
 
     model = new LogisticModelWithOffsetOverLogX();
-    name = (model.getClass().getSimpleName() + '_') + '1';
+    name = __name(model, index);
 
-    parameters = new double[] { 200, 1e-4, 2, 0 };
+    parameters = new double[] { 100, 1e-4, 2, 0 };
 
     use = parameters.clone();
+    use[0] = 200;
     nB = ModelPlotter.plotModelStepWise(destDir, gnuplotScript, model,
         name, 1, //
         use, 0, //
         B = ModelPlotter.__stepLinear(50, 200));
 
     use = parameters.clone();
-    use[0] = 100;
     nC = ModelPlotter.plotModelStepWise(destDir, gnuplotScript, model,
         name, 2, //
         use, 1, //
@@ -479,7 +480,7 @@ public class ModelPlotter {
     double[] parameters, use, A, B, C, D;
 
     model = new LogisticModelWithOffsetOverLogX();
-    name = (model.getClass().getSimpleName() + '_') + '2';
+    name = __name(model, index);
 
     parameters = new double[] { -100, 20, -0.5, 100 };
 
@@ -487,7 +488,7 @@ public class ModelPlotter {
     nB = ModelPlotter.plotModelStepWise(destDir, gnuplotScript, model,
         name, 1, //
         use, 0, //
-        B = ModelPlotter.__stepLinear(-20, -100));
+        B = ModelPlotter.__stepLinear(-50, -200));
 
     use = parameters.clone();
     nC = ModelPlotter.plotModelStepWise(destDir, gnuplotScript, model,
@@ -509,7 +510,12 @@ public class ModelPlotter {
         A = ModelPlotter.__stepLinear(50, 100));
     // 0, 15, 30, 45);
 
-    ModelPlotter.__doPlot(latexScript, index, model, parameters,
+    use[0] = parameters[3];
+    use[1] = parameters[0];
+    use[2] = parameters[1];
+    use[3] = parameters[2];
+
+    ModelPlotter.__doPlot(latexScript, index, model, use,
         new String[] { nA, nB, nC, nD }, new double[][] { A, B, C, D });
   }
 
@@ -535,12 +541,12 @@ public class ModelPlotter {
     double[] parameters, use, A, B, C, D;
 
     model = new GompertzModel();
-    name = (model.getClass().getSimpleName() + '_') + '1';
+    name = __name(model, index);
 
-    parameters = new double[] { 100, -100, -100, -0.05d };
+    parameters = new double[] { 100, -100, -5, -0.03d };
 
     use = parameters.clone();
-    use[1] = -70;
+    use[1] = -50;
     nA = ModelPlotter.plotModelStepWise(destDir, gnuplotScript, model,
         name, //
         use, 0, //
@@ -560,7 +566,7 @@ public class ModelPlotter {
     nD = ModelPlotter.plotModelStepWise(destDir, gnuplotScript, model,
         name, //
         parameters, 3, //
-        D = ModelPlotter.__stepLinear(-3.2d, -0.05d));// -3.2, -0.8, -0.2,
+        D = ModelPlotter.__stepLinear(-3.2d, -0.02d));// -3.2, -0.8, -0.2,
                                                       // -0.050d);
 
     ModelPlotter.__doPlot(latexScript, index, model, parameters,
@@ -589,7 +595,7 @@ public class ModelPlotter {
     double[] parameters, A, B, C, D;
 
     model = new GompertzModel();
-    name = (model.getClass().getSimpleName() + '_') + '2';
+    name = __name(model, index);
 
     parameters = new double[] { 0, 100, -0.1, 0.01d };
 
@@ -633,17 +639,17 @@ public class ModelPlotter {
    * @throws IOException
    *           if i/o fails
    */
-  public static final void plot_ExpLinearModelOverLogX(final Path destDir,
-      final ITextOutput gnuplotScript, final ITextOutput latexScript,
-      final int index) throws IOException {
+  public static final void plot_ExpLinearModelOverLogX_1(
+      final Path destDir, final ITextOutput gnuplotScript,
+      final ITextOutput latexScript, final int index) throws IOException {
     final ExpLinearModelOverLogX model;
     final String name, nA, nB, nC, nD;
     double[] parameters, use, A, B, C, D;
 
     model = new ExpLinearModelOverLogX();
-    name = model.getClass().getSimpleName();
+    name = __name(model, index);
 
-    parameters = new double[] { 0, 100, -0.75d, 0 };
+    parameters = new double[] { 0, 175, -0.4d, 4 };
 
     use = parameters.clone();
     use[1] = 70;
@@ -655,12 +661,12 @@ public class ModelPlotter {
     nB = ModelPlotter.plotModelStepWise(destDir, gnuplotScript, model,
         name, //
         parameters, 1, //
-        B = ModelPlotter.__stepLinear(50, 100));// 55, 70, 85, 100);
+        B = ModelPlotter.__stepLinear(50, 200));// 55, 70, 85, 100);
 
     nC = ModelPlotter.plotModelStepWise(destDir, gnuplotScript, model,
         name, //
         parameters, 2, //
-        C = ModelPlotter.__stepLinear(-2, -0.1));// -1d, -0.75d, -0.5d,
+        C = ModelPlotter.__stepLinear(-1, -0.3));// -1d, -0.75d, -0.5d,
                                                  // -0.25d);
 
     nD = ModelPlotter.plotModelStepWise(destDir, gnuplotScript, model,
@@ -670,6 +676,74 @@ public class ModelPlotter {
 
     ModelPlotter.__doPlot(latexScript, index, model, parameters,
         new String[] { nA, nB, nC, nD }, new double[][] { A, B, C, D });
+  }
+
+  /**
+   * plot an exp-linear model for parameter step sizes
+   *
+   * @param destDir
+   *          the destination directory
+   * @param gnuplotScript
+   *          the gnuplot gnuplotScript to generate
+   * @param latexScript
+   *          the latex script
+   * @param index
+   *          the index
+   * @throws IOException
+   *           if i/o fails
+   */
+  public static final void plot_ExpLinearModelOverLogX_2(
+      final Path destDir, final ITextOutput gnuplotScript,
+      final ITextOutput latexScript, final int index) throws IOException {
+    final ExpLinearModelOverLogX model;
+    final String name, nA, nB, nC, nD;
+    double[] parameters, use, A, B, C, D;
+
+    model = new ExpLinearModelOverLogX();
+    name = __name(model, index);
+
+    parameters = new double[] { 100, -1, 0.4d, 4 };
+
+    use = parameters.clone();
+    use[1] = -5;
+    nA = ModelPlotter.plotModelStepWise(destDir, gnuplotScript, model,
+        name, //
+        use, 0, //
+        A = ModelPlotter.__stepLinear(50, 120));// 0, 15, 30, 45);
+
+    nB = ModelPlotter.plotModelStepWise(destDir, gnuplotScript, model,
+        name, //
+        parameters, 1, //
+        B = ModelPlotter.__stepLinear(-25, -0.05));// 55, 70, 85, 100);
+
+    nC = ModelPlotter.plotModelStepWise(destDir, gnuplotScript, model,
+        name, //
+        parameters, 2, //
+        C = ModelPlotter.__stepLinear(1, 0.3));// -1d, -0.75d, -0.5d,
+                                               // -0.25d);
+
+    nD = ModelPlotter.plotModelStepWise(destDir, gnuplotScript, model,
+        name, //
+        parameters, 3, //
+        D = ModelPlotter.__stepLinear(-0.9, 1e4));// 0, 3, 6, 9);
+
+    ModelPlotter.__doPlot(latexScript, index, model, parameters,
+        new String[] { nA, nB, nC, nD }, new double[][] { A, B, C, D });
+  }
+
+  /**
+   * get a good name for figures and files
+   * 
+   * @param model
+   *          the model
+   * @param index
+   *          the index
+   * @return the name
+   */
+  private static final String __name(final ParametricUnaryFunction model,
+      final int index) {
+    return Integer.toString(index + 1) + '_'
+        + model.getClass().getSimpleName();
   }
 
   /**
@@ -699,10 +773,6 @@ public class ModelPlotter {
         latexScript = AbstractTextOutput.wrap(laTeXWriter);
 
         latexScript.append("\\begin{figure}%");//$NON-NLS-1$
-        latexScript.appendLineBreak();
-        latexScript.append("\\scriptsize%");//$NON-NLS-1$
-        latexScript.appendLineBreak();
-        latexScript.append("\\setstretch{1.0}%");//$NON-NLS-1$
         latexScript.appendLineBreak();
         latexScript.append("\\definecolor{modelChartMinColor}{RGB}{");//$NON-NLS-1$
         latexScript.append(ModelPlotter.BLEND_COLORS[0].getRed());
@@ -739,6 +809,16 @@ public class ModelPlotter {
             ModelPlotter.BLEND_COLORS[ModelPlotter.BLEND_COLORS.length >>> 1]
                 .getBlue());
         latexScript.append("}%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
+        
+        
+        latexScript.append("\\resizebox{\\linewidth}{!}{%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
+        latexScript.append("\\parbox{1.25\\linewidth}{%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
+        latexScript.append("\\scriptsize%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
+        latexScript.append("\\setstretch{1.0}%");//$NON-NLS-1$
         latexScript.appendLineBreak();
 
         gnuplotScript = AbstractTextOutput.wrap(gnuplotWriter);
@@ -779,12 +859,18 @@ public class ModelPlotter {
             index++);
         ModelPlotter.plot_GompertzModel_2(dest, gnuplotScript, latexScript,
             index++);
-        ModelPlotter.plot_ExpLinearModelOverLogX(dest, gnuplotScript,
+        ModelPlotter.plot_ExpLinearModelOverLogX_1(dest, gnuplotScript,
+            latexScript, index++);
+        ModelPlotter.plot_ExpLinearModelOverLogX_2(dest, gnuplotScript,
             latexScript, index++);
 
         latexScript.append('%');
         latexScript.appendLineBreak();
+        latexScript.append("}}%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
         latexScript.append('%');
+        latexScript.appendLineBreak();
+        latexScript.append("\\vspace{-0.6em}%");//$NON-NLS-1$
         latexScript.appendLineBreak();
         latexScript.append("\\caption{");//$NON-NLS-1$
         latexScript.append(
@@ -973,6 +1059,8 @@ public class ModelPlotter {
       final double[] baseParams, final String[] files,
       final double[][] parameterization) {
     int xindex;
+    MemoryTextOutput mto;
+    String name;
 
     dest.append('%');
     dest.appendLineBreak();
@@ -982,8 +1070,14 @@ public class ModelPlotter {
     dest.append("\\noindent\\textbf{");//$NON-NLS-1$
     dest.append((char) ('a' + index));
     dest.append(".}~"); //$NON-NLS-1$
+    mto = new MemoryTextOutput();
+    model.printLongName(mto, ETextCase.AT_SENTENCE_START);
+    name = mto.toString();
     model.printLongName(dest, ETextCase.AT_SENTENCE_START);
-    dest.append(" model \\"); //$NON-NLS-1$
+    if (!(name.toLowerCase().contains("model"))) { //$NON-NLS-1$
+      dest.append(" model"); //$NON-NLS-1$
+    }
+    dest.append(" \\"); //$NON-NLS-1$
     dest.append(model.getClass().getSimpleName());
 
     for (xindex = 0; xindex < files.length; xindex++) {
