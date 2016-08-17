@@ -133,6 +133,7 @@ public class ExpLinearModelOverLogX extends _ModelBase {
     out.append('+');
     x.mathRender(out, renderer);
     out.append(')');
+    out.append(')');
   }
 
   /** {@inheritDoc} */
