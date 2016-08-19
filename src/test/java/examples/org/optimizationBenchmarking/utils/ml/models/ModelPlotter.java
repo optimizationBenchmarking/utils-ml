@@ -141,39 +141,6 @@ public class ModelPlotter {
       final String name, final double[] parameters,
       final int stepParameterIndex, final double... parameterValues)
           throws IOException {
-    return ModelPlotter.plotModelStepWise(destDir, gnuplotScript, model,
-        name, stepParameterIndex, parameters, stepParameterIndex,
-        parameterValues);
-  }
-
-  /**
-   * plot a model for parameter step sizes
-   *
-   * @param model
-   *          the model
-   * @param gnuplotScript
-   *          the gnuplot gnuplotScript to generate
-   * @param name
-   *          the model's name
-   * @param parameterName
-   *          the name of the parameter
-   * @param parameters
-   *          the parameters
-   * @param stepParameterIndex
-   *          the step parameter index
-   * @param destDir
-   *          the destination directory
-   * @param parameterValues
-   *          the values of the parameter to render
-   * @return the file name
-   * @throws IOException
-   *           if i/o fails
-   */
-  public static final String plotModelStepWise(final Path destDir,
-      final ITextOutput gnuplotScript, final ParametricUnaryFunction model,
-      final String name, final int parameterName,
-      final double[] parameters, final int stepParameterIndex,
-      final double... parameterValues) throws IOException {
     final Path path;
     final ITextOutput textOut;
     final double[] use;
@@ -181,7 +148,7 @@ public class ModelPlotter {
     final char parameter;
     int index;
 
-    parameter = ((char) ('A' + parameterName));
+    parameter = ((char) ('A' + stepParameterIndex));
     fileName = name + '_' + parameter;
     sourceFile = (fileName + ".txt"); //$NON-NLS-1$
     path = PathUtils.createPathInside(destDir, sourceFile);
@@ -318,7 +285,7 @@ public class ModelPlotter {
     double[] parameters, use, A, B, C, D;
 
     model = new ExponentialDecayModel();
-    name = __name(model, index);
+    name = ModelPlotter.__name(model, index);
 
     parameters = new double[] { 0, 100, -0.01, 0.8d };
 
@@ -370,7 +337,7 @@ public class ModelPlotter {
     double[] parameters, use, A, B, C, D;
 
     model = new ExponentialDecayModel();
-    name = __name(model, index);
+    name = ModelPlotter.__name(model, index);
 
     parameters = new double[] { 100, -100, 1d / -0.01, -0.8d };
 
@@ -423,34 +390,34 @@ public class ModelPlotter {
     double[] parameters, use, A, B, C, D;
 
     model = new LogisticModelWithOffsetOverLogX();
-    name = __name(model, index);
+    name = ModelPlotter.__name(model, index);
 
-    parameters = new double[] { 100, 1e-4, 2, 0 };
+    parameters = new double[] { 0, 100, 1e-4, 2 };
 
     use = parameters.clone();
-    use[0] = 200;
+    use[0] = 0;
     nB = ModelPlotter.plotModelStepWise(destDir, gnuplotScript, model,
-        name, 1, //
-        use, 0, //
+        name, //
+        use, 1, //
         B = ModelPlotter.__stepLinear(50, 200));
 
     use = parameters.clone();
     nC = ModelPlotter.plotModelStepWise(destDir, gnuplotScript, model,
-        name, 2, //
-        use, 1, //
+        name, //
+        use, 2, //
         C = ModelPlotter.__stepLinear(1e-5, 1e-3d));
     // 1e-6, 1e-4, 1e-2, 1, 2);
 
     nD = ModelPlotter.plotModelStepWise(destDir, gnuplotScript, model,
-        name, 3, //
-        parameters, 2, //
+        name, //
+        parameters, 3, //
         D = ModelPlotter.__stepLinear(0.5, 8));
     // 1, 3, 5, 7);
     use = parameters.clone();
-    use[0] = 50;
+    use[1] = 50;
     nA = ModelPlotter.plotModelStepWise(destDir, gnuplotScript, model,
-        name, 0, //
-        use, 3, //
+        name, //
+        use, 0, //
         A = ModelPlotter.__stepLinear(0, 50));
     // 0, 15, 30, 45);
 
@@ -480,40 +447,35 @@ public class ModelPlotter {
     double[] parameters, use, A, B, C, D;
 
     model = new LogisticModelWithOffsetOverLogX();
-    name = __name(model, index);
+    name = ModelPlotter.__name(model, index);
 
-    parameters = new double[] { -100, 20, -0.5, 100 };
+    parameters = new double[] { 100, -100, 20, -0.5 };
 
     use = parameters.clone();
     nB = ModelPlotter.plotModelStepWise(destDir, gnuplotScript, model,
-        name, 1, //
-        use, 0, //
+        name, //
+        use, 1, //
         B = ModelPlotter.__stepLinear(-50, -200));
 
     use = parameters.clone();
     nC = ModelPlotter.plotModelStepWise(destDir, gnuplotScript, model,
-        name, 2, //
-        use, 1, //
+        name, //
+        use, 2, //
         C = ModelPlotter.__stepLinear(0.5, 30));
     // 1e-6, 1e-4, 1e-2, 1, 2);
 
     nD = ModelPlotter.plotModelStepWise(destDir, gnuplotScript, model,
-        name, 3, //
-        parameters, 2, //
+        name, //
+        parameters, 3, //
         D = ModelPlotter.__stepLinear(-2, -0.1));
     // 1, 3, 5, 7);
     use = parameters.clone();
-    use[0] = -50;
+    use[1] = -50;
     nA = ModelPlotter.plotModelStepWise(destDir, gnuplotScript, model,
-        name, 0, //
-        use, 3, //
+        name, //
+        use, 0, //
         A = ModelPlotter.__stepLinear(50, 100));
     // 0, 15, 30, 45);
-
-    use[0] = parameters[3];
-    use[1] = parameters[0];
-    use[2] = parameters[1];
-    use[3] = parameters[2];
 
     ModelPlotter.__doPlot(latexScript, index, model, use,
         new String[] { nA, nB, nC, nD }, new double[][] { A, B, C, D });
@@ -541,7 +503,7 @@ public class ModelPlotter {
     double[] parameters, use, A, B, C, D;
 
     model = new GompertzModel();
-    name = __name(model, index);
+    name = ModelPlotter.__name(model, index);
 
     parameters = new double[] { 100, -100, -5, -0.03d };
 
@@ -595,7 +557,7 @@ public class ModelPlotter {
     double[] parameters, A, B, C, D;
 
     model = new GompertzModel();
-    name = __name(model, index);
+    name = ModelPlotter.__name(model, index);
 
     parameters = new double[] { 0, 100, -0.1, 0.01d };
 
@@ -647,7 +609,7 @@ public class ModelPlotter {
     double[] parameters, use, A, B, C, D;
 
     model = new ExpLinearModelOverLogX();
-    name = __name(model, index);
+    name = ModelPlotter.__name(model, index);
 
     parameters = new double[] { 0, 175, -0.4d, 4 };
 
@@ -700,7 +662,7 @@ public class ModelPlotter {
     double[] parameters, use, A, B, C, D;
 
     model = new ExpLinearModelOverLogX();
-    name = __name(model, index);
+    name = ModelPlotter.__name(model, index);
 
     parameters = new double[] { 100, -1, 0.4d, 4 };
 
@@ -733,7 +695,7 @@ public class ModelPlotter {
 
   /**
    * get a good name for figures and files
-   * 
+   *
    * @param model
    *          the model
    * @param index
@@ -810,8 +772,7 @@ public class ModelPlotter {
                 .getBlue());
         latexScript.append("}%");//$NON-NLS-1$
         latexScript.appendLineBreak();
-        
-        
+
         latexScript.append("\\resizebox{\\linewidth}{!}{%");//$NON-NLS-1$
         latexScript.appendLineBreak();
         latexScript.append("\\parbox{1.25\\linewidth}{%");//$NON-NLS-1$

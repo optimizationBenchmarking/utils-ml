@@ -5,10 +5,14 @@ import java.util.Random;
 import org.optimizationBenchmarking.utils.document.spec.IMath;
 import org.optimizationBenchmarking.utils.document.spec.IMathRenderable;
 import org.optimizationBenchmarking.utils.document.spec.IParameterRenderer;
+import org.optimizationBenchmarking.utils.document.spec.IText;
 import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
+import org.optimizationBenchmarking.utils.math.text.INegatableParameterRenderer;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueChecker;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueCheckerMinMax;
+import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueCheckerMinMaxAbs;
+import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.SamplePermutationBasedParameterGuesser;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IParameterGuesser;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
@@ -188,12 +192,20 @@ import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
  * {@code d=(-y1*y2*x1^c+y1*y3*x1^c+y1*y2*x2^c-y2*y3*x2^c)/(-y2*x1^c+y3*x1^c+y1*x2^c-y3*x2^c)}
  * </dd>
  * </dl>
+ * _ModelBase
  */
-public final class LogisticModelWithOffsetOverLogX
-    extends LogisticModelOverLogX {
+public final class LogisticModelWithOffsetOverLogX extends _ModelBase {
+
+  /** the checker for {@code a} */
+  static final ParameterValueCheckerMinMax A = _ModelBase.CURVE_OFFSET;
+  /** the checker for {@code b} */
+  static final ParameterValueCheckerMinMaxAbs B = _ModelBase.CURVE_SPREAD;
+  /** the checker for parameter {@code c} */
+  static final ParameterValueCheckerMinMaxAbs C = new ParameterValueCheckerMinMaxAbs(
+      1e-10d, 1e3d);
   /** the checker for parameter {@code d} */
-  static final ParameterValueCheckerMinMax D = new ParameterValueCheckerMinMax(
-      -1e30d, 1e30d);
+  static final ParameterValueCheckerMinMaxAbs D = new ParameterValueCheckerMinMaxAbs(
+      1e-6d, 1e2d);
 
   /** create */
   public LogisticModelWithOffsetOverLogX() {
@@ -202,16 +214,54 @@ public final class LogisticModelWithOffsetOverLogX
 
   /** {@inheritDoc} */
   @Override
+  public final String toString() {
+    return "generalized logistic model"; //$NON-NLS-1$
+  }
+
+  /** {@inheritDoc} */
+  @Override
   public final double value(final double x, final double[] parameters) {
-    return (super.value(x, parameters) + parameters[3]);
+    double res, a;
+
+    res = 1d + (_ModelBase._pow(x, parameters[3]) * parameters[2]);
+    if (MathUtils.isFinite(res)) {
+      res = (parameters[1] / res) + (a = parameters[0]);
+      return ((MathUtils.isFinite(res)) ? res
+          : (MathUtils.isFinite(a) ? a : 0d));
+    }
+    return parameters[0];
   }
 
   /** {@inheritDoc} */
   @Override
   public final void gradient(final double x, final double[] parameters,
       final double[] gradient) {
-    super.gradient(x, parameters, gradient);
-    gradient[3] = 1d;
+    final double b, c, d, xd, cxd, bxd, div;
+
+    gradient[0] = 1;
+
+    d = parameters[3];
+    xd = _ModelBase._pow(x, d);
+
+    if ((xd == 0d) || ((cxd = ((c = parameters[2]) * xd)) <= 0d)) {
+      gradient[1] = 1d;
+      gradient[2] = gradient[3] = 0d;
+      return;
+    }
+
+    b = parameters[1];
+    gradient[1] = _ModelBase._gradient((1d / (1d + cxd)), b);
+
+    bxd = (b * xd);
+    if (bxd == 0d) {
+      gradient[2] = gradient[3] = 0d;
+      return;
+    }
+
+    div = _ModelBase._add(1d, 2d * cxd, cxd * cxd);
+    gradient[2] = _ModelBase._gradient(((-bxd) / div), c);
+    gradient[3] = _ModelBase
+        ._gradient(((-(c * bxd * _ModelBase._log(x))) / div), d);
   }
 
   /** {@inheritDoc} */
@@ -224,18 +274,88 @@ public final class LogisticModelWithOffsetOverLogX
   @Override
   public final void mathRender(final ITextOutput out,
       final IParameterRenderer renderer, final IMathRenderable x) {
-    super.mathRender(out, renderer, x);
+    renderer.renderParameter(0, out);
     out.append('+');
+    renderer.renderParameter(1, out);
+    out.append('/');
+    out.append('(');
+    out.append('1');
+    out.append('+');
+    renderer.renderParameter(2, out);
+    out.append('*');
+    x.mathRender(out, renderer);
+    out.append('^');
     renderer.renderParameter(3, out);
+    out.append(')');
   }
 
   /** {@inheritDoc} */
+  @SuppressWarnings({ "resource", "null" })
   @Override
   public final void mathRender(final IMath out,
       final IParameterRenderer renderer, final IMathRenderable x) {
-    try (final IMath add = out.add()) {
-      super.mathRender(add, renderer, x);
-      renderer.renderParameter(3, add);
+
+    final INegatableParameterRenderer negatableRenderer;
+    final IMath closerB, closerC;
+    final boolean negateB, negateC;
+
+    if (renderer instanceof INegatableParameterRenderer) {
+      negatableRenderer = ((INegatableParameterRenderer) (renderer));
+    } else {
+      negatableRenderer = null;
+    }
+
+    if ((negatableRenderer != null) && (negatableRenderer.isNegative(1))) {
+      negateB = true;
+      closerB = out.sub();
+    } else {
+      negateB = false;
+      closerB = out.add();
+    }
+    try {
+
+      renderer.renderParameter(0, closerB);
+
+      try (final IMath div = closerB.div()) {
+        if (negateB) {
+          negatableRenderer.renderNegatedParameter(1, div);
+        } else {
+          renderer.renderParameter(1, div);
+        }
+
+        if ((negatableRenderer != null)
+            && (negatableRenderer.isNegative(2))) {
+          negateC = true;
+          closerC = div.sub();
+        } else {
+          negateC = false;
+          closerC = div.add();
+        }
+
+        try {
+          try (final IText num = closerC.number()) {
+            num.append('1');
+          }
+          try (final IMath mul = closerC.mul()) {
+
+            if (negateC) {
+              negatableRenderer.renderNegatedParameter(2, mul);
+            } else {
+              renderer.renderParameter(2, mul);
+            }
+
+            try (final IMath pow = mul.pow()) {
+              x.mathRender(pow, renderer);
+              renderer.renderParameter(3, pow);
+            }
+          }
+
+        } finally {
+          closerC.close();
+        }
+      }
+    } finally {
+      closerB.close();
     }
   }
 
@@ -474,7 +594,7 @@ public final class LogisticModelWithOffsetOverLogX
             * (_ModelBase._add(-y2 * powx1c, y3 * powx1c, y1 * powx2c,
                 -y3 * powx2c)))
             / (y2 - y1), //
-        LogisticModelOverLogX.B);
+        LogisticModelWithOffsetOverLogX.B);
   }
 
   /**
@@ -565,7 +685,7 @@ public final class LogisticModelWithOffsetOverLogX
                 -y2 * y3 * powx2c, sy3 * powx2c))
             / (_ModelBase._add(y2 * powx1c, -y3 * powx1c, -y1 * powx2c,
                 y3 * powx2c))), //
-        LogisticModelOverLogX.A);
+        LogisticModelWithOffsetOverLogX.A);
   }
 
   /**
@@ -649,9 +769,35 @@ public final class LogisticModelWithOffsetOverLogX
         LogisticModelWithOffsetOverLogX.D);
   }
 
+  /**
+   * the internal fallback routine
+   *
+   * @param minY
+   *          the minimal y coordinate
+   * @param maxY
+   *          the maximum y coordinate
+   * @param dest
+   *          the destination array
+   * @param random
+   *          the random number generator
+   */
+  static final void _fallback(final double minY, final double maxY,
+      final double[] dest, final Random random) {
+    final boolean signChoice;
+    signChoice = random.nextBoolean();
+    if (signChoice) {
+      dest[0] = minY;
+    } else {
+      dest[0] = maxY;
+    }
+    LogisticModelOverLogX._fallback(signChoice, maxY - minY, dest, 1,
+        random);
+  }
+
   /** the parameter guesser */
   private final class __LogisticModelWithOffsetOverLogXParameterGuesser
-      extends _LogisticModelOverLogXParameterGuesser {
+      extends SamplePermutationBasedParameterGuesser {
+
     /**
      * Create the parameter guesser
      *
@@ -659,39 +805,36 @@ public final class LogisticModelWithOffsetOverLogX
      *          the data
      */
     __LogisticModelWithOffsetOverLogXParameterGuesser(final IMatrix data) {
-      super(data);
+      super(data, 4, //
+          3);
     }
 
     /** {@inheritDoc} */
     @Override
     protected final boolean fallback(final double[] points,
         final double[] dest, final Random random) {
-      double minY;
-      int i;
-
-      findMinY: {
-        if (random.nextInt(10) <= 0) {
-          minY = this.m_minY;
-          if (MathUtils.isFinite(minY)) {
-            break findMinY;
-          }
-        }
-        minY = Double.POSITIVE_INFINITY;
-        for (i = (points.length - 1); i > 0; i -= 2) {
-          minY = Math.min(minY, points[i]);
-        }
-      }
-
-      minY = (minY * ((1d + //
-          Math.abs(0.05d * random.nextGaussian()))));
-      dest[3] = minY;
-      this._fallback(points, dest, random, minY);
+      final double[] minMax;
+      minMax = _ModelBase._getMinMax(true, this.m_minY, this.m_maxY,
+          points, random);
+      LogisticModelWithOffsetOverLogX._fallback(minMax[0], minMax[1], dest,
+          random);
       return true;
     }
 
     /** {@inheritDoc} */
     @Override
-    protected void guessBasedOnPermutation(final double[] points,
+    protected final void fallback(final double[] dest,
+        final Random random) {
+      final double[] minMax;
+      minMax = _ModelBase._getMinMax(true, this.m_minY, this.m_maxY, null,
+          random);
+      LogisticModelWithOffsetOverLogX._fallback(minMax[0], minMax[1], dest,
+          random);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected final void guessBasedOnPermutation(final double[] points,
         final double[] bestGuess, final double[] destGuess) {
 
       final double x0, y0, x1, y1, x2, y2, /* x3, y3, */ oldA, oldB, oldC,
@@ -722,7 +865,7 @@ public final class LogisticModelWithOffsetOverLogX
             // find B based on the existing or new A, C and D values
             newB = LogisticModelWithOffsetOverLogX._b_x1y1x2y2ad(x0, y0,
                 x1, y1, (hasA ? newA : oldA), (hasD ? newD : oldD));
-            if (LogisticModelOverLogX.B.check(newB)) {
+            if (LogisticModelWithOffsetOverLogX.B.check(newB)) {
               changed = hasB = true;
               break findB;
             }
@@ -730,21 +873,21 @@ public final class LogisticModelWithOffsetOverLogX
             newB = LogisticModelWithOffsetOverLogX._b_xyacd(x0, y0,
                 (hasA ? newA : bestGuess[0]), (hasC ? newC : oldC),
                 (hasD ? newD : oldD));
-            if (LogisticModelOverLogX.B.check(newB)) {
+            if (LogisticModelWithOffsetOverLogX.B.check(newB)) {
               changed = hasB = true;
               break findB;
             }
 
             newB = LogisticModelWithOffsetOverLogX._b_x1y1x2y2cd(x0, y0,
                 x1, y1, (hasC ? newC : oldC), (hasD ? newD : oldD));
-            if (LogisticModelOverLogX.B.check(newB)) {
+            if (LogisticModelWithOffsetOverLogX.B.check(newB)) {
               changed = hasB = true;
               break findB;
             }
 
             newB = LogisticModelWithOffsetOverLogX._b_x1y1x2y2x3y3c(x0, y0,
                 x1, y1, x2, y2, (hasC ? newC : oldC));
-            if (LogisticModelOverLogX.B.check(newB)) {
+            if (LogisticModelWithOffsetOverLogX.B.check(newB)) {
               changed = hasB = true;
               break findB;
             }
@@ -757,7 +900,7 @@ public final class LogisticModelWithOffsetOverLogX
             // find C based on the existing or new A and B values
             newC = LogisticModelWithOffsetOverLogX._c_x1y1x2y2ad(x0, y0,
                 x1, y1, (hasA ? newA : oldA), (hasD ? newD : oldD));
-            if (LogisticModelOverLogX.C.check(newC)) {
+            if (LogisticModelWithOffsetOverLogX.C.check(newC)) {
               changed = hasC = true;
               break findC;
             }
@@ -765,7 +908,7 @@ public final class LogisticModelWithOffsetOverLogX
             newC = LogisticModelWithOffsetOverLogX._c_xyabd(x0, y0,
                 (hasA ? newA : oldA), (hasB ? newB : oldB),
                 (hasD ? newD : oldD));
-            if (LogisticModelOverLogX.C.check(newC)) {
+            if (LogisticModelWithOffsetOverLogX.C.check(newC)) {
               changed = hasC = true;
               break findC;
             }
@@ -779,7 +922,7 @@ public final class LogisticModelWithOffsetOverLogX
             if (hasB) {
               newA = LogisticModelWithOffsetOverLogX._a_xybcd(x0, y0, newB,
                   (hasC ? newC : oldC), (hasD ? newD : oldD));
-              if (LogisticModelOverLogX.A.check(newA)) {
+              if (LogisticModelWithOffsetOverLogX.A.check(newA)) {
                 changed = hasA = true;
                 break findA;
               }
@@ -787,14 +930,14 @@ public final class LogisticModelWithOffsetOverLogX
 
             newA = LogisticModelWithOffsetOverLogX._a_x1y1x2y2cd(x0, y0,
                 x1, y1, (hasC ? newC : oldC), (hasD ? newD : oldD));
-            if (LogisticModelOverLogX.A.check(newA)) {
+            if (LogisticModelWithOffsetOverLogX.A.check(newA)) {
               changed = hasA = true;
               break findA;
             }
 
             newA = LogisticModelWithOffsetOverLogX._a_x1y1x2y2x3y3c(x0, y0,
                 x1, y1, x2, y2, (hasC ? newC : oldC));
-            if (LogisticModelOverLogX.A.check(newA)) {
+            if (LogisticModelWithOffsetOverLogX.A.check(newA)) {
               changed = hasA = true;
               break findA;
             }
@@ -802,7 +945,7 @@ public final class LogisticModelWithOffsetOverLogX
             if (!hasB) {
               newA = LogisticModelWithOffsetOverLogX._a_xybcd(x0, y0, oldB,
                   (hasC ? newC : oldC), (hasD ? newD : oldD));
-              if (LogisticModelOverLogX.A.check(newA)) {
+              if (LogisticModelWithOffsetOverLogX.A.check(newA)) {
                 changed = hasA = true;
                 break findA;
               }
@@ -865,12 +1008,6 @@ public final class LogisticModelWithOffsetOverLogX
                   changed = hasA = true;
                   break findA2;
                 }
-                // if (Math.abs(x3) <= 0d) {
-                // newA = Math.max(Double.MIN_NORMAL,
-                // y3 - (hasD ? newD : oldD));
-                // changed = hasA = true;
-                // break findA2;
-                // }
               }
             }
           }
@@ -882,5 +1019,13 @@ public final class LogisticModelWithOffsetOverLogX
       destGuess[2] = newC;
       destGuess[3] = newD;
     }
+
+    /** {@inheritDoc} */
+    @Override
+    protected final double value(final double x,
+        final double[] parameters) {
+      return LogisticModelWithOffsetOverLogX.this.value(x, parameters);
+    }
   }
+
 }

@@ -72,13 +72,12 @@ import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 public final class ExponentialDecayModel extends _ModelBase {
 
   /** the checker for {@code a} */
-  static final ParameterValueCheckerMinMax A = new ParameterValueCheckerMinMax(
-      -1e30d, 1e30d);
+  static final ParameterValueCheckerMinMax A = _ModelBase.CURVE_OFFSET;
   /** the checker for {@code b} */
-  static final ParameterValueCheckerMinMax B = ExponentialDecayModel.A;
+  static final ParameterValueCheckerMinMaxAbs B = _ModelBase.CURVE_SPREAD;
   /** the checker for {@code c} */
-  static final ParameterValueCheckerMinMax C = new ParameterValueCheckerMinMax(
-      -1e5d, -1e-5d);
+  static final ParameterValueCheckerMinMaxAbs C = new ParameterValueCheckerMinMaxAbs(
+      1e-10d, 1e5d);
   /** the checker for {@code d} */
   static final ParameterValueCheckerMinMaxAbs D = new ParameterValueCheckerMinMaxAbs(
       1e-5d, 50d);
@@ -396,35 +395,16 @@ public final class ExponentialDecayModel extends _ModelBase {
    */
   static final void _fallback(final double minY, final double maxY,
       final double[] dest, final Random random) {
-    double trialA, trialB;
-    int trials;
-
     if (random.nextBoolean()) {
-      trials = 100;
-      do {
-        trialA = (minY * (1d + (0.05d * random.nextGaussian())));
-      } while ((((minY > 0d) && (trialA < 0d)) || (trialA >= maxY))
-          && ((--trials) >= 0));
-      dest[0] = trialA;
-
-      trials = 100;
-      do {
-        trialB = ((maxY - trialA) * ((1d + //
-            Math.abs(0.05d * random.nextGaussian()))));
-      } while (((minY > 0d) && ((maxY - trialB) < 0d))
-          && ((--trials) >= 0));
-      dest[1] = trialB;
-
-      dest[2] = -(random.nextDouble() + random.nextInt(5));
-      dest[3] = (1e-5d + random.nextDouble());
+      dest[0] = minY;
+      dest[1] = (maxY - minY);
+      dest[2] = -random.nextDouble();
+      dest[3] = random.nextInt(5) + random.nextDouble();
     } else {
-      dest[0] = trialB = (maxY
-          * (1d + Math.abs(0.05d * random.nextGaussian())));
-      dest[1] = ((minY - trialB)
-          * (1d + Math.abs(0.05d * random.nextGaussian())));
-      dest[2] = -1d - (random.nextDouble() + random.nextInt(5));
-      dest[3] = -(random.nextDouble()
-          + (random.nextInt(3) * random.nextDouble()));
+      dest[0] = maxY;
+      dest[1] = (minY - maxY);
+      dest[2] = -(random.nextDouble() + random.nextInt(200));
+      dest[3] = -(random.nextInt(5) + random.nextDouble());
     }
   }
 
@@ -454,36 +434,10 @@ public final class ExponentialDecayModel extends _ModelBase {
     @Override
     protected final boolean fallback(final double[] points,
         final double[] dest, final Random random) {
-      double minY, maxY;
-      int i;
-
-      findMinY: {
-        if (random.nextInt(10) <= 0) {
-          minY = this.m_minY;
-          if (MathUtils.isFinite(minY)) {
-            break findMinY;
-          }
-        }
-        minY = Double.POSITIVE_INFINITY;
-        for (i = (points.length - 1); i > 0; i -= 2) {
-          minY = Math.min(minY, points[i]);
-        }
-      }
-
-      findMaxY: {
-        if (random.nextInt(10) <= 0) {
-          maxY = this.m_maxY;
-          if (MathUtils.isFinite(maxY)) {
-            break findMaxY;
-          }
-        }
-        maxY = Double.NEGATIVE_INFINITY;
-        for (i = (points.length - 1); i > 0; i -= 2) {
-          maxY = Math.max(maxY, points[i]);
-        }
-      }
-
-      ExponentialDecayModel._fallback(minY, maxY, dest, random);
+      final double[] minMax;
+      minMax = _ModelBase._getMinMax(true, this.m_minY, this.m_maxY,
+          points, random);
+      ExponentialDecayModel._fallback(minMax[0], minMax[1], dest, random);
       return true;
     }
 
@@ -491,14 +445,10 @@ public final class ExponentialDecayModel extends _ModelBase {
     @Override
     protected final void fallback(final double[] dest,
         final Random random) {
-      final double maxY, minY;
-
-      minY = (random.nextBoolean() ? this.m_minY
-          : ((random.nextInt(11) - 5) + (random.nextGaussian() * 10)));
-      maxY = (random.nextBoolean() ? this.m_maxY
-          : (minY
-              + Math.abs(random.nextInt(1000) * random.nextGaussian())));
-      ExponentialDecayModel._fallback(minY, maxY, dest, random);
+      final double[] minMax;
+      minMax = _ModelBase._getMinMax(true, this.m_minY, this.m_maxY, null,
+          random);
+      ExponentialDecayModel._fallback(minMax[0], minMax[1], dest, random);
     }
 
     /** {@inheritDoc} */

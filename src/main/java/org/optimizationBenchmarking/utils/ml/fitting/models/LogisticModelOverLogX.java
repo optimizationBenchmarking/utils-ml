@@ -64,7 +64,7 @@ import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
  * </li>
  * </ol>
  */
-public class LogisticModelOverLogX extends _ModelBase {
+public final class LogisticModelOverLogX extends _ModelBase {
 
   /** the checker for parameter {@code a} */
   static final ParameterValueCheckerMinMaxAbs A = new ParameterValueCheckerMinMaxAbs(
@@ -84,7 +84,7 @@ public class LogisticModelOverLogX extends _ModelBase {
   /** {@inheritDoc} */
   @Override
   public final String toString() {
-    return "generalized logistic model"; //$NON-NLS-1$
+    return "logistic model"; //$NON-NLS-1$
   }
 
   /** {@inheritDoc} */
@@ -380,8 +380,42 @@ public class LogisticModelOverLogX extends _ModelBase {
         LogisticModelOverLogX.C);
   }
 
+  /**
+   * the internal fallback routine
+   *
+   * @param signChoice
+   *          {@code true} if all parameters are positive, {@code false} if
+   *          {@code b} and {@code d} should be negative
+   * @param spread
+   *          the parameter spread
+   * @param dest
+   *          the destination array
+   * @param offset
+   *          the parameter offset
+   * @param random
+   *          the random number generator
+   */
+  static final void _fallback(final boolean signChoice,
+      final double spread, final double[] dest, final int offset,
+      final Random random) {
+    if (signChoice) {
+      dest[offset] = _ModelBase
+          ._exp((_ModelBase._log(spread) + Math.abs(random.nextGaussian()))
+              - (6d * Math.abs(random.nextGaussian())));
+      dest[offset + 1] = _ModelBase
+          ._exp((random.nextInt(24) - 18) + random.nextDouble());
+      dest[offset + 2] = 15d * random.nextDouble();
+    } else {
+      dest[offset] = -spread * (2d
+          * _ModelBase._exp(-(random.nextDouble() + random.nextInt(10))));
+      dest[offset + 1] = 100d
+          * _ModelBase._exp(-(random.nextDouble() + random.nextInt(10)));
+      dest[offset + 2] = 5d * random.nextDouble();
+    }
+  }
+
   /** the parameter guesser */
-  class _LogisticModelOverLogXParameterGuesser
+  private final class _LogisticModelOverLogXParameterGuesser
       extends SamplePermutationBasedParameterGuesser {
 
     /**
@@ -395,58 +429,27 @@ public class LogisticModelOverLogX extends _ModelBase {
           (LogisticModelOverLogX.this.getParameterCount() - 1));
     }
 
-    /**
-     * compute a fallback point of everything else fails.
-     *
-     * @param points
-     *          the points
-     * @param dest
-     *          the destination
-     * @param random
-     *          the random number generator
-     * @param offset
-     *          the offset
-     */
-    final void _fallback(final double[] points, final double[] dest,
-        final Random random, final double offset) {
-      double maxY;
-      int i;
-
-      findMaxY: {
-        if (random.nextInt(10) <= 0) {
-          maxY = this.m_maxY;
-          if (MathUtils.isFinite(maxY)) {
-            break findMaxY;
-          }
-        }
-        maxY = Double.NEGATIVE_INFINITY;
-        for (i = (points.length - 1); i > 0; i -= 2) {
-          maxY = Math.max(maxY, points[i]);
-        }
-      }
-
-      maxY = Math.abs(maxY - offset);
-      if (maxY < 1e-6d) {
-        maxY = 1e-6d;
-      }
-
-      dest[0] = maxY = (maxY * Math.abs((1d + //
-          Math.abs(0.05d * random.nextGaussian()))));
-
-      dest[1] = (-Math.abs(//
-          maxY * (1d / (17d + (3d * random.nextGaussian())))));
-
-      do {
-        dest[2] = (1d + random.nextGaussian());
-      } while (dest[2] <= 1e-7d);
+    /** {@inheritDoc} */
+    @Override
+    protected final boolean fallback(final double[] points,
+        final double[] dest, final Random random) {
+      final double[] minMax;
+      minMax = _ModelBase._getMinMax(true, this.m_minY, this.m_maxY,
+          points, random);
+      LogisticModelOverLogX._fallback(random.nextBoolean(),
+          minMax[1] - minMax[0], dest, 0, random);
+      return true;
     }
 
     /** {@inheritDoc} */
     @Override
-    protected boolean fallback(final double[] points, final double[] dest,
+    protected final void fallback(final double[] dest,
         final Random random) {
-      this._fallback(points, dest, random, 0d);
-      return true;
+      final double[] minMax;
+      minMax = _ModelBase._getMinMax(true, this.m_minY, this.m_maxY, null,
+          random);
+      LogisticModelOverLogX._fallback(random.nextBoolean(),
+          minMax[1] - minMax[0], dest, 0, random);
     }
 
     /** {@inheritDoc} */
@@ -458,7 +461,7 @@ public class LogisticModelOverLogX extends _ModelBase {
 
     /** {@inheritDoc} */
     @Override
-    protected void guessBasedOnPermutation(final double[] points,
+    protected final void guessBasedOnPermutation(final double[] points,
         final double[] bestGuess, final double[] destGuess) {
       final double x0, y0, x1, y1/* , x2, y2 */, oldA, oldB, oldC;
       double newA, newB, newC;
