@@ -8,21 +8,52 @@ import org.optimizationBenchmarking.utils.math.functions.power.Exp;
 import org.optimizationBenchmarking.utils.math.functions.power.Ln;
 import org.optimizationBenchmarking.utils.math.functions.power.Pow;
 import org.optimizationBenchmarking.utils.math.functions.power.Sqrt;
-import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueCheckerMinMax;
-import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueCheckerMinMaxAbs;
 
 /** A base class with some utility methods */
 abstract class _ModelBase extends BasicModel {
-  /** the checker for curve offsets */
-  static final ParameterValueCheckerMinMax CURVE_OFFSET = new ParameterValueCheckerMinMax(
-      -1e30d, 1e30d);
-  /** the checker for curve spreads */
-  static final ParameterValueCheckerMinMaxAbs CURVE_SPREAD = new ParameterValueCheckerMinMaxAbs(
-      1e-10d, 1e30d);
 
   /** create */
   _ModelBase() {
     super();
+  }
+
+  /**
+   * assign a value to an array item if it is finite
+   *
+   * @param dest
+   *          the destination array
+   * @param index
+   *          the index
+   * @param value
+   *          the value
+   */
+  static final void _assign1IfFinite(final double[] dest, final int index,
+      final double value) {
+    if (MathUtils.isFinite(value)) {
+      dest[index] = value;
+    }
+  }
+
+  /**
+   * assign two values to an array item if both are finite
+   *
+   * @param dest
+   *          the destination array
+   * @param index1
+   *          the first index
+   * @param value1
+   *          the first value
+   * @param index2
+   *          the second index
+   * @param value2
+   *          the second value
+   */
+  static final void _assign2IfFinite(final double[] dest, final int index1,
+      final double value1, final int index2, final double value2) {
+    if (MathUtils.isFinite(value1) && MathUtils.isFinite(value2)) {
+      dest[index1] = value1;
+      dest[index2] = value2;
+    }
   }
 
   /**

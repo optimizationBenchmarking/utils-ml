@@ -322,18 +322,36 @@ public final class ExponentialDecayModel extends _ModelBase {
    */
   static final void _fallback(final double minY, final double maxY,
       final double[] dest, final Random random) {
+    double temp;
+    int steps;
+
     if (random.nextBoolean()) {
       dest[0] = minY;
       dest[1] = (maxY - minY);
-      dest[2] = -_ModelBase._exp(-7d * random.nextDouble());
-      dest[3] = 5d * _ModelBase._exp(-5d * random.nextDouble());
+      steps = 100;
+      do {
+        dest[2] = temp = -_ModelBase._exp(-7d * random.nextDouble());
+      } while ((((--steps) > 0) && (temp >= -1e-13d))
+          || (!(MathUtils.isFinite(temp))));
+      steps = 100;
+      do {
+        dest[3] = temp = 5d * _ModelBase._exp(-5d * random.nextDouble());
+      } while ((((--steps) > 0) && (temp <= 1e-13d))
+          || (!(MathUtils.isFinite(temp))));
     } else {
       dest[0] = maxY;
       dest[1] = (minY - maxY);
-      dest[2] = -(random.nextDouble() + random.nextInt(200));
-      dest[3] = -(1d / (Math.abs(random.nextGaussian())
-          + (1e-7d * random.nextDouble())));// random.nextInt(5) +
-                                            // random.nextDouble());
+      steps = 100;
+      do {
+        dest[2] = temp = -(random.nextDouble() + random.nextInt(200));
+      } while ((((--steps) > 0) && (temp >= -1e-10d))
+          || (!(MathUtils.isFinite(temp))));
+      steps = 100;
+      do {
+        dest[3] = temp = -(1d / (Math.abs(random.nextGaussian())
+            + (1e-7d * random.nextDouble())));
+      } while ((((--steps) > 0) && (temp >= -1e-11d))
+          || (!(MathUtils.isFinite(temp))));
     }
   }
 
@@ -363,35 +381,67 @@ public final class ExponentialDecayModel extends _ModelBase {
     protected final boolean fallback(final double[] points,
         final double[] dest, final Random random) {
       final double[] minMax;
+      double temp;
+
       minMax = _ModelBase._getMinMax(true, this.m_minY, this.m_maxY,
           points, random);
       ExponentialDecayModel._fallback(minMax[0], minMax[1], dest, random);
 
-      if (random.nextBoolean()) {
-        dest[2] = ExponentialDecayModel._c_x1y1abd(points[0], points[1],
-            dest[0], dest[1], dest[3]);
-        dest[3] = ExponentialDecayModel._d_x1y1abc(points[0], points[1],
-            dest[0], dest[1], dest[2]);
-      } else {
-        dest[3] = ExponentialDecayModel._d_x1y1abc(points[0], points[1],
-            dest[0], dest[1], dest[2]);
-        dest[2] = ExponentialDecayModel._c_x1y1abd(points[0], points[1],
-            dest[0], dest[1], dest[3]);
+      switch (random.nextInt(3)) {
+        case 0: {
+          temp = ExponentialDecayModel._c_x1y1abd(points[0], points[1],
+              dest[0], dest[1], dest[3]);
+          if ((Math.abs(temp) > 1e-13d) && MathUtils.isFinite(temp)) {
+            dest[2] = temp;
+          }
+          temp = ExponentialDecayModel._d_x1y1abc(points[0], points[1],
+              dest[0], dest[1], dest[2]);
+          if ((Math.abs(temp) > 1e-13d) && MathUtils.isFinite(temp)) {
+            dest[3] = temp;
+          }
+          break;
+        }
+        default: {
+          temp = ExponentialDecayModel._d_x1y1abc(points[0], points[1],
+              dest[0], dest[1], dest[2]);
+          if ((Math.abs(temp) > 1e-13d) && MathUtils.isFinite(temp)) {
+            dest[3] = temp;
+          }
+          temp = ExponentialDecayModel._c_x1y1abd(points[0], points[1],
+              dest[0], dest[1], dest[3]);
+          if ((Math.abs(temp) > 1e-13d) && MathUtils.isFinite(temp)) {
+            dest[2] = temp;
+          }
+        }
       }
 
       switch (random.nextInt(3)) {
         case 0: {
-          ExponentialDecayModel._a_x1y1bcd(points[0], points[1], dest[1],
-              dest[2], dest[3]);
-          dest[1] = ExponentialDecayModel._b_x1y1acd(points[0], points[1],
+          temp = ExponentialDecayModel._a_x1y1bcd(points[0], points[1],
+              dest[1], dest[2], dest[3]);
+          if ((Math.abs(temp) > 1e-13d) && MathUtils.isFinite(temp)) {
+            dest[0] = temp;
+          }
+
+          temp = ExponentialDecayModel._b_x1y1acd(points[0], points[1],
               dest[0], dest[2], dest[3]);
+          if ((Math.abs(temp) > 1e-13d) && MathUtils.isFinite(temp)) {
+            dest[1] = temp;
+          }
           break;
         }
         default: {
-          dest[1] = ExponentialDecayModel._b_x1y1acd(points[0], points[1],
+          temp = ExponentialDecayModel._b_x1y1acd(points[0], points[1],
               dest[0], dest[2], dest[3]);
-          dest[0] = ExponentialDecayModel._a_x1y1bcd(points[0], points[1],
+          if ((Math.abs(temp) > 1e-13d) && MathUtils.isFinite(temp)) {
+            dest[1] = temp;
+          }
+          temp = ExponentialDecayModel._a_x1y1bcd(points[0], points[1],
               dest[1], dest[2], dest[3]);
+          if ((Math.abs(temp) > 1e-13d) && MathUtils.isFinite(temp)) {
+            dest[0] = temp;
+          }
+
           break;
         }
       }
