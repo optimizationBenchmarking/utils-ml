@@ -205,7 +205,7 @@ public abstract class SampleBasedParameterGuesser
   }
 
   /**
-   * guess not all required points are available
+   * guess if potentially not all required points are available
    *
    * @param points
    *          an array with {@code x, y} coordinate pairs

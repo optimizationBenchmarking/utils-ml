@@ -9,9 +9,8 @@ import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
 import org.optimizationBenchmarking.utils.math.text.INegatableParameterRenderer;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueChecker;
-import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueCheckerMinMax;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueCheckerMinMaxAbs;
-import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.SamplePermutationBasedParameterGuesser;
+import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.SamplingBasedParameterGuesser;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IParameterGuesser;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
@@ -71,16 +70,9 @@ import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
  */
 public final class ExponentialDecayModel extends _ModelBase {
 
-  /** the checker for {@code a} */
-  static final ParameterValueCheckerMinMax A = _ModelBase.CURVE_OFFSET;
-  /** the checker for {@code b} */
-  static final ParameterValueCheckerMinMaxAbs B = _ModelBase.CURVE_SPREAD;
   /** the checker for {@code c} */
   static final ParameterValueCheckerMinMaxAbs C = new ParameterValueCheckerMinMaxAbs(
       1e-10d, 1e5d);
-  /** the checker for {@code d} */
-  static final ParameterValueCheckerMinMaxAbs D = new ParameterValueCheckerMinMaxAbs(
-      1e-5d, 50d);
 
   /** create the exponential decay model */
   public ExponentialDecayModel() {
@@ -227,71 +219,6 @@ public final class ExponentialDecayModel extends _ModelBase {
   }
 
   /**
-   * compute {@code a} based on two points and {@code c} and {@code d}.
-   *
-   * @param x1
-   *          the {@code x}-coordinate of the first point
-   * @param y1
-   *          the {@code y}-coordinate of the first point
-   * @param x2
-   *          the {@code x}-coordinate of the second point
-   * @param y2
-   *          the {@code y}-coordinate of the second point
-   * @param c
-   *          the {@code c} value
-   * @param d
-   *          the {@code d} value
-   * @return the guess for {@code a}
-   */
-  static final double _a_x1y1x2y2cd(final double x1, final double y1,
-      final double x2, final double y2, final double c, final double d) {
-    final double x1d, x2d, ecx1d, ecx2d, pp;
-
-    x1d = _ModelBase._pow(x1, d);
-    ecx1d = _ModelBase._exp(c * x1d);
-    x2d = _ModelBase._pow(x2, d);
-    ecx2d = _ModelBase._exp(c * x2d);
-    pp = _ModelBase._pow((ecx1d), (x2d / x1d));
-
-    return ParameterValueChecker.choose(//
-        -((ecx2d * y1) - (ecx1d * y2)) / (ecx1d - ecx2d), //
-        ((y2 * ecx1d) - (y1 * pp)) / (ecx1d - pp), //
-        ExponentialDecayModel.A);
-  }
-
-  /**
-   * compute {@code b} based on two points and {@code c} and {@code d}.
-   *
-   * @param x1
-   *          the {@code x}-coordinate of the first point
-   * @param y1
-   *          the {@code y}-coordinate of the first point
-   * @param x2
-   *          the {@code x}-coordinate of the second point
-   * @param y2
-   *          the {@code y}-coordinate of the second point
-   * @param c
-   *          the {@code c} value
-   * @param d
-   *          the {@code d} value
-   * @return the guess for {@code b}
-   */
-  static final double _b_x1y1x2y2cd(final double x1, final double y1,
-      final double x2, final double y2, final double c, final double d) {
-    final double x1d, x2d, ecx1d, ecx2d;
-
-    x1d = _ModelBase._pow(x1, d);
-    x2d = _ModelBase._pow(x2, d);
-    ecx1d = _ModelBase._exp(c * x1d);
-    ecx2d = _ModelBase._exp(c * x2d);
-
-    return ParameterValueChecker.choose(//
-        (y1 - y2) / (ecx1d - ecx2d), //
-        (y1 - y2) / (ecx1d - _ModelBase._pow((ecx1d), (x2d / x1d))), //
-        ExponentialDecayModel.B);
-  }
-
-  /**
    * Compute {@code a} from one point and {@code b}, {@code c}, and
    * {@code d}.
    *
@@ -398,19 +325,21 @@ public final class ExponentialDecayModel extends _ModelBase {
     if (random.nextBoolean()) {
       dest[0] = minY;
       dest[1] = (maxY - minY);
-      dest[2] = -random.nextDouble();
-      dest[3] = random.nextInt(5) + random.nextDouble();
+      dest[2] = -_ModelBase._exp(-7d * random.nextDouble());
+      dest[3] = 5d * _ModelBase._exp(-5d * random.nextDouble());
     } else {
       dest[0] = maxY;
       dest[1] = (minY - maxY);
       dest[2] = -(random.nextDouble() + random.nextInt(200));
-      dest[3] = -(random.nextInt(5) + random.nextDouble());
+      dest[3] = -(1d / (Math.abs(random.nextGaussian())
+          + (1e-7d * random.nextDouble())));// random.nextInt(5) +
+                                            // random.nextDouble());
     }
   }
 
   /** the parameter guesser */
   private class __DecayModelParameterGuesser
-      extends SamplePermutationBasedParameterGuesser {
+      extends SamplingBasedParameterGuesser {
 
     /**
      * create the model
@@ -419,8 +348,7 @@ public final class ExponentialDecayModel extends _ModelBase {
      *          the data
      */
     __DecayModelParameterGuesser(final IMatrix data) {
-      super(data, ExponentialDecayModel.this.getParameterCount(),
-          ExponentialDecayModel.this.getParameterCount() - 1);
+      super(data, 3, 4);
     }
 
     /** {@inheritDoc} */
@@ -438,6 +366,36 @@ public final class ExponentialDecayModel extends _ModelBase {
       minMax = _ModelBase._getMinMax(true, this.m_minY, this.m_maxY,
           points, random);
       ExponentialDecayModel._fallback(minMax[0], minMax[1], dest, random);
+
+      if (random.nextBoolean()) {
+        dest[2] = ExponentialDecayModel._c_x1y1abd(points[0], points[1],
+            dest[0], dest[1], dest[3]);
+        dest[3] = ExponentialDecayModel._d_x1y1abc(points[0], points[1],
+            dest[0], dest[1], dest[2]);
+      } else {
+        dest[3] = ExponentialDecayModel._d_x1y1abc(points[0], points[1],
+            dest[0], dest[1], dest[2]);
+        dest[2] = ExponentialDecayModel._c_x1y1abd(points[0], points[1],
+            dest[0], dest[1], dest[3]);
+      }
+
+      switch (random.nextInt(3)) {
+        case 0: {
+          ExponentialDecayModel._a_x1y1bcd(points[0], points[1], dest[1],
+              dest[2], dest[3]);
+          dest[1] = ExponentialDecayModel._b_x1y1acd(points[0], points[1],
+              dest[0], dest[2], dest[3]);
+          break;
+        }
+        default: {
+          dest[1] = ExponentialDecayModel._b_x1y1acd(points[0], points[1],
+              dest[0], dest[2], dest[3]);
+          dest[0] = ExponentialDecayModel._a_x1y1bcd(points[0], points[1],
+              dest[1], dest[2], dest[3]);
+          break;
+        }
+      }
+
       return true;
     }
 
@@ -449,124 +407,6 @@ public final class ExponentialDecayModel extends _ModelBase {
       minMax = _ModelBase._getMinMax(true, this.m_minY, this.m_maxY, null,
           random);
       ExponentialDecayModel._fallback(minMax[0], minMax[1], dest, random);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected final void guessBasedOnPermutation(final double[] points,
-        final double[] bestGuess, final double[] destGuess) {
-      final double oldA, oldB, oldC, oldD;
-      double newA, newB, newC, newD;
-      boolean changed, hasA, hasB, hasC, hasD;
-
-      hasA = hasB = hasC = hasD = false;
-      oldA = newA = bestGuess[0];
-      oldB = newB = bestGuess[1];
-      oldC = newC = bestGuess[2];
-      oldD = newD = bestGuess[3];
-
-      do {
-        changed = false;
-
-        // find A
-        findA: {
-          if (!hasA) {
-
-            newA = ExponentialDecayModel._a_x1y1x2y2cd(points[0],
-                points[1], points[2], points[3], (hasC ? newC : oldC),
-                (hasD ? newD : oldD));
-            if (ExponentialDecayModel.A.check(newA)) {
-              changed = hasA = true;
-              break findA;
-            }
-
-            newA = ExponentialDecayModel._a_x1y1bcd(points[0], points[1],
-                (hasB ? newB : oldB), (hasC ? newC : oldC),
-                (hasD ? newD : oldD));
-            if (ExponentialDecayModel.A.check(newA)) {
-              changed = hasA = true;
-              break findA;
-            }
-          }
-        }
-
-        // find B
-        findB: {
-          if (!hasB) {
-            newB = ExponentialDecayModel._b_x1y1x2y2cd(points[0],
-                points[1], points[2], points[3], (hasC ? newC : oldC),
-                (hasD ? newD : oldD));
-            if (ExponentialDecayModel.B.check(newB)) {
-              changed = hasB = true;
-              break findB;
-            }
-
-            newB = ExponentialDecayModel._b_x1y1acd(points[0], points[1],
-                (hasA ? newA : oldA), (hasC ? newC : oldC),
-                (hasD ? newD : oldD));
-            if (ExponentialDecayModel.B.check(newB)) {
-              changed = hasB = true;
-              break findB;
-            }
-          }
-        }
-
-        // find C
-        findC: {
-          if (!hasC) {
-            newC = ExponentialDecayModel._c_x1y1abd(points[0], points[1],
-                (hasA ? newA : oldA), (hasB ? newB : oldB),
-                (hasD ? newD : oldD));
-            if (ExponentialDecayModel.C.check(newC)) {
-              changed = hasC = true;
-              break findC;
-            }
-          }
-        }
-
-        // find D
-        findD: {
-          if (!hasD) {
-            newD = ExponentialDecayModel._d_x1y1abc(points[0], points[1],
-                (hasA ? newA : oldA), (hasB ? newB : oldB),
-                (hasC ? newC : oldC));
-            if (ExponentialDecayModel.D.check(newD)) {
-              changed = hasD = true;
-              break findD;
-            }
-          }
-        }
-
-        // OK, everything else has failed us
-        emergency: {
-          if (!(changed)) {
-
-            if (!(hasA)) {
-              newA = Math.min(points[1], Math.min(points[3], points[5]));
-              if (ExponentialDecayModel.A.check(newA)) {
-                hasA = changed = true;
-                break emergency;
-              }
-            }
-
-            if (!(hasB)) {
-              newB = (Math.max(points[1], Math.max(points[3], points[5])) - //
-                  (hasA ? newA
-                      : Math.min(points[1],
-                          Math.min(points[3], points[5]))));
-              if (ExponentialDecayModel.B.check(newB)) {
-                hasB = changed = true;
-                break emergency;
-              }
-            }
-          }
-        }
-      } while (changed);
-
-      destGuess[0] = newA;
-      destGuess[1] = newB;
-      destGuess[2] = newC;
-      destGuess[3] = newD;
     }
   }
 }

@@ -84,6 +84,7 @@ public abstract class SamplePermutationBasedParameterGuesser
   protected final double error(final double[] points,
       final double[] parameters) {
     final double[] temp;
+    double y, error;
     int i, j;
 
     for (final double value : parameters) {
@@ -94,10 +95,10 @@ public abstract class SamplePermutationBasedParameterGuesser
 
     temp = this.m_errorTemp;
     for (i = temp.length, j = (i << 1); (--i) >= 0;) {
-      temp[i] = Math.abs(points[--j] - //
-          this.value(points[--j], parameters));
+      y = points[--j];
+      error = Math.abs(y - this.value(points[--j], parameters));
+      temp[i] = (y != 0d) ? error / Math.abs(y) : error;
     }
-
     return AddN.destructiveSum(temp);
   }
 
