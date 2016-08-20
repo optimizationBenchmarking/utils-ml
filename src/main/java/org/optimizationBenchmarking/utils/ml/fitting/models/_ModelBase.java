@@ -18,42 +18,32 @@ abstract class _ModelBase extends BasicModel {
   }
 
   /**
-   * assign a value to an array item if it is finite
+   * check whether a new value can be used based on an old value
    *
-   * @param dest
-   *          the destination array
-   * @param index
-   *          the index
-   * @param value
-   *          the value
+   * @param newValue
+   *          the new value
+   * @param oldValue
+   *          the old value
+   * @param minAbs
+   *          the minimal absolute value
+   * @return {@code true} if the new value is a suitable replacement of the
+   *         old value, {@code false} otherwise
    */
-  static final void _assign1IfFinite(final double[] dest, final int index,
-      final double value) {
-    if (MathUtils.isFinite(value)) {
-      dest[index] = value;
+  static final boolean _check(final double newValue, final double oldValue,
+      final double minAbs) {
+    final double compare;
+    if (newValue == newValue) {
+      compare = ((oldValue != 0d) ? oldValue : newValue);
+      if (compare < 0d) {
+        return ((newValue < (-minAbs))
+            && (newValue > Double.NEGATIVE_INFINITY));
+      }
+      if (compare > 0d) {
+        return ((newValue > (minAbs))
+            && (newValue < Double.POSITIVE_INFINITY));
+      }
     }
-  }
-
-  /**
-   * assign two values to an array item if both are finite
-   *
-   * @param dest
-   *          the destination array
-   * @param index1
-   *          the first index
-   * @param value1
-   *          the first value
-   * @param index2
-   *          the second index
-   * @param value2
-   *          the second value
-   */
-  static final void _assign2IfFinite(final double[] dest, final int index1,
-      final double value1, final int index2, final double value2) {
-    if (MathUtils.isFinite(value1) && MathUtils.isFinite(value2)) {
-      dest[index1] = value1;
-      dest[index2] = value2;
-    }
+    return false;
   }
 
   /**

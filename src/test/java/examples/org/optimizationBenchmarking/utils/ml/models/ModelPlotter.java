@@ -8,7 +8,6 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.optimizationBenchmarking.utils.io.paths.PathUtils;
 import org.optimizationBenchmarking.utils.math.text.ABCParameterRenderer;
@@ -568,7 +567,7 @@ public class ModelPlotter extends _Utils {
     ITextOutput gnuplotScript, latexScript;
     int index;
 
-    dest = Paths.get(args[0]);
+    dest = _Utils._destination(args, ModelPlotter.class);
     gnuplotScriptPath = dest.resolve("gnuplot.gnuplotScript");//$NON-NLS-1$
     latexScriptPath = dest.resolve("models.tex");//$NON-NLS-1$
     try (final BufferedWriter gnuplotWriter = Files

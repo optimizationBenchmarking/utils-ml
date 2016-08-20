@@ -516,11 +516,71 @@ public final class LogisticModelWithOffsetOverLogX extends _ModelBase {
     protected final boolean fallback(final double[] points,
         final double[] dest, final Random random) {
       final double[] minMax;
+      double temp;
 
       minMax = _ModelBase._getMinMax(true, this.m_minY, this.m_maxY,
           points, random);
       LogisticModelWithOffsetOverLogX._fallback(minMax[0], minMax[1], dest,
           random);
+
+      switch (random.nextInt(3)) {
+        case 0: {
+          temp = LogisticModelWithOffsetOverLogX._c_x1y1abd(points[0],
+              points[1], dest[0], dest[1], dest[3]);
+          if (_ModelBase._check(temp, dest[2], 1e-13d)) {
+            dest[2] = temp;
+          }
+          temp = LogisticModelWithOffsetOverLogX._d_x1y1abc(points[0],
+              points[1], dest[0], dest[1], dest[2]);
+          if (_ModelBase._check(temp, dest[3], 1e-13d)) {
+            dest[3] = temp;
+          }
+          break;
+        }
+        default: {
+          temp = LogisticModelWithOffsetOverLogX._d_x1y1abc(points[0],
+              points[1], dest[0], dest[1], dest[2]);
+          if (_ModelBase._check(temp, dest[3], 1e-13d)) {
+            dest[3] = temp;
+          }
+          temp = LogisticModelWithOffsetOverLogX._c_x1y1abd(points[0],
+              points[1], dest[0], dest[1], dest[3]);
+          if (_ModelBase._check(temp, dest[2], 1e-13d)) {
+            dest[2] = temp;
+          }
+        }
+      }
+
+      switch (random.nextInt(3)) {
+        case 0: {
+          temp = LogisticModelWithOffsetOverLogX._a_x1y1bcd(points[0],
+              points[1], dest[1], dest[2], dest[3]);
+          if (_ModelBase._check(temp, dest[0], 1e-13d)) {
+            dest[0] = temp;
+          }
+
+          temp = LogisticModelWithOffsetOverLogX._b_x1y1acd(points[0],
+              points[1], dest[0], dest[2], dest[3]);
+          if (_ModelBase._check(temp, dest[1], 1e-13d)) {
+            dest[1] = temp;
+          }
+          break;
+        }
+        default: {
+          temp = LogisticModelWithOffsetOverLogX._b_x1y1acd(points[0],
+              points[1], dest[0], dest[2], dest[3]);
+          if (_ModelBase._check(temp, dest[1], 1e-13d)) {
+            dest[1] = temp;
+          }
+          temp = LogisticModelWithOffsetOverLogX._a_x1y1bcd(points[0],
+              points[1], dest[1], dest[2], dest[3]);
+          if (_ModelBase._check(temp, dest[0], 1e-13d)) {
+            dest[0] = temp;
+          }
+
+          break;
+        }
+      }
 
       return true;
     }

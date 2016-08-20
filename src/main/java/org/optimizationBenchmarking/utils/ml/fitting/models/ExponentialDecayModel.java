@@ -8,8 +8,6 @@ import org.optimizationBenchmarking.utils.document.spec.IParameterRenderer;
 import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
 import org.optimizationBenchmarking.utils.math.text.INegatableParameterRenderer;
-import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueChecker;
-import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueCheckerMinMaxAbs;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.SamplingBasedParameterGuesser;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IParameterGuesser;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
@@ -69,10 +67,6 @@ import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
  * </dl>
  */
 public final class ExponentialDecayModel extends _ModelBase {
-
-  /** the checker for {@code c} */
-  static final ParameterValueCheckerMinMaxAbs C = new ParameterValueCheckerMinMaxAbs(
-      1e-10d, 1e5d);
 
   /** create the exponential decay model */
   public ExponentialDecayModel() {
@@ -279,11 +273,14 @@ public final class ExponentialDecayModel extends _ModelBase {
   static final double _c_x1y1abd(final double x1, final double y1,
       final double a, final double b, final double d) {
     final double l;
+    double res;
 
     l = _ModelBase._log((y1 / b) - (a / b));
-    return ParameterValueChecker.choose(//
-        l / _ModelBase._pow(x1, d), //
-        l * _ModelBase._pow(x1, -d), ExponentialDecayModel.C);
+    res = l / _ModelBase._pow(x1, d);
+    if (MathUtils.isFinite(res)) {
+      return res;
+    }
+    return l * _ModelBase._pow(x1, -d);
   }
 
   /**
@@ -391,12 +388,12 @@ public final class ExponentialDecayModel extends _ModelBase {
         case 0: {
           temp = ExponentialDecayModel._c_x1y1abd(points[0], points[1],
               dest[0], dest[1], dest[3]);
-          if ((Math.abs(temp) > 1e-13d) && MathUtils.isFinite(temp)) {
+          if (_ModelBase._check(temp, dest[2], 1e-13d)) {
             dest[2] = temp;
           }
           temp = ExponentialDecayModel._d_x1y1abc(points[0], points[1],
               dest[0], dest[1], dest[2]);
-          if ((Math.abs(temp) > 1e-13d) && MathUtils.isFinite(temp)) {
+          if (_ModelBase._check(temp, dest[3], 1e-13d)) {
             dest[3] = temp;
           }
           break;
@@ -404,12 +401,12 @@ public final class ExponentialDecayModel extends _ModelBase {
         default: {
           temp = ExponentialDecayModel._d_x1y1abc(points[0], points[1],
               dest[0], dest[1], dest[2]);
-          if ((Math.abs(temp) > 1e-13d) && MathUtils.isFinite(temp)) {
+          if (_ModelBase._check(temp, dest[3], 1e-13d)) {
             dest[3] = temp;
           }
           temp = ExponentialDecayModel._c_x1y1abd(points[0], points[1],
               dest[0], dest[1], dest[3]);
-          if ((Math.abs(temp) > 1e-13d) && MathUtils.isFinite(temp)) {
+          if (_ModelBase._check(temp, dest[2], 1e-13d)) {
             dest[2] = temp;
           }
         }
@@ -419,13 +416,13 @@ public final class ExponentialDecayModel extends _ModelBase {
         case 0: {
           temp = ExponentialDecayModel._a_x1y1bcd(points[0], points[1],
               dest[1], dest[2], dest[3]);
-          if ((Math.abs(temp) > 1e-13d) && MathUtils.isFinite(temp)) {
+          if (_ModelBase._check(temp, dest[0], 1e-13d)) {
             dest[0] = temp;
           }
 
           temp = ExponentialDecayModel._b_x1y1acd(points[0], points[1],
               dest[0], dest[2], dest[3]);
-          if ((Math.abs(temp) > 1e-13d) && MathUtils.isFinite(temp)) {
+          if (_ModelBase._check(temp, dest[1], 1e-13d)) {
             dest[1] = temp;
           }
           break;
@@ -433,12 +430,12 @@ public final class ExponentialDecayModel extends _ModelBase {
         default: {
           temp = ExponentialDecayModel._b_x1y1acd(points[0], points[1],
               dest[0], dest[2], dest[3]);
-          if ((Math.abs(temp) > 1e-13d) && MathUtils.isFinite(temp)) {
+          if (_ModelBase._check(temp, dest[1], 1e-13d)) {
             dest[1] = temp;
           }
           temp = ExponentialDecayModel._a_x1y1bcd(points[0], points[1],
               dest[1], dest[2], dest[3]);
-          if ((Math.abs(temp) > 1e-13d) && MathUtils.isFinite(temp)) {
+          if (_ModelBase._check(temp, dest[0], 1e-13d)) {
             dest[0] = temp;
           }
 

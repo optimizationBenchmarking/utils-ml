@@ -1,12 +1,16 @@
 package examples.org.optimizationBenchmarking.utils.ml.models;
 
 import java.awt.Color;
+import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 
 import org.optimizationBenchmarking.utils.document.spec.IMath;
 import org.optimizationBenchmarking.utils.document.spec.IText;
+import org.optimizationBenchmarking.utils.io.paths.PathUtils;
 import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.math.functions.UnaryFunction;
 import org.optimizationBenchmarking.utils.math.functions.power.Lg;
@@ -491,6 +495,31 @@ abstract class _Utils {
     gnuplotScript.appendLineBreak();
     gnuplotScript.append("unset output"); //$NON-NLS-1$
     gnuplotScript.appendLineBreak();
+  }
+
+  /**
+   * get the destination path
+   *
+   * @param args
+   *          the command line arguments provided to the program
+   * @param clazz
+   *          the calling class
+   * @return the path
+   * @throws IOException
+   *           if i/o fails
+   */
+  static final Path _destination(final String[] args, final Class<?> clazz)
+      throws IOException {
+    Path path;
+
+    if ((args != null) && (args.length > 0)) {
+      path = Paths.get(args[0]);
+    } else {
+      path = PathUtils.createPathInside(PathUtils.getTempDir(),
+          clazz.getSimpleName());
+    }
+    Files.createDirectories(path);
+    return path;
   }
 
   /** render {@code x} */

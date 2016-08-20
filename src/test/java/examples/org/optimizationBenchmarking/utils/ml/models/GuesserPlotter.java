@@ -8,7 +8,6 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -329,7 +328,7 @@ public class GuesserPlotter extends _Utils {
     ITextOutput gnuplotScript;
     int index;
 
-    dest = Paths.get(args[0]);
+    dest = _Utils._destination(args, GuesserPlotter.class);
     gnuplotScriptPath = dest.resolve("gnuplot.gnuplotScript");//$NON-NLS-1$
     try (final BufferedWriter gnuplotWriter = Files
         .newBufferedWriter(gnuplotScriptPath, Charset.forName("UTF-8"))) {//$NON-NLS-1$
