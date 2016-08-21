@@ -126,8 +126,9 @@ public final class GompertzModel extends _ModelBase {
       cexpdx = (b * _ModelBase._exp(cexpdx + dx));
       gradient[2] = _ModelBase._gradient(cexpdx, c);
       gradient[3] = _ModelBase._gradient((cexpdx * c * x), d);
+    } else {
+      gradient[2] = gradient[3] = 0d;
     }
-    gradient[2] = gradient[3] = 0d;
   }
 
   /** {@inheritDoc} */

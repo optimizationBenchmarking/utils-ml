@@ -129,9 +129,9 @@ public final class ExponentialDecayModel extends _ModelBase {
       gradient[2] = _ModelBase._gradient(g, c);
       gradient[3] = (((g *= c) != 0d)
           ? _ModelBase._gradient(g * _ModelBase._log(x), d) : 0d);
-      return;
+    } else {
+      gradient[2] = gradient[3] = 0d;
     }
-    gradient[2] = gradient[3] = 0d;
   }
 
   /** {@inheritDoc} */
@@ -308,6 +308,8 @@ public final class ExponentialDecayModel extends _ModelBase {
   /**
    * the internal fallback routine
    *
+   * @param model
+   *          the model selector
    * @param minY
    *          the minimal y coordinate
    * @param maxY
@@ -317,12 +319,12 @@ public final class ExponentialDecayModel extends _ModelBase {
    * @param random
    *          the random number generator
    */
-  static final void _fallback(final double minY, final double maxY,
-      final double[] dest, final Random random) {
+  static final void _fallback(final boolean model, final double minY,
+      final double maxY, final double[] dest, final Random random) {
     double temp;
     int steps;
 
-    if (random.nextBoolean()) {
+    if (model) {
       dest[0] = minY;
       dest[1] = (maxY - minY);
       steps = 100;
@@ -363,7 +365,7 @@ public final class ExponentialDecayModel extends _ModelBase {
      *          the data
      */
     __DecayModelParameterGuesser(final IMatrix data) {
-      super(data, 3, 4);
+      super(data, 2, 3, 4);
     }
 
     /** {@inheritDoc} */
@@ -375,14 +377,15 @@ public final class ExponentialDecayModel extends _ModelBase {
 
     /** {@inheritDoc} */
     @Override
-    protected final boolean fallback(final double[] points,
+    protected final boolean guess(final int variant, final double[] points,
         final double[] dest, final Random random) {
       final double[] minMax;
       double temp;
 
       minMax = _ModelBase._getMinMax(true, this.m_minY, this.m_maxY,
           points, random);
-      ExponentialDecayModel._fallback(minMax[0], minMax[1], dest, random);
+      ExponentialDecayModel._fallback((variant == 0), minMax[0], minMax[1],
+          dest, random);
 
       switch (random.nextInt(3)) {
         case 0: {
@@ -448,12 +451,21 @@ public final class ExponentialDecayModel extends _ModelBase {
 
     /** {@inheritDoc} */
     @Override
+    protected final boolean fallback(final double[] points,
+        final double[] dest, final Random random) {
+      return this.guess(random.nextBoolean() ? 1 : 0, points, dest,
+          random);
+    }
+
+    /** {@inheritDoc} */
+    @Override
     protected final void fallback(final double[] dest,
         final Random random) {
       final double[] minMax;
       minMax = _ModelBase._getMinMax(true, this.m_minY, this.m_maxY, null,
           random);
-      ExponentialDecayModel._fallback(minMax[0], minMax[1], dest, random);
+      ExponentialDecayModel._fallback(random.nextBoolean(), minMax[0],
+          minMax[1], dest, random);
     }
   }
 }

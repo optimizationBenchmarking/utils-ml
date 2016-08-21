@@ -441,6 +441,8 @@ public final class LogisticModelWithOffsetOverLogX extends _ModelBase {
   /**
    * the internal fallback routine
    *
+   * @param model
+   *          the model selector
    * @param minY
    *          the minimal y coordinate
    * @param maxY
@@ -450,12 +452,12 @@ public final class LogisticModelWithOffsetOverLogX extends _ModelBase {
    * @param random
    *          the random number generator
    */
-  static final void _fallback(final double minY, final double maxY,
-      final double[] dest, final Random random) {
+  static final void _fallback(final boolean model, final double minY,
+      final double maxY, final double[] dest, final Random random) {
     double temp;
     int steps;
 
-    if (random.nextBoolean()) {
+    if (model) {
       dest[0] = minY;
 
       steps = 100;
@@ -508,20 +510,20 @@ public final class LogisticModelWithOffsetOverLogX extends _ModelBase {
      *          the data
      */
     __LogisticModelWithOffsetOverLogXParameterGuesser(final IMatrix data) {
-      super(data, 3, 4);
+      super(data, 2, 3, 4);
     }
 
     /** {@inheritDoc} */
     @Override
-    protected final boolean fallback(final double[] points,
+    protected final boolean guess(final int variant, final double[] points,
         final double[] dest, final Random random) {
       final double[] minMax;
       double temp;
 
       minMax = _ModelBase._getMinMax(true, this.m_minY, this.m_maxY,
           points, random);
-      LogisticModelWithOffsetOverLogX._fallback(minMax[0], minMax[1], dest,
-          random);
+      LogisticModelWithOffsetOverLogX._fallback((variant == 0), minMax[0],
+          minMax[1], dest, random);
 
       switch (random.nextInt(3)) {
         case 0: {
@@ -583,6 +585,15 @@ public final class LogisticModelWithOffsetOverLogX extends _ModelBase {
       }
 
       return true;
+
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected final boolean fallback(final double[] points,
+        final double[] dest, final Random random) {
+      return this.guess(random.nextBoolean() ? 1 : 0, points, dest,
+          random);
     }
 
     /** {@inheritDoc} */
@@ -592,8 +603,8 @@ public final class LogisticModelWithOffsetOverLogX extends _ModelBase {
       final double[] minMax;
       minMax = _ModelBase._getMinMax(true, this.m_minY, this.m_maxY, null,
           random);
-      LogisticModelWithOffsetOverLogX._fallback(minMax[0], minMax[1], dest,
-          random);
+      LogisticModelWithOffsetOverLogX._fallback(random.nextBoolean(),
+          minMax[0], minMax[1], dest, random);
     }
 
     /** {@inheritDoc} */

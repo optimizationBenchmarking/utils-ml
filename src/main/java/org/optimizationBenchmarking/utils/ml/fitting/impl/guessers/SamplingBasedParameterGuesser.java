@@ -16,6 +16,9 @@ public abstract class SamplingBasedParameterGuesser
   /** the temporary array for errors */
   private final double[] m_errorTemp;
 
+  /** the number of model "variants" */
+  private final int m_variants;
+
   /**
    * Create the sample-based guesser. Normally, the number of rows in the
    * {@code data} matrix should be much higher than the number of
@@ -23,15 +26,18 @@ public abstract class SamplingBasedParameterGuesser
    *
    * @param data
    *          the data
+   * @param variants
+   *          the number of model "variants"
    * @param required
    *          the number of points needed for an educated guess
    * @param parameterCount
    *          the number of parameters
    */
   protected SamplingBasedParameterGuesser(final IMatrix data,
-      final int required, final int parameterCount) {
+      final int variants, final int required, final int parameterCount) {
     super(data, required);
 
+    this.m_variants = variants;
     this.m_currentGuess = new double[parameterCount];
     this.m_errorTemp = new double[required];
   }
@@ -85,6 +91,8 @@ public abstract class SamplingBasedParameterGuesser
   /**
    * guess if all required points are available
    *
+   * @param variant
+   *          the model variant
    * @param points
    *          an array with {@code x, y} coordinate pairs
    * @param dest
@@ -93,8 +101,8 @@ public abstract class SamplingBasedParameterGuesser
    *          the random number generator
    * @return {@code true} if guessing was successful
    */
-  protected boolean doGuess(final double[] points, final double[] dest,
-      final Random random) {
+  protected boolean guess(final int variant, final double[] points,
+      final double[] dest, final Random random) {
     return this.fallback(points, dest, random);
   }
 
@@ -103,6 +111,7 @@ public abstract class SamplingBasedParameterGuesser
   protected final boolean guess(final double[] points, final double[] dest,
       final Random random) {
     final double[] currentGuess;
+    final int variant;
     boolean hasGuess;
     double bestQuality, currentQuality, minAbs, minAbs2, currentAbs;
     int steps;
@@ -111,6 +120,7 @@ public abstract class SamplingBasedParameterGuesser
     hasGuess = false;
     bestQuality = Double.POSITIVE_INFINITY;
 
+    variant = random.nextInt(this.m_variants);
     minAbs = minAbs2 = Double.POSITIVE_INFINITY;
     for (steps = points.length - 1; steps > 0; steps -= 2) {
       currentAbs = Math.abs(points[steps]);
@@ -138,7 +148,7 @@ public abstract class SamplingBasedParameterGuesser
 
     for (steps = (currentGuess.length
         * currentGuess.length); (--steps) >= 0;) {
-      if (this.doGuess(points, currentGuess, random)) {
+      if (this.guess(variant, points, currentGuess, random)) {
         currentQuality = this.__error(points, currentGuess, minAbs);
         if ((!hasGuess) || (currentQuality < bestQuality)) {
           bestQuality = currentQuality;
