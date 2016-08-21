@@ -220,17 +220,20 @@ public final class ExponentialDecayModel extends _ModelBase {
    *          the point's {@code x}-coordinate
    * @param y1
    *          the point's {@code y}-coordinate
-   * @param b
-   *          the value of {@code b}
-   * @param c
-   *          the value of {@code c}
-   * @param d
-   *          the value of {@code d}
-   * @return the value of {@code a}
+   * @param dest
+   *          the in/out array of current parameter values
+   * @return {@code true} on success, {@code false} on failure
    */
-  static final double _a_x1y1bcd(final double x1, final double y1,
-      final double b, final double c, final double d) {
-    return y1 - (b * _ModelBase._exp(c * _ModelBase._pow(x1, d)));
+  static final boolean _a_x1y1bcd(final double x1, final double y1,
+      final double[] dest) {
+    final double temp;
+    temp = y1 - (dest[1]
+        * _ModelBase._exp(dest[2] * _ModelBase._pow(x1, dest[3])));
+    if (_ModelBase._check(temp, dest[0], 1e-13d, 1e100d)) {
+      dest[0] = temp;
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -241,17 +244,21 @@ public final class ExponentialDecayModel extends _ModelBase {
    *          the point's {@code x}-coordinate
    * @param y1
    *          the point's {@code y}-coordinate
-   * @param a
-   *          the value of {@code a}
-   * @param c
-   *          the value of {@code c}
-   * @param d
-   *          the value of {@code d}
-   * @return the value of {@code b}
+   * @param dest
+   *          the in/out array of current parameter values
+   * @return {@code true} on success, {@code false} on failure
    */
-  static final double _b_x1y1acd(final double x1, final double y1,
-      final double a, final double c, final double d) {
-    return _ModelBase._exp(-(c * _ModelBase._pow(x1, d))) * (y1 - a);
+  static final boolean _b_x1y1acd(final double x1, final double y1,
+      final double[] dest) {
+    final double temp;
+
+    temp = _ModelBase._exp(-(dest[2] * _ModelBase._pow(x1, dest[3])))
+        * (y1 - dest[0]);
+    if (_ModelBase._check(temp, dest[1], 1e-13d, 1e100d)) {
+      dest[1] = temp;
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -262,25 +269,27 @@ public final class ExponentialDecayModel extends _ModelBase {
    *          the point's {@code x}-coordinate
    * @param y1
    *          the point's {@code y}-coordinate
-   * @param a
-   *          the value of {@code a}
-   * @param b
-   *          the value of {@code b}
-   * @param d
-   *          the value of {@code d}
-   * @return the value of {@code c}
+   * @param dest
+   *          the in/out array of current parameter values
+   * @return {@code true} on success, {@code false} on failure
    */
-  static final double _c_x1y1abd(final double x1, final double y1,
-      final double a, final double b, final double d) {
+  static final boolean _c_x1y1abd(final double x1, final double y1,
+      final double[] dest) {
     final double l;
     double res;
 
-    l = _ModelBase._log((y1 / b) - (a / b));
-    res = l / _ModelBase._pow(x1, d);
-    if (MathUtils.isFinite(res)) {
-      return res;
+    l = _ModelBase._log((y1 / dest[1]) - (dest[0] / dest[1]));
+    res = l / _ModelBase._pow(x1, dest[3]);
+    if (_ModelBase._check(res, dest[2], 1e-13d, 1e5d)) {
+      dest[2] = res;
+      return true;
     }
-    return l * _ModelBase._pow(x1, -d);
+    res = l * _ModelBase._pow(x1, -dest[3]);
+    if (_ModelBase._check(res, dest[2], 1e-13d, 1e5d)) {
+      dest[2] = res;
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -291,18 +300,21 @@ public final class ExponentialDecayModel extends _ModelBase {
    *          the point's {@code x}-coordinate
    * @param y1
    *          the point's {@code y}-coordinate
-   * @param a
-   *          the value of {@code a}
-   * @param b
-   *          the value of {@code b}
-   * @param c
-   *          the value of {@code c}
-   * @return the value of {@code d}
+   * @param dest
+   *          the in/out array of current parameter values
+   * @return {@code true} on success, {@code false} on failure
    */
-  static final double _d_x1y1abc(final double x1, final double y1,
-      final double a, final double b, final double c) {
-    return _ModelBase._log(_ModelBase._log((y1 / b) - (a / b)) / c)
+  static final boolean _d_x1y1abc(final double x1, final double y1,
+      final double[] dest) {
+    final double temp;
+    temp = _ModelBase._log(
+        _ModelBase._log((y1 / dest[1]) - (dest[0] / dest[1])) / dest[2])
         / _ModelBase._log(x1);
+    if (_ModelBase._check(temp, dest[3], 1e-13d, 1e5d)) {
+      dest[3] = temp;
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -376,11 +388,11 @@ public final class ExponentialDecayModel extends _ModelBase {
     }
 
     /** {@inheritDoc} */
+    @SuppressWarnings("incomplete-switch")
     @Override
     protected final boolean guess(final int variant, final double[] points,
         final double[] dest, final Random random) {
       final double[] minMax;
-      double temp;
 
       minMax = _ModelBase._getMinMax(true, this.m_minY, this.m_maxY,
           points, random);
@@ -389,59 +401,26 @@ public final class ExponentialDecayModel extends _ModelBase {
 
       switch (random.nextInt(3)) {
         case 0: {
-          temp = ExponentialDecayModel._c_x1y1abd(points[0], points[1],
-              dest[0], dest[1], dest[3]);
-          if (_ModelBase._check(temp, dest[2], 1e-13d)) {
-            dest[2] = temp;
-          }
-          temp = ExponentialDecayModel._d_x1y1abc(points[0], points[1],
-              dest[0], dest[1], dest[2]);
-          if (_ModelBase._check(temp, dest[3], 1e-13d)) {
-            dest[3] = temp;
-          }
+          ExponentialDecayModel._c_x1y1abd(points[0], points[1], dest);
+          ExponentialDecayModel._d_x1y1abc(points[0], points[1], dest);
           break;
         }
-        default: {
-          temp = ExponentialDecayModel._d_x1y1abc(points[0], points[1],
-              dest[0], dest[1], dest[2]);
-          if (_ModelBase._check(temp, dest[3], 1e-13d)) {
-            dest[3] = temp;
-          }
-          temp = ExponentialDecayModel._c_x1y1abd(points[0], points[1],
-              dest[0], dest[1], dest[3]);
-          if (_ModelBase._check(temp, dest[2], 1e-13d)) {
-            dest[2] = temp;
-          }
+        case 1: {
+          ExponentialDecayModel._d_x1y1abc(points[0], points[1], dest);
+          ExponentialDecayModel._c_x1y1abd(points[0], points[1], dest);
+          break;
         }
       }
 
       switch (random.nextInt(3)) {
         case 0: {
-          temp = ExponentialDecayModel._a_x1y1bcd(points[0], points[1],
-              dest[1], dest[2], dest[3]);
-          if (_ModelBase._check(temp, dest[0], 1e-13d)) {
-            dest[0] = temp;
-          }
-
-          temp = ExponentialDecayModel._b_x1y1acd(points[0], points[1],
-              dest[0], dest[2], dest[3]);
-          if (_ModelBase._check(temp, dest[1], 1e-13d)) {
-            dest[1] = temp;
-          }
+          ExponentialDecayModel._a_x1y1bcd(points[0], points[1], dest);
+          ExponentialDecayModel._b_x1y1acd(points[0], points[1], dest);
           break;
         }
-        default: {
-          temp = ExponentialDecayModel._b_x1y1acd(points[0], points[1],
-              dest[0], dest[2], dest[3]);
-          if (_ModelBase._check(temp, dest[1], 1e-13d)) {
-            dest[1] = temp;
-          }
-          temp = ExponentialDecayModel._a_x1y1bcd(points[0], points[1],
-              dest[1], dest[2], dest[3]);
-          if (_ModelBase._check(temp, dest[0], 1e-13d)) {
-            dest[0] = temp;
-          }
-
+        case 1: {
+          ExponentialDecayModel._b_x1y1acd(points[0], points[1], dest);
+          ExponentialDecayModel._a_x1y1bcd(points[0], points[1], dest);
           break;
         }
       }

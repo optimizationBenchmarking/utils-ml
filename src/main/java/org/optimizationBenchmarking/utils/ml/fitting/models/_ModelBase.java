@@ -26,21 +26,21 @@ abstract class _ModelBase extends BasicModel {
    *          the old value
    * @param minAbs
    *          the minimal absolute value
+   * @param maxAbs
+   *          the maximum permitted absolute value
    * @return {@code true} if the new value is a suitable replacement of the
    *         old value, {@code false} otherwise
    */
   static final boolean _check(final double newValue, final double oldValue,
-      final double minAbs) {
+      final double minAbs, final double maxAbs) {
     final double compare;
     if (newValue == newValue) {
       compare = ((oldValue != 0d) ? oldValue : newValue);
       if (compare < 0d) {
-        return ((newValue < (-minAbs))
-            && (newValue > Double.NEGATIVE_INFINITY));
+        return ((newValue < (-minAbs)) && (newValue > (-maxAbs)));
       }
       if (compare > 0d) {
-        return ((newValue > (minAbs))
-            && (newValue < Double.POSITIVE_INFINITY));
+        return ((newValue > (minAbs)) && (newValue < maxAbs));
       }
     }
     return false;

@@ -35,13 +35,33 @@ public class GuesserPlotter extends _Utils {
    *          the parameters
    * @return the return value
    */
-  private static final Color __color(final double[] parameters) {
+  private static final Color __color1(final double[] parameters) {
     return _Utils._colorBlend(//
         _Utils._colorBlend(((parameters[0] < 0d) ? Color.RED : Color.BLUE), //
             ((parameters[1] < 0d) ? Color.RED : Color.BLUE), //
             0.5d), //
         _Utils._colorBlend(((parameters[2] < 0d) ? Color.RED : Color.BLUE), //
             ((parameters[3] < 0d) ? Color.RED : Color.BLUE), //
+            0.5d), //
+        0.5d);
+  }
+
+  /**
+   * get the parameters
+   *
+   * @param parameters
+   *          the parameters
+   * @return the return value
+   */
+  private static final Color __color2(final double[] parameters) {
+    return _Utils._colorBlend(//
+        _Utils._colorBlend(
+            ((parameters[0] < 0d) ? Color.cyan : Color.orange), //
+            ((parameters[1] < 0d) ? Color.cyan : Color.orange), //
+            0.5d), //
+        _Utils._colorBlend(
+            ((parameters[2] < 0d) ? Color.cyan : Color.orange), //
+            ((parameters[3] < 0d) ? Color.cyan : Color.orange), //
             0.5d), //
         0.5d);
   }
@@ -78,7 +98,7 @@ public class GuesserPlotter extends _Utils {
     sourceFile = (name + ".txt"); //$NON-NLS-1$
     path = PathUtils.createPathInside(destDir, sourceFile);
 
-    outFile = (name + ".eps"); //$NON-NLS-1$
+    outFile = _Utils._gnuplotFigureFile(name, false);
 
     function = model.toUnaryFunction(parameters);
     guesser = model.createParameterGuesser(
@@ -99,7 +119,13 @@ public class GuesserPlotter extends _Utils {
           guesser.createRandomGuess(guess, random);
           _Utils._gnuplotCurve(gnuplotScript, sourceFile, index,
               (index <= 1), //
-              Arrays.toString(guess), GuesserPlotter.__color(guess), -1);
+              Arrays.toString(guess),
+
+              (index < (GuesserPlotter.STEPS - 10))
+                  ? GuesserPlotter.__color1(guess)
+                  : GuesserPlotter.__color2(guess),
+
+              (index < (GuesserPlotter.STEPS - 10)) ? -1 : 5);
           _Utils._plotModel(model.toUnaryFunction(guess), textOut);
         }
       }
@@ -334,7 +360,7 @@ public class GuesserPlotter extends _Utils {
         .newBufferedWriter(gnuplotScriptPath, Charset.forName("UTF-8"))) {//$NON-NLS-1$
 
       gnuplotScript = AbstractTextOutput.wrap(gnuplotWriter);
-      _Utils._gnuplotSetup(gnuplotScript, true);
+      _Utils._gnuplotSetup(false, gnuplotScript, true);
 
       index = 0;
       GuesserPlotter.plot_ExponentialDecay_1(dest, gnuplotScript, index++);

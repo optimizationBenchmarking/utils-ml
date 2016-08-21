@@ -332,15 +332,19 @@ abstract class _Utils {
   /**
    * set up a gnuplot script
    *
+   * @param vector
+   *          create vector graphics ({@code true}) or pixel graphics (
+   *          {@code false})
    * @param gnuplotScript
    *          the gnuplot script
    * @param useYRange
    *          should we set the y range
    */
-  static final void _gnuplotSetup(final ITextOutput gnuplotScript,
-      final boolean useYRange) {
-    gnuplotScript.append(//
-        "set terminal postscript eps enhanced size 5,3");//$NON-NLS-1$
+  static final void _gnuplotSetup(final boolean vector,
+      final ITextOutput gnuplotScript, final boolean useYRange) {
+    gnuplotScript.append(vector//
+        ? "set terminal postscript eps enhanced size 5,3"//$NON-NLS-1$
+        : "set terminal png truecolor rounded size 1280,1024 crop enhanced");//$NON-NLS-1$
     gnuplotScript.appendLineBreak();
     if (useYRange) {
       gnuplotScript.append("set yrange [0:100]");//$NON-NLS-1$
@@ -415,6 +419,21 @@ abstract class _Utils {
     gnuplotScript.append("set output '"); //$NON-NLS-1$
     gnuplotScript.append(outputFile);
     gnuplotScript.append('\'');
+  }
+
+  /**
+   * create the output file name
+   *
+   * @param name
+   *          the base file name
+   * @param vector
+   *          create vector graphics ({@code true}) or pixel graphics (
+   *          {@code false})
+   * @return the output file name
+   */
+  static final String _gnuplotFigureFile(final String name,
+      final boolean vector) {
+    return name + (vector ? ".eps" : ".png"); //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   /**

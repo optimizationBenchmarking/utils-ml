@@ -359,19 +359,20 @@ public final class LogisticModelWithOffsetOverLogX extends _ModelBase {
    *          the point's {@code x}-coordinate
    * @param y1
    *          the point's {@code y}-coordinate
-   * @param b
-   *          the value of {@code b}
-   * @param c
-   *          the value of {@code c}
-   * @param d
-   *          the value of {@code d}
-   * @return the value of {@code a}
+   * @param dest
+   *          the in/out array of current parameter values
+   * @return {@code true} on success, {@code false} on failure
    */
-  static final double _a_x1y1bcd(final double x1, final double y1,
-      final double b, final double c, final double d) {
-    final double cxd;
-    cxd = c * _ModelBase._pow(x1, d);
-    return (((1d + cxd) * y1) - b) / (1d + cxd);
+  static final boolean _a_x1y1bcd(final double x1, final double y1,
+      final double[] dest) {
+    final double cxd, result;
+    cxd = dest[2] * _ModelBase._pow(x1, dest[3]);
+    result = (((1d + cxd) * y1) - dest[1]) / (1d + cxd);
+    if (_ModelBase._check(result, dest[0], 1e-13d, 1e100d)) {
+      dest[0] = result;
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -382,17 +383,21 @@ public final class LogisticModelWithOffsetOverLogX extends _ModelBase {
    *          the point's {@code x}-coordinate
    * @param y1
    *          the point's {@code y}-coordinate
-   * @param a
-   *          the value of {@code a}
-   * @param c
-   *          the value of {@code c}
-   * @param d
-   *          the value of {@code d}
-   * @return the value of {@code b}
+   * @param dest
+   *          the in/out array of current parameter values
+   * @return {@code true} on success, {@code false} on failure
    */
-  static final double _b_x1y1acd(final double x1, final double y1,
-      final double a, final double c, final double d) {
-    return (y1 - a) * ((c * _ModelBase._pow(x1, d)) + 1d);
+  static final boolean _b_x1y1acd(final double x1, final double y1,
+      final double[] dest) {
+    final double result;
+
+    result = (y1 - dest[0])
+        * ((dest[2] * _ModelBase._pow(x1, dest[3])) + 1d);
+    if (_ModelBase._check(result, dest[1], 1e-13d, 1e100d)) {
+      dest[1] = result;
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -403,17 +408,21 @@ public final class LogisticModelWithOffsetOverLogX extends _ModelBase {
    *          the point's {@code x}-coordinate
    * @param y1
    *          the point's {@code y}-coordinate
-   * @param a
-   *          the value of {@code a}
-   * @param b
-   *          the value of {@code b}
-   * @param d
-   *          the value of {@code d}
-   * @return the value of {@code c}
+   * @param dest
+   *          the in/out array of current parameter values
+   * @return {@code true} on success, {@code false} on failure
    */
-  static final double _c_x1y1abd(final double x1, final double y1,
-      final double a, final double b, final double d) {
-    return ((a + b) - y1) / (_ModelBase._pow(x1, d) * (y1 - a));
+  static final boolean _c_x1y1abd(final double x1, final double y1,
+      final double[] dest) {
+    final double result;
+
+    result = ((dest[0] + dest[1]) - y1)
+        / (_ModelBase._pow(x1, dest[3]) * (y1 - dest[0]));
+    if (_ModelBase._check(result, dest[2], 1e-13, 1e5d)) {
+      dest[2] = result;
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -424,18 +433,22 @@ public final class LogisticModelWithOffsetOverLogX extends _ModelBase {
    *          the point's {@code x}-coordinate
    * @param y1
    *          the point's {@code y}-coordinate
-   * @param a
-   *          the value of {@code a}
-   * @param b
-   *          the value of {@code b}
-   * @param c
-   *          the value of {@code c}
-   * @return the value of {@code d}
+   * @param dest
+   *          the in/out array of current parameter values
+   * @return {@code true} on success, {@code false} on failure
    */
-  static final double _d_x1y1abc(final double x1, final double y1,
-      final double a, final double b, final double c) {
-    return _ModelBase._log((y1 - a - b) / (c * (a - y1)))
+  static final boolean _d_x1y1abc(final double x1, final double y1,
+      final double[] dest) {
+    final double result;
+
+    result = _ModelBase
+        ._log((y1 - dest[0] - dest[1]) / (dest[3] * (dest[0] - y1)))
         / _ModelBase._log(x1);
+    if (_ModelBase._check(result, dest[3], 1e-13d, 1e5d)) {
+      dest[3] = result;
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -495,7 +508,6 @@ public final class LogisticModelWithOffsetOverLogX extends _ModelBase {
         dest[3] = temp = -2d * _ModelBase._exp(-random.nextDouble() * 6d);
       } while ((((--steps) > 0) && (temp > -1e-13d))
           || (!(MathUtils.isFinite(temp))));
-
     }
   }
 
@@ -514,11 +526,11 @@ public final class LogisticModelWithOffsetOverLogX extends _ModelBase {
     }
 
     /** {@inheritDoc} */
+    @SuppressWarnings("incomplete-switch")
     @Override
     protected final boolean guess(final int variant, final double[] points,
         final double[] dest, final Random random) {
       final double[] minMax;
-      double temp;
 
       minMax = _ModelBase._getMinMax(true, this.m_minY, this.m_maxY,
           points, random);
@@ -527,65 +539,39 @@ public final class LogisticModelWithOffsetOverLogX extends _ModelBase {
 
       switch (random.nextInt(3)) {
         case 0: {
-          temp = LogisticModelWithOffsetOverLogX._c_x1y1abd(points[0],
-              points[1], dest[0], dest[1], dest[3]);
-          if (_ModelBase._check(temp, dest[2], 1e-13d)) {
-            dest[2] = temp;
-          }
-          temp = LogisticModelWithOffsetOverLogX._d_x1y1abc(points[0],
-              points[1], dest[0], dest[1], dest[2]);
-          if (_ModelBase._check(temp, dest[3], 1e-13d)) {
-            dest[3] = temp;
-          }
+          LogisticModelWithOffsetOverLogX._c_x1y1abd(points[0], points[1],
+              dest);
+          LogisticModelWithOffsetOverLogX._d_x1y1abc(points[0], points[1],
+              dest);
           break;
         }
-        default: {
-          temp = LogisticModelWithOffsetOverLogX._d_x1y1abc(points[0],
-              points[1], dest[0], dest[1], dest[2]);
-          if (_ModelBase._check(temp, dest[3], 1e-13d)) {
-            dest[3] = temp;
-          }
-          temp = LogisticModelWithOffsetOverLogX._c_x1y1abd(points[0],
-              points[1], dest[0], dest[1], dest[3]);
-          if (_ModelBase._check(temp, dest[2], 1e-13d)) {
-            dest[2] = temp;
-          }
+        case 1: {
+          LogisticModelWithOffsetOverLogX._d_x1y1abc(points[0], points[1],
+              dest);
+          LogisticModelWithOffsetOverLogX._c_x1y1abd(points[0], points[1],
+              dest);
+          break;
         }
       }
 
       switch (random.nextInt(3)) {
         case 0: {
-          temp = LogisticModelWithOffsetOverLogX._a_x1y1bcd(points[0],
-              points[1], dest[1], dest[2], dest[3]);
-          if (_ModelBase._check(temp, dest[0], 1e-13d)) {
-            dest[0] = temp;
-          }
-
-          temp = LogisticModelWithOffsetOverLogX._b_x1y1acd(points[0],
-              points[1], dest[0], dest[2], dest[3]);
-          if (_ModelBase._check(temp, dest[1], 1e-13d)) {
-            dest[1] = temp;
-          }
+          LogisticModelWithOffsetOverLogX._a_x1y1bcd(points[0], points[1],
+              dest);
+          LogisticModelWithOffsetOverLogX._b_x1y1acd(points[0], points[1],
+              dest);
           break;
         }
-        default: {
-          temp = LogisticModelWithOffsetOverLogX._b_x1y1acd(points[0],
-              points[1], dest[0], dest[2], dest[3]);
-          if (_ModelBase._check(temp, dest[1], 1e-13d)) {
-            dest[1] = temp;
-          }
-          temp = LogisticModelWithOffsetOverLogX._a_x1y1bcd(points[0],
-              points[1], dest[1], dest[2], dest[3]);
-          if (_ModelBase._check(temp, dest[0], 1e-13d)) {
-            dest[0] = temp;
-          }
-
+        case 1: {
+          LogisticModelWithOffsetOverLogX._b_x1y1acd(points[0], points[1],
+              dest);
+          LogisticModelWithOffsetOverLogX._a_x1y1bcd(points[0], points[1],
+              dest);
           break;
         }
       }
 
       return true;
-
     }
 
     /** {@inheritDoc} */

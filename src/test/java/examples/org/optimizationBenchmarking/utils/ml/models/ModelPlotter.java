@@ -73,7 +73,7 @@ public class ModelPlotter extends _Utils {
     sourceFile = (fileName + ".txt"); //$NON-NLS-1$
     path = PathUtils.createPathInside(destDir, sourceFile);
     use = parameters.clone();
-    outFile = (fileName + ".eps"); //$NON-NLS-1$
+    outFile = _Utils._gnuplotFigureFile(fileName, true);
 
     _Utils._gnuplotBeginPlot(gnuplotScript, outFile, model, parameters);
     try (final OutputStream outputStream = PathUtils
@@ -626,7 +626,7 @@ public class ModelPlotter extends _Utils {
         latexScript.appendLineBreak();
 
         gnuplotScript = AbstractTextOutput.wrap(gnuplotWriter);
-        _Utils._gnuplotSetup(gnuplotScript, true);
+        _Utils._gnuplotSetup(true, gnuplotScript, true);
 
         index = 0;
         ModelPlotter.plot_ExponentialDecay_1(dest, gnuplotScript,
