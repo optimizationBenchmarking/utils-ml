@@ -8,9 +8,7 @@ import org.optimizationBenchmarking.utils.document.spec.IParameterRenderer;
 import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
 import org.optimizationBenchmarking.utils.math.text.INegatableParameterRenderer;
-import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueChecker;
-import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueCheckerMinMax;
-import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.SamplePermutationBasedParameterGuesser;
+import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ImprovingSamplingBasedParameterGuesser;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IParameterGuesser;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
@@ -59,19 +57,6 @@ import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
  * </dl>
  */
 public class ExpLinearModelOverLogX extends _ModelBase {
-
-  /** the checker for parameter {@code a} */
-  static final ParameterValueCheckerMinMax A = new ParameterValueCheckerMinMax(
-      -1e100d, 1e100d);
-  /** the checker for parameter {@code b} */
-  static final ParameterValueCheckerMinMax B = new ParameterValueCheckerMinMax(
-      1e-10d, 1e100d);
-  /** the checker for parameter {@code c} */
-  static final ParameterValueCheckerMinMax C = new ParameterValueCheckerMinMax(
-      1e-100d, 5d);
-  /** the checker for parameter {@code d} */
-  static final ParameterValueCheckerMinMax D = new ParameterValueCheckerMinMax(
-      -1e9d, 1e30d);
 
   /** create */
   public ExpLinearModelOverLogX() {
@@ -216,306 +201,209 @@ public class ExpLinearModelOverLogX extends _ModelBase {
     return new __ExpLinearModelOverLogXParameterGuesser(data);
   }
 
-  /**
-   * compute {@code a} based on two points and {@code c} and {@code d}.
-   *
-   * @param x0
-   *          the {@code x}-coordinate of the first point
-   * @param y0
-   *          the {@code y}-coordinate of the first point
-   * @param x1
-   *          the {@code x}-coordinate of the second point
-   * @param y1
-   *          the {@code y}-coordinate of the second point
-   * @param c
-   *          the {@code c} value
-   * @param d
-   *          the {@code d} value
-   * @return the guess for {@code a}
-   */
-  static final double _a_x0y0x1y1cd_1(final double x0, final double y0,
-      final double x1, final double y1, final double c, final double d) {
-    final double dx0c, dx1c;
-
-    dx0c = _ModelBase._pow(d + x0, c);
-    dx1c = _ModelBase._pow(d + x1, c);
-
-    return ((y1 * dx0c) - (y0 * dx1c)) / (dx0c - dx1c);
-  }
-
-  /**
-   * compute {@code a} based on two points and {@code c} and {@code d}.
-   *
-   * @param x0
-   *          the {@code x}-coordinate of the first point
-   * @param y0
-   *          the {@code y}-coordinate of the first point
-   * @param x1
-   *          the {@code x}-coordinate of the second point
-   * @param y1
-   *          the {@code y}-coordinate of the second point
-   * @param c
-   *          the {@code c} value
-   * @param d
-   *          the {@code d} value
-   * @return the guess for {@code a}
-   */
-  static final double _a_x0y0x1y1cd_2(final double x0, final double y0,
-      final double x1, final double y1, final double c, final double d) {
-    final double expclogx0d, expclogx1d;
-
-    expclogx0d = _ModelBase._exp(c * _ModelBase._log(x0 + d));
-    expclogx1d = _ModelBase._exp(c * _ModelBase._log(x1 + d));
-
-    return ((y0 * expclogx1d) - (y1 * expclogx0d))
-        / (expclogx1d - expclogx0d);
-  }
-
-  /**
-   * compute {@code b} based on two points and {@code c} and {@code d}.
-   *
-   * @param x0
-   *          the {@code x}-coordinate of the first point
-   * @param y0
-   *          the {@code y}-coordinate of the first point
-   * @param x1
-   *          the {@code x}-coordinate of the second point
-   * @param y1
-   *          the {@code y}-coordinate of the second point
-   * @param c
-   *          the {@code c} value
-   * @param d
-   *          the {@code d} value
-   * @return the guess for {@code a}
-   */
-  static final double _b_x0y0x1y1cd_1(final double x0, final double y0,
-      final double x1, final double y1, final double c, final double d) {
-    return (y1 - y0) / (_ModelBase._exp(c * _ModelBase._log(x1 + d))
-        - _ModelBase._exp(c * _ModelBase._log(x0 + d)));
-  }
-
-  /**
-   * compute {@code b} based on two points and {@code c} and {@code d}.
-   *
-   * @param x0
-   *          the {@code x}-coordinate of the first point
-   * @param y0
-   *          the {@code y}-coordinate of the first point
-   * @param x1
-   *          the {@code x}-coordinate of the second point
-   * @param y1
-   *          the {@code y}-coordinate of the second point
-   * @param c
-   *          the {@code c} value
-   * @param d
-   *          the {@code d} value
-   * @return the guess for {@code a}
-   */
-  static final double _b_x0y0x1y1cd_2(final double x0, final double y0,
-      final double x1, final double y1, final double c, final double d) {
-    return (y1 - y0)
-        / (_ModelBase._pow(d + x0, c) - _ModelBase._pow(d + x1, c));
-  }
-
-  /**
-   * compute {@code c} based on two points and {@code a} and {@code d}.
-   *
-   * @param x0
-   *          the {@code x}-coordinate of the first point
-   * @param y0
-   *          the {@code y}-coordinate of the first point
-   * @param x1
-   *          the {@code x}-coordinate of the second point
-   * @param y1
-   *          the {@code y}-coordinate of the second point
-   * @param a
-   *          the {@code a} value
-   * @param d
-   *          the {@code d} value
-   * @return the guess for {@code c}
-   */
-  static final double _c_x0y0x1y1ad(final double x0, final double y0,
-      final double x1, final double y1, final double a, final double d) {
-    return (_ModelBase._log(y0 - a) - _ModelBase._log(y1 - a))
-        / (_ModelBase._log(d + x0) - _ModelBase._log(d + x1));
-  }
-
-  /**
-   * compute {@code a} based on two points and {@code b}, {@code c} and
-   * {@code d}.
-   *
-   * @param x0
-   *          the {@code x}-coordinate of the first point
-   * @param y0
-   *          the {@code y}-coordinate of the first point
-   * @param b
-   *          the {@code b} value
-   * @param c
-   *          the {@code c} value
-   * @param d
-   *          the {@code d} value
-   * @return the guess for {@code a}
-   */
-  static final double _a_x0y0bcd_1(final double x0, final double y0,
-      final double b, final double c, final double d) {
-    return y0 - (b * _ModelBase._exp(c * _ModelBase._log(x0 + d)));
-  }
-
-  /**
-   * compute {@code a} based on two points and {@code b}, {@code c} and
-   * {@code d}.
-   *
-   * @param x0
-   *          the {@code x}-coordinate of the first point
-   * @param y0
-   *          the {@code y}-coordinate of the first point
-   * @param b
-   *          the {@code b} value
-   * @param c
-   *          the {@code c} value
-   * @param d
-   *          the {@code d} value
-   * @return the guess for {@code a}
-   */
-  static final double _a_x0y0bcd2(final double x0, final double y0,
-      final double b, final double c, final double d) {
-    return y0 - (b * _ModelBase._pow((d + x0), c));
-  }
-
-  /**
-   * compute {@code b} based on two points and {@code a}, {@code c} and
-   * {@code d}.
-   *
-   * @param x0
-   *          the {@code x}-coordinate of the first point
-   * @param y0
-   *          the {@code y}-coordinate of the first point
-   * @param a
-   *          the {@code a} value
-   * @param c
-   *          the {@code c} value
-   * @param d
-   *          the {@code d} value
-   * @return the guess for {@code b}
-   */
-  static final double _b_x0y0acd_1(final double x0, final double y0,
-      final double a, final double c, final double d) {
-    return _ModelBase._exp(-(c * _ModelBase._log(x0 + d))) * (y0 - a);
-  }
-
-  /**
-   * compute {@code b} based on two points and {@code a}, {@code c} and
-   * {@code d}.
-   *
-   * @param x0
-   *          the {@code x}-coordinate of the first point
-   * @param y0
-   *          the {@code y}-coordinate of the first point
-   * @param a
-   *          the {@code a} value
-   * @param c
-   *          the {@code c} value
-   * @param d
-   *          the {@code d} value
-   * @return the guess for {@code b}
-   */
-  static final double _b_x0y0acd_2(final double x0, final double y0,
-      final double a, final double c, final double d) {
-    return (y0 - a) * _ModelBase._pow((d + x0), (-c));
-  }
-
-  /**
-   * compute {@code c} based on two points and {@code a}, {@code b} and
-   * {@code d}.
-   *
-   * @param x0
-   *          the {@code x}-coordinate of the first point
-   * @param y0
-   *          the {@code y}-coordinate of the first point
-   * @param a
-   *          the {@code a} value
-   * @param b
-   *          the {@code b} value
-   * @param d
-   *          the {@code d} value
-   * @return the guess for {@code c}
-   */
-  static final double _c_x0y0abd(final double x0, final double y0,
-      final double a, final double b, final double d) {
-    return (_ModelBase._log((y0 - a) / b)) / (_ModelBase._log(d + x0));
-  }
-
-  /**
-   * compute {@code d} based on two points and {@code a}, {@code b} and
-   * {@code c}.
-   *
-   * @param x0
-   *          the {@code x}-coordinate of the first point
-   * @param y0
-   *          the {@code y}-coordinate of the first point
-   * @param a
-   *          the {@code a} value
-   * @param b
-   *          the {@code b} value
-   * @param c
-   *          the {@code c} value
-   * @return the guess for {@code d}
-   */
-  static final double _d_x0y0abc(final double x0, final double y0,
-      final double a, final double b, final double c) {
-    return _ModelBase._pow((-(a - y0) / b), (1d / c)) - x0;
-  }
-
-  /**
-   * perform the fallback
-   *
-   * @param yMin
-   *          the minimal y
-   * @param yMax
-   *          the maximak y
-   * @param dest
-   *          the destination to receive the guess
-   * @param random
-   *          the random number generator
-   * @return {@code true}
-   */
-  static final boolean _fallback(final double yMin, final double yMax,
-      final double[] dest, final Random random) {
-    double maxY, minY;
-
-    maxY = (yMax * Math.abs((1d + //
-        Math.abs(0.05d * random.nextGaussian()))));
-    minY = (yMin * Math.abs((1d - //
-        Math.abs(0.05d * random.nextGaussian()))));
-
-    maxY = Math.abs(maxY - minY);
-    if (maxY < 1e-6d) {
-      maxY = 1e-6d;
-    }
-
-    dest[0] = minY;
-    dest[1] = maxY;
-
-    do {
-      dest[2] = -(random.nextInt(10) + random.nextGaussian());
-    } while (dest[2] >= -1e-7d);
-
-    dest[3] = (random.nextDouble() * 1e2d);
-    return true;
-  }
-
   /** the parameter guesser */
   private final class __ExpLinearModelOverLogXParameterGuesser
-      extends SamplePermutationBasedParameterGuesser {
+      extends ImprovingSamplingBasedParameterGuesser {
 
     /**
-     * Create the parameter guesser
+     * create the model
      *
      * @param data
      *          the data
      */
     __ExpLinearModelOverLogXParameterGuesser(final IMatrix data) {
-      super(data, 4, 2);
+      super(data, 2, 4, new int[] { 4, 4, 2, 1, });
+    }
+
+    /** {@inheritDoc} */
+    @SuppressWarnings("incomplete-switch")
+    @Override
+    protected final double improveParameter(final int variant,
+        final int parameter, final int guesser, final double[] points,
+        final double[] parameters, final Random random) {
+      final double x0, y0, a, b, c, d, dx0c, dx1c, expclogx0d, expclogx1d;
+
+      x0 = points[0];
+      y0 = points[1];
+      a = parameters[0];
+      b = parameters[1];
+      c = parameters[2];
+      d = parameters[3];
+
+      switch (parameter) {
+        case 0: {
+          switch (guesser) {
+            case 0: {
+              return y0
+                  - (b * _ModelBase._exp(c * _ModelBase._log(x0 + d)));
+            }
+            case 1: {
+              return y0 - (b * _ModelBase._pow((d + x0), c));
+            }
+            case 2: {
+              if (points.length < 4) {
+                return Double.NaN;
+              }
+              dx0c = _ModelBase._pow(d + x0, c);
+              dx1c = _ModelBase._pow(d + points[2], c);
+
+              return ((points[3] * dx0c) - (y0 * dx1c)) / (dx0c - dx1c);
+            }
+            case 3: {
+              if (points.length < 4) {
+                return Double.NaN;
+              }
+              expclogx0d = _ModelBase._exp(c * _ModelBase._log(x0 + d));
+              expclogx1d = _ModelBase
+                  ._exp(c * _ModelBase._log(points[2] + d));
+
+              return ((y0 * expclogx1d) - (points[3] * expclogx0d))
+                  / (expclogx1d - expclogx0d);
+            }
+          }
+          break;
+        }
+        case 1: {
+          switch (guesser) {
+            case 0: {
+              return _ModelBase._exp(-(c * _ModelBase._log(x0 + d)))
+                  * (y0 - a);
+            }
+            case 1: {
+              return _ModelBase._exp(-(c * _ModelBase._log(x0 + d)))
+                  * (y0 - a);
+            }
+            case 2: {
+              if (points.length < 4) {
+                return Double.NaN;
+              }
+              return (points[3] - y0)
+                  / (_ModelBase._exp(c * _ModelBase._log(points[2] + d))
+                      - _ModelBase._exp(c * _ModelBase._log(x0 + d)));
+            }
+            case 3: {
+              if (points.length < 4) {
+                return Double.NaN;
+              }
+              return (points[3] - y0) / (_ModelBase._pow(d + x0, c)
+                  - _ModelBase._pow(d + points[2], c));
+            }
+          }
+          break;
+        }
+        case 2: {
+          switch (guesser) {
+            case 0: {
+              return (_ModelBase._log((y0 - a) / b))
+                  / (_ModelBase._log(d + x0));
+            }
+            case 1: {
+              if (points.length < 4) {
+                return Double.NaN;
+              }
+              return (_ModelBase._log(y0 - a)
+                  - _ModelBase._log(points[3] - a))
+                  / (_ModelBase._log(d + x0)
+                      - _ModelBase._log(d + points[2]));
+            }
+          }
+          break;
+        }
+        case 3: {
+          return _ModelBase._pow((-(a - y0) / b), (1d / c)) - x0;
+        }
+      }
+
+      return super.improveParameter(variant, parameter, guesser, points,
+          parameters, random);
+    }
+
+    /** {@inheritDoc} */
+    @SuppressWarnings("incomplete-switch")
+    @Override
+    protected final boolean checkParameter(final int variant,
+        final int parameter, final double newValue,
+        final double[] parameters) {
+
+      if (variant == 0) {
+        switch (parameter) {
+          case 1: {
+            return ((newValue > 1e-13d) && (newValue < 1e100d));
+          }
+          case 2: {
+            return ((newValue < -1e-13d) && (newValue > -1e2d));
+          }
+          case 3: {
+            return ((newValue > (-this.m_minX)) && (newValue < 1e3d));
+          }
+        }
+      } else {
+        switch (parameter) {
+          case 1: {
+            return ((newValue < -1e-13d) && (newValue > -1e100d));
+          }
+          case 2: {
+            return ((newValue > 1e-13d) && (newValue < 1e2d));
+          }
+          case 3: {
+            return ((newValue > (-this.m_minX)) && (newValue < 1e3d));
+          }
+        }
+      }
+
+      return ((newValue > -1e100d) && (newValue < 1e100d));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected final boolean guess(final int variant, final double[] points,
+        final double[] dest, final Random random) {
+      final double[] minMaxY, minMaxX;
+      double temp;
+      int steps;
+
+      minMaxY = _ModelBase._getMinMax(true, this.m_minY, this.m_maxY,
+          points, random);
+      minMaxX = _ModelBase._getMinMax(false, this.m_minX, this.m_maxX,
+          points, random);
+
+      if (variant == 0) {
+        dest[0] = minMaxY[0];
+        dest[1] = minMaxY[1] - minMaxY[0];
+
+        steps = 100;
+        do {
+          temp = -3d * _ModelBase._exp(-13d * random.nextDouble());
+        } while (((--steps) > 0) && this.checkParameter(0, 2, temp, dest));
+        dest[2] = temp;
+
+      } else {
+        dest[0] = minMaxY[1];
+        dest[1] = minMaxY[0] - minMaxY[1];
+
+        steps = 100;
+        do {
+          temp = -(_ModelBase._exp(random.nextDouble()
+              * _ModelBase._log(minMaxY[1] - minMaxY[0])));
+        } while (((--steps) > 0) && this.checkParameter(0, 1, temp, dest));
+        dest[1] = temp;
+
+        steps = 100;
+        do {
+          temp = 2d * _ModelBase._exp(-3.5d * random.nextDouble());
+        } while (((--steps) > 0) && this.checkParameter(0, 2, temp, dest));
+        dest[2] = temp;
+
+      }
+
+      steps = 100;
+      do {
+        temp = -(minMaxX[0] + _ModelBase._exp(random.nextDouble()
+            * _ModelBase._log(minMaxX[1] - minMaxX[0])));
+      } while (((--steps) > 0) && this.checkParameter(0, 3, temp, dest));
+      dest[3] = temp;
+
+      return true;
     }
 
     /** {@inheritDoc} */
@@ -523,195 +411,6 @@ public class ExpLinearModelOverLogX extends _ModelBase {
     protected final double value(final double x,
         final double[] parameters) {
       return ExpLinearModelOverLogX.this.value(x, parameters);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected boolean fallback(final double[] points, final double[] dest,
-        final Random random) {
-      double maxY, minY;
-      int i;
-
-      findMaxY: {
-        if (random.nextInt(10) <= 0) {
-          maxY = this.m_maxY;
-          if (MathUtils.isFinite(maxY)) {
-            break findMaxY;
-          }
-        }
-        maxY = Double.NEGATIVE_INFINITY;
-        for (i = (points.length - 1); i > 0; i -= 2) {
-          maxY = Math.max(maxY, points[i]);
-        }
-      }
-
-      findMinY: {
-        if (random.nextInt(10) <= 0) {
-          minY = this.m_minY;
-          if (MathUtils.isFinite(minY)) {
-            break findMinY;
-          }
-        }
-        minY = Double.POSITIVE_INFINITY;
-        for (i = (points.length - 1); i > 0; i -= 2) {
-          minY = Math.min(minY, points[i]);
-        }
-      }
-
-      return ExpLinearModelOverLogX._fallback(minY, maxY, dest, random);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected final void fallback(final double[] dest,
-        final Random random) {
-      ExpLinearModelOverLogX._fallback(this.m_minY, this.m_maxY, dest,
-          random);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected final void guessBasedOnPermutation(final double[] points,
-        final double[] bestGuess, final double[] destGuess) {
-      final double oldA, oldB, oldC, oldD;
-      double newA, newB, newC, newD;
-      boolean changed, hasA, hasB, hasC, hasD;
-
-      hasA = hasB = hasC = hasD = false;
-      oldA = newA = bestGuess[0];
-      oldB = newB = bestGuess[1];
-      oldC = newC = bestGuess[2];
-      oldD = newD = bestGuess[3];
-
-      do {
-        changed = false;
-
-        // find A
-        findA: {
-          if (!hasA) {
-
-            newA = ParameterValueChecker.choose(//
-                ExpLinearModelOverLogX._a_x0y0x1y1cd_1(points[0],
-                    points[1], points[2], points[3], (hasC ? newC : oldC),
-                    (hasD ? newD : oldD)), //
-                ExpLinearModelOverLogX._a_x0y0x1y1cd_2(points[0],
-                    points[1], points[2], points[3], (hasC ? newC : oldC),
-                    (hasD ? newD : oldD)), //
-                ExpLinearModelOverLogX.A);
-            if (ExpLinearModelOverLogX.A.check(newA)) {
-              changed = hasA = true;
-              break findA;
-            }
-
-            newA = ParameterValueChecker.choose(//
-                ExpLinearModelOverLogX._a_x0y0bcd_1(points[0], points[1],
-                    (hasB ? newB : oldB), (hasC ? newC : oldC),
-                    (hasD ? newD : oldD)), //
-                ExpLinearModelOverLogX._a_x0y0bcd_1(points[0], points[1],
-                    (hasB ? newB : oldB), (hasC ? newC : oldC),
-                    (hasD ? newD : oldD)), //
-                ExpLinearModelOverLogX.A);
-            if (ExpLinearModelOverLogX.A.check(newA)) {
-              changed = hasA = true;
-              break findA;
-            }
-          }
-        }
-
-        // find B
-        findB: {
-          if (!hasB) {
-            newB = ParameterValueChecker.choose(//
-                ExpLinearModelOverLogX._b_x0y0x1y1cd_1(points[0],
-                    points[1], points[2], points[3], (hasC ? newC : oldC),
-                    (hasD ? newD : oldD)), //
-                ExpLinearModelOverLogX._b_x0y0x1y1cd_2(points[0],
-                    points[1], points[2], points[3], (hasC ? newC : oldC),
-                    (hasD ? newD : oldD)), //
-                ExpLinearModelOverLogX.B);
-
-            if (ExpLinearModelOverLogX.B.check(newB)) {
-              changed = hasB = true;
-              break findB;
-            }
-
-            newB = ParameterValueChecker.choose(//
-                ExpLinearModelOverLogX._b_x0y0acd_1(points[0], points[1],
-                    (hasA ? newA : oldA), (hasC ? newC : oldC),
-                    (hasD ? newD : oldD)), //
-                ExpLinearModelOverLogX._b_x0y0acd_1(points[0], points[1],
-                    (hasA ? newA : oldA), (hasC ? newC : oldC),
-                    (hasD ? newD : oldD)), //
-                ExpLinearModelOverLogX.B);
-
-            if (ExpLinearModelOverLogX.B.check(newB)) {
-              changed = hasB = true;
-              break findB;
-            }
-          }
-        }
-
-        // find C
-        findC: {
-          if (!hasC) {
-            newC = ExpLinearModelOverLogX._c_x0y0x1y1ad(points[0],
-                points[1], points[2], points[3], (hasA ? newA : oldA),
-                (hasD ? newD : oldD));
-            if (ExpLinearModelOverLogX.C.check(newC)) {
-              changed = hasC = true;
-              break findC;
-            }
-
-            newC = ExpLinearModelOverLogX._c_x0y0abd(points[0], points[1],
-                (hasA ? newA : oldA), (hasB ? newB : oldB),
-                (hasD ? newD : oldD));
-            if (ExpLinearModelOverLogX.C.check(newC)) {
-              changed = hasC = true;
-              break findC;
-            }
-          }
-        }
-
-        // find D
-        findC: {
-          if (!hasD) {
-            newD = ExpLinearModelOverLogX._d_x0y0abc(points[0], points[1],
-                (hasA ? newA : oldA), (hasB ? newB : oldB),
-                (hasC ? newC : oldC));
-            if (ExpLinearModelOverLogX.D.check(newD)) {
-              changed = hasD = true;
-              break findC;
-            }
-          }
-        }
-
-        // OK, everything else has failed us
-        emergency: {
-          if (!(changed)) {
-
-            if (!hasA) {
-              newA = Math.nextUp(this.m_minY);
-              if (ExpLinearModelOverLogX.A.check(newA)) {
-                hasA = changed = true;
-              }
-              break emergency;
-            }
-
-            if (!hasB) {
-              newB = (this.m_maxY - (hasA ? newA : this.m_minY));
-              if (ExpLinearModelOverLogX.A.check(newB)) {
-                hasB = changed = true;
-              }
-              break emergency;
-            }
-          }
-        }
-      } while (changed);
-
-      destGuess[0] = newA;
-      destGuess[1] = newB;
-      destGuess[2] = newC;
-      destGuess[3] = newD;
     }
   }
 }

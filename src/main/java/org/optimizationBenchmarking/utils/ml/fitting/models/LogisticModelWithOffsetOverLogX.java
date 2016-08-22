@@ -9,7 +9,7 @@ import org.optimizationBenchmarking.utils.document.spec.IText;
 import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
 import org.optimizationBenchmarking.utils.math.text.INegatableParameterRenderer;
-import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.SamplingBasedParameterGuesser;
+import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ImprovingSamplingBasedParameterGuesser;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IParameterGuesser;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
@@ -351,246 +351,150 @@ public final class LogisticModelWithOffsetOverLogX extends _ModelBase {
     return new __LogisticModelWithOffsetOverLogXParameterGuesser(data);
   }
 
-  /**
-   * Compute {@code a} from one point and {@code b}, {@code c}, and
-   * {@code d}.
-   *
-   * @param x1
-   *          the point's {@code x}-coordinate
-   * @param y1
-   *          the point's {@code y}-coordinate
-   * @param dest
-   *          the in/out array of current parameter values
-   * @return {@code true} on success, {@code false} on failure
-   */
-  static final boolean _a_x1y1bcd(final double x1, final double y1,
-      final double[] dest) {
-    final double cxd, result;
-    cxd = dest[2] * _ModelBase._pow(x1, dest[3]);
-    result = (((1d + cxd) * y1) - dest[1]) / (1d + cxd);
-    if (_ModelBase._check(result, dest[0], 1e-13d, 1e100d)) {
-      dest[0] = result;
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Compute {@code b} from one point and {@code a}, {@code c}, and
-   * {@code d}.
-   *
-   * @param x1
-   *          the point's {@code x}-coordinate
-   * @param y1
-   *          the point's {@code y}-coordinate
-   * @param dest
-   *          the in/out array of current parameter values
-   * @return {@code true} on success, {@code false} on failure
-   */
-  static final boolean _b_x1y1acd(final double x1, final double y1,
-      final double[] dest) {
-    final double result;
-
-    result = (y1 - dest[0])
-        * ((dest[2] * _ModelBase._pow(x1, dest[3])) + 1d);
-    if (_ModelBase._check(result, dest[1], 1e-13d, 1e100d)) {
-      dest[1] = result;
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Compute {@code c} from one point and {@code a}, {@code b}, and
-   * {@code d}.
-   *
-   * @param x1
-   *          the point's {@code x}-coordinate
-   * @param y1
-   *          the point's {@code y}-coordinate
-   * @param dest
-   *          the in/out array of current parameter values
-   * @return {@code true} on success, {@code false} on failure
-   */
-  static final boolean _c_x1y1abd(final double x1, final double y1,
-      final double[] dest) {
-    final double result;
-
-    result = ((dest[0] + dest[1]) - y1)
-        / (_ModelBase._pow(x1, dest[3]) * (y1 - dest[0]));
-    if (_ModelBase._check(result, dest[2], 1e-13, 1e5d)) {
-      dest[2] = result;
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Compute {@code d} from one point and {@code a}, {@code b}, and
-   * {@code c}.
-   *
-   * @param x1
-   *          the point's {@code x}-coordinate
-   * @param y1
-   *          the point's {@code y}-coordinate
-   * @param dest
-   *          the in/out array of current parameter values
-   * @return {@code true} on success, {@code false} on failure
-   */
-  static final boolean _d_x1y1abc(final double x1, final double y1,
-      final double[] dest) {
-    final double result;
-
-    result = _ModelBase
-        ._log((y1 - dest[0] - dest[1]) / (dest[3] * (dest[0] - y1)))
-        / _ModelBase._log(x1);
-    if (_ModelBase._check(result, dest[3], 1e-13d, 1e5d)) {
-      dest[3] = result;
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * the internal fallback routine
-   *
-   * @param model
-   *          the model selector
-   * @param minY
-   *          the minimal y coordinate
-   * @param maxY
-   *          the maximum y coordinate
-   * @param dest
-   *          the destination array
-   * @param random
-   *          the random number generator
-   */
-  static final void _fallback(final boolean model, final double minY,
-      final double maxY, final double[] dest, final Random random) {
-    double temp;
-    int steps;
-
-    if (model) {
-      dest[0] = minY;
-
-      steps = 100;
-      do {
-        dest[1] = temp = (maxY - minY)
-            * (1d + (0.1d * random.nextGaussian()));
-      } while ((((--steps) > 0) && (temp < 1e-13d))
-          || (!(MathUtils.isFinite(temp))));
-
-      steps = 100;
-      do {
-        dest[2] = temp = _ModelBase._exp(-12d * random.nextDouble());
-      } while ((((--steps) > 0) && (temp < 1e-13d))
-          || (!(MathUtils.isFinite(temp))));
-
-      steps = 100;
-      do {
-        dest[3] = temp = 12d * _ModelBase._exp(-8d * random.nextDouble());
-      } while ((((--steps) > 0) && (temp < 1e-12d))
-          || (!(MathUtils.isFinite(temp))));
-
-    } else {
-      dest[0] = maxY;
-      dest[1] = random.nextDouble() * (minY - maxY);
-
-      steps = 100;
-      do {
-        dest[2] = temp = 30d * _ModelBase
-            ._exp(-7d * (random.nextDouble() * random.nextDouble()));
-      } while ((((--steps) > 0) && (temp < 1e-13d))
-          || (!(MathUtils.isFinite(temp))));
-
-      steps = 100;
-      do {
-        dest[3] = temp = -2d * _ModelBase._exp(-random.nextDouble() * 6d);
-      } while ((((--steps) > 0) && (temp > -1e-13d))
-          || (!(MathUtils.isFinite(temp))));
-    }
-  }
-
   /** the parameter guesser */
   private final class __LogisticModelWithOffsetOverLogXParameterGuesser
-      extends SamplingBasedParameterGuesser {
+      extends ImprovingSamplingBasedParameterGuesser {
 
     /**
-     * Create the parameter guesser
+     * create the model
      *
      * @param data
      *          the data
      */
     __LogisticModelWithOffsetOverLogXParameterGuesser(final IMatrix data) {
-      super(data, 2, 3, 4);
+      super(data, 2, 4, new int[] { 1, 1, 1, 1, });
     }
 
     /** {@inheritDoc} */
     @SuppressWarnings("incomplete-switch")
     @Override
+    protected final double improveParameter(final int variant,
+        final int parameter, final int guesser, final double[] points,
+        final double[] parameters, final Random random) {
+      final double x0, y0, a, b, c, d, cxd;
+
+      x0 = points[0];
+      y0 = points[1];
+      a = parameters[0];
+      b = parameters[1];
+      c = parameters[2];
+      d = parameters[3];
+
+      switch (parameter) {
+        case 0: {
+          cxd = c * _ModelBase._pow(x0, d);
+          return (((1d + cxd) * y0) - b) / (1d + cxd);
+        }
+        case 1: {
+          return (y0 - a) * ((c * _ModelBase._pow(x0, d)) + 1d);
+        }
+        case 2: {
+          return ((a + b) - y0) / (_ModelBase._pow(x0, d) * (y0 - a));
+        }
+        case 3: {
+          return _ModelBase._log((y0 - a - b) / (d * (a - y0)))
+              / _ModelBase._log(x0);
+        }
+      }
+
+      return super.improveParameter(variant, parameter, guesser, points,
+          parameters, random);
+    }
+
+    /** {@inheritDoc} */
+    @SuppressWarnings("incomplete-switch")
+    @Override
+    protected final boolean checkParameter(final int variant,
+        final int parameter, final double newValue,
+        final double[] parameters) {
+
+      if (variant == 0) {
+        switch (parameter) {
+          case 1: {
+            return ((newValue > 1e-13d) && (newValue < 1e100d));
+          }
+          case 2: {
+            return ((newValue > 1e-13d) && (newValue < 10d));
+          }
+          case 3: {
+            return ((newValue > 1e-13d) && (newValue < 1e3d));
+          }
+        }
+      } else {
+        switch (parameter) {
+          case 1: {
+            return ((newValue < -1e-13d) && (newValue > -1e100d));
+          }
+          case 2: {
+            return ((newValue > 1e-13d) && (newValue < 1e4d));
+          }
+          case 3: {
+            return ((newValue < -1e-13d) && (newValue > -1e4d));
+          }
+        }
+      }
+
+      return ((newValue > -1e100d) && (newValue < 1e100d));
+    }
+
+    /** {@inheritDoc} */
+    @Override
     protected final boolean guess(final int variant, final double[] points,
         final double[] dest, final Random random) {
       final double[] minMax;
+      double temp;
+      int steps;
 
       minMax = _ModelBase._getMinMax(true, this.m_minY, this.m_maxY,
           points, random);
-      LogisticModelWithOffsetOverLogX._fallback((variant == 0), minMax[0],
-          minMax[1], dest, random);
 
-      switch (random.nextInt(3)) {
-        case 0: {
-          LogisticModelWithOffsetOverLogX._c_x1y1abd(points[0], points[1],
-              dest);
-          LogisticModelWithOffsetOverLogX._d_x1y1abc(points[0], points[1],
-              dest);
-          break;
-        }
-        case 1: {
-          LogisticModelWithOffsetOverLogX._d_x1y1abc(points[0], points[1],
-              dest);
-          LogisticModelWithOffsetOverLogX._c_x1y1abd(points[0], points[1],
-              dest);
-          break;
-        }
-      }
+      if (variant == 0) {
+        dest[0] = minMax[0];
 
-      switch (random.nextInt(3)) {
-        case 0: {
-          LogisticModelWithOffsetOverLogX._a_x1y1bcd(points[0], points[1],
-              dest);
-          LogisticModelWithOffsetOverLogX._b_x1y1acd(points[0], points[1],
-              dest);
-          break;
-        }
-        case 1: {
-          LogisticModelWithOffsetOverLogX._b_x1y1acd(points[0], points[1],
-              dest);
-          LogisticModelWithOffsetOverLogX._a_x1y1bcd(points[0], points[1],
-              dest);
-          break;
-        }
+        steps = 100;
+        do {
+          temp = (minMax[1] - minMax[0])
+              * (1d + (0.1d * random.nextGaussian()));
+        } while (((--steps) > 0) && this.checkParameter(0, 1, temp, dest));
+        dest[1] = temp;
+
+        steps = 100;
+        do {
+          temp = _ModelBase._exp(-12d * random.nextDouble());
+        } while (((--steps) > 0) && this.checkParameter(0, 2, temp, dest));
+        dest[2] = temp;
+
+        steps = 100;
+        do {
+          temp = 12d * _ModelBase._exp(-8d * random.nextDouble());
+        } while (((--steps) > 0) && this.checkParameter(0, 3, temp, dest));
+        dest[3] = temp;
+
+      } else {
+        dest[0] = minMax[1];
+
+        steps = 100;
+        do {
+          temp = (minMax[0] - minMax[1])
+              * (0.9d + (0.1d * random.nextGaussian()));
+        } while (((--steps) > 0) && this.checkParameter(0, 1, temp, dest));
+        dest[1] = temp;
+
+        steps = 100;
+        do {
+          temp = 30d * _ModelBase
+              ._exp(-7d * (random.nextDouble() * random.nextDouble()));
+        } while (((--steps) > 0) && this.checkParameter(0, 2, temp, dest));
+        dest[2] = temp;
+
+        steps = 100;
+        do {
+          temp = -2d * _ModelBase._exp(-random.nextDouble() * 6d);
+        } while (((--steps) > 0) && this.checkParameter(0, 3, temp, dest));
+        dest[3] = temp;
       }
 
       return true;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected final boolean fallback(final double[] points,
-        final double[] dest, final Random random) {
-      return this.guess(random.nextBoolean() ? 1 : 0, points, dest,
-          random);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected final void fallback(final double[] dest,
-        final Random random) {
-      final double[] minMax;
-      minMax = _ModelBase._getMinMax(true, this.m_minY, this.m_maxY, null,
-          random);
-      LogisticModelWithOffsetOverLogX._fallback(random.nextBoolean(),
-          minMax[0], minMax[1], dest, random);
     }
 
     /** {@inheritDoc} */

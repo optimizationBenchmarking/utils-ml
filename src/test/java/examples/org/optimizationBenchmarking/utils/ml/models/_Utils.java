@@ -379,6 +379,7 @@ abstract class _Utils {
    */
   static final void _gnuplotRun(final Path destDir,
       final Path gnuplotScriptPath) {
+    System.out.print("Now invoking gnuplot."); //$NON-NLS-1$
     try {
       new ProcessBuilder()//
           .command("gnuplot", //$NON-NLS-1$
@@ -390,6 +391,7 @@ abstract class _Utils {
     } catch (final Throwable error) {
       error.printStackTrace();
     }
+    System.out.print("Finished invoking gnuplot."); //$NON-NLS-1$
   }
 
   /**

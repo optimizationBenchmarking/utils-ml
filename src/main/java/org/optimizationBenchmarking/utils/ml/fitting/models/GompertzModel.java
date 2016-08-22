@@ -8,10 +8,7 @@ import org.optimizationBenchmarking.utils.document.spec.IParameterRenderer;
 import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
 import org.optimizationBenchmarking.utils.math.text.INegatableParameterRenderer;
-import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueChecker;
-import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueCheckerMinMax;
-import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ParameterValueCheckerMinMaxAbs;
-import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.SamplePermutationBasedParameterGuesser;
+import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ImprovingSamplingBasedParameterGuesser;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IParameterGuesser;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
@@ -56,18 +53,6 @@ import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
  * </dl>
  */
 public final class GompertzModel extends _ModelBase {
-
-  /** the checker for {@code a} */
-  static final ParameterValueCheckerMinMax A = new ParameterValueCheckerMinMax(
-      -1e30d, 1e30d);
-  /** the checker for {@code b} */
-  static final ParameterValueCheckerMinMax B = GompertzModel.A;
-  /** the checker for {@code c} */
-  static final ParameterValueCheckerMinMaxAbs C = new ParameterValueCheckerMinMaxAbs(
-      1e-6d, 1e4d);
-  /** the checker for {@code d} */
-  static final ParameterValueCheckerMinMaxAbs D = GompertzModel.C;
-
   /** create the exponential decay model */
   public GompertzModel() {
     super();
@@ -215,189 +200,9 @@ public final class GompertzModel extends _ModelBase {
     return new __GompertzModelParameterGuesser(data);
   }
 
-  /**
-   * the internal fallback routine
-   *
-   * @param minY
-   *          the minimal y coordinate
-   * @param maxY
-   *          the maximum y coordinate
-   * @param dest
-   *          the destination array
-   * @param random
-   *          the random number generator
-   */
-  static final void _fallback(final double minY, final double maxY,
-      final double[] dest, final Random random) {
-    double trialA, trialB;
-    int trials;
-
-    trials = 100;
-    do {
-      trialA = (minY * (1d + (0.05d * random.nextGaussian())));
-    } while ((((minY > 0d) && (trialA < 0d)) || (trialA >= maxY))
-        && ((--trials) >= 0));
-
-    trials = 100;
-    do {
-      trialB = ((maxY - trialA) * ((1d + //
-          Math.abs(0.05d * random.nextGaussian()))));
-    } while (((minY > 0d) && ((maxY - trialB) < 0d)) && ((--trials) >= 0));
-
-    dest[0] = trialA + trialB;
-    dest[1] = -trialB;
-
-    dest[2] = -(random.nextDouble() + random.nextInt(5));
-    dest[3] = -(random.nextDouble() + random.nextInt(5));
-  }
-
-  /**
-   * compute {@code a} from {@code c} and {@code d} and two points
-   * according to
-   * {@code a=-(exp(c*exp(d*x2))*y1-exp(c*exp(d*x1))*y2)/(exp(c*exp(d*x1))-exp(c*exp(d*x2)))}
-   *
-   * @param x1
-   *          the {@code x}-coordinate of the first point
-   * @param y1
-   *          the {@code y}-coordinate of the first point
-   * @param x2
-   *          the {@code x}-coordinate of the second point
-   * @param y2
-   *          the {@code y}-coordinate of the second point
-   * @param c
-   *          the value of {@code c}
-   * @param d
-   *          the value of {@code d}
-   * @return {@code a}
-   */
-  static final double _a_x1y1x2y2cd(final double x1, final double y1,
-      final double x2, final double y2, final double c, final double d) {
-    final double expcexpdx1, expcexpdx2;
-
-    expcexpdx1 = _ModelBase._exp_o_p(c, _ModelBase._exp_o_p(d, x1));
-    expcexpdx2 = _ModelBase._exp_o_p(c, _ModelBase._exp_o_p(d, x2));
-
-    return (((y2 * expcexpdx1) - (y1 * expcexpdx2))
-        / (expcexpdx1 - expcexpdx2));
-  }
-
-  /**
-   * compute {@code b} from {@code c} and {@code d} and two points
-   * according to {@code b=(y1-y2)/(exp(c*exp(d*x1))-exp(c*exp(d*x2)))}
-   *
-   * @param x1
-   *          the {@code x}-coordinate of the first point
-   * @param y1
-   *          the {@code y}-coordinate of the first point
-   * @param x2
-   *          the {@code x}-coordinate of the second point
-   * @param y2
-   *          the {@code y}-coordinate of the second point
-   * @param c
-   *          the value of {@code c}
-   * @param d
-   *          the value of {@code d}
-   * @return {@code b}
-   */
-  static final double _b_x1y1x2y2cd(final double x1, final double y1,
-      final double x2, final double y2, final double c, final double d) {
-    return (y1 - y2) / (_ModelBase._exp_o_p(c, _ModelBase._exp_o_p(d, x1))
-        - _ModelBase._exp_o_p(c, _ModelBase._exp_o_p(d, x2)));
-  }
-
-  /**
-   * compute {@code a} from {@code b}, {@code c}, and {@code d} and two
-   * points according to {@code a=y1-b*exp(c*exp(d*x1))}
-   *
-   * @param x1
-   *          the {@code x}-coordinate of the first point
-   * @param y1
-   *          the {@code y}-coordinate of the first point
-   * @param b
-   *          the value of {@code b}
-   * @param c
-   *          the value of {@code c}
-   * @param d
-   *          the value of {@code d}
-   * @return {@code a}
-   */
-  static final double _a_x1y1bcd(final double x1, final double y1,
-      final double b, final double c, final double d) {
-    return (y1 - (b * _ModelBase._exp_o_p(c, _ModelBase._exp_o_p(d, x1))));
-  }
-
-  /**
-   * compute {@code b} from {@code a}, {@code c}, and {@code d} and two
-   * points according to {@code b=exp(-(c*exp(d*x1)))*(y1-a)}
-   *
-   * @param x1
-   *          the {@code x}-coordinate of the first point
-   * @param y1
-   *          the {@code y}-coordinate of the first point
-   * @param a
-   *          the value of {@code a}
-   * @param c
-   *          the value of {@code c}
-   * @param d
-   *          the value of {@code d}
-   * @return {@code b}
-   */
-  static final double _b_x1y1acd(final double x1, final double y1,
-      final double a, final double c, final double d) {
-    return _ModelBase._exp_o_p(-c, _ModelBase._exp_o_p(d, x1)) * (y1 - a);
-  }
-
-  /**
-   * compute {@code c} from {@code a}, {@code b}, and {@code d} and two
-   * points according to {@code c=exp(-(d*x1))*log(y1/b-a/b)}
-   *
-   * @param x1
-   *          the {@code x}-coordinate of the first point
-   * @param y1
-   *          the {@code y}-coordinate of the first point
-   * @param a
-   *          the value of {@code a}
-   * @param b
-   *          the value of {@code b}
-   * @param d
-   *          the value of {@code d}
-   * @return {@code c}
-   */
-  static final double _c_x1y1abd(final double x1, final double y1,
-      final double a, final double b, final double d) {
-    return ParameterValueChecker.choose(//
-        _ModelBase._exp_o_p(-d, x1) * _ModelBase._log((y1 - a) / b), //
-        _ModelBase._exp_o_p(-d, x1) * _ModelBase._log((y1 / b) - (a / b)), //
-        GompertzModel.C);
-  }
-
-  /**
-   * compute {@code c} from {@code a}, {@code b}, and {@code c} and two
-   * points according to {@code d=log(log(y1/b-a/b)/c)/x1)}
-   *
-   * @param x1
-   *          the {@code x}-coordinate of the first point
-   * @param y1
-   *          the {@code y}-coordinate of the first point
-   * @param a
-   *          the value of {@code a}
-   * @param b
-   *          the value of {@code b}
-   * @param c
-   *          the value of {@code c}
-   * @return {@code d}
-   */
-  static final double _d_x1y1abc(final double x1, final double y1,
-      final double a, final double b, final double c) {
-    return ParameterValueChecker.choose(//
-        (_ModelBase._log(_ModelBase._log((y1 - a) / b) / c) / x1), //
-        (_ModelBase._log(_ModelBase._log((y1 / b) - (a / b)) / c) / x1), //
-        GompertzModel.D);
-  }
-
   /** the parameter guesser */
   private class __GompertzModelParameterGuesser
-      extends SamplePermutationBasedParameterGuesser {
+      extends ImprovingSamplingBasedParameterGuesser {
 
     /**
      * create the model
@@ -406,8 +211,178 @@ public final class GompertzModel extends _ModelBase {
      *          the data
      */
     __GompertzModelParameterGuesser(final IMatrix data) {
-      super(data, GompertzModel.this.getParameterCount(),
-          GompertzModel.this.getParameterCount() - 1);
+      super(data, 2, 4, new int[] { 2, 2, 2, 2, });
+    }
+
+    /** {@inheritDoc} */
+    @SuppressWarnings("incomplete-switch")
+    @Override
+    protected final double improveParameter(final int variant,
+        final int parameter, final int guesser, final double[] points,
+        final double[] parameters, final Random random) {
+      final double x0, y0, a, b, c, d, expcexpdx1, expcexpdx2;
+
+      x0 = points[0];
+      y0 = points[1];
+      a = parameters[0];
+      b = parameters[1];
+      c = parameters[2];
+      d = parameters[3];
+
+      switch (parameter) {
+        case 0: {// a
+          switch (guesser) {
+            case 0: {
+              return (y0 - (b
+                  * _ModelBase._exp_o_p(c, _ModelBase._exp_o_p(d, x0))));
+            }
+            case 1: {
+              if (points.length > 2) {
+                expcexpdx1 = _ModelBase._exp_o_p(c,
+                    _ModelBase._exp_o_p(d, x0));
+                expcexpdx2 = _ModelBase._exp_o_p(c,
+                    _ModelBase._exp_o_p(d, points[2]));
+
+                return (((points[3] * expcexpdx1) - (y0 * expcexpdx2))
+                    / (expcexpdx1 - expcexpdx2));
+              }
+              return Double.NaN;
+            }
+          }
+          break;
+        }
+
+        case 1: {// b
+          switch (guesser) {
+            case 0: {
+              return _ModelBase._exp_o_p(-c, _ModelBase._exp_o_p(d, x0))
+                  * (y0 - a);
+            }
+            case 1: {
+              return (y0 - points[3])
+                  / (_ModelBase._exp_o_p(c, _ModelBase._exp_o_p(d, x0))
+                      - _ModelBase._exp_o_p(c,
+                          _ModelBase._exp_o_p(d, points[2])));
+            }
+          }
+          break;
+        }
+
+        case 2: {// c
+          switch (guesser) {
+            case 0: {
+              return _ModelBase._exp_o_p(-d, x0)
+                  * _ModelBase._log((y0 - a) / b);
+            }
+
+            case 1: {
+              return _ModelBase._exp_o_p(-d, x0)
+                  * _ModelBase._log((y0 / b) - (a / b));
+            }
+          }
+          break;
+        }
+
+        case 3: {// d
+          switch (guesser) {
+            case 0: {
+              return (_ModelBase._log(_ModelBase._log((y0 - a) / b) / c)
+                  / x0);
+            }
+            case 1: {
+              return (_ModelBase
+                  ._log(_ModelBase._log((y0 / b) - (a / b)) / c) / x0);
+            }
+          }
+          break;
+        }
+      }
+
+      return super.improveParameter(variant, parameter, guesser, points,
+          parameters, random);
+    }
+
+    /** {@inheritDoc} */
+    @SuppressWarnings("incomplete-switch")
+    @Override
+    protected final boolean checkParameter(final int variant,
+        final int parameter, final double newValue,
+        final double[] parameters) {
+
+      if (variant == 0) {
+        switch (parameter) {
+          case 1: {
+            return ((newValue < -1e-13d) && (newValue > -1e100d));
+          }
+          case 2: {
+            return ((newValue < -1e-13d) && (newValue > -1e5d));
+          }
+          case 3: {
+            return ((newValue < -1e-13d) && (newValue > -1e5d));
+          }
+        }
+      } else {
+        switch (parameter) {
+          case 1: {
+            return ((newValue > 1e-13d) && (newValue < 1e100d));
+          }
+          case 2: {
+            return ((newValue < -1e-13d) && (newValue > -1e5d));
+          }
+          case 3: {
+            return ((newValue > 1e-13d) && (newValue < 1e5d));
+          }
+        }
+      }
+
+      return ((newValue > -1e100d) && (newValue < 1e100d));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected final boolean guess(final int variant, final double[] points,
+        final double[] dest, final Random random) {
+      final double[] minMax;
+      double temp;
+      int steps;
+
+      minMax = _ModelBase._getMinMax(true, this.m_minY, this.m_maxY,
+          points, random);
+
+      if (variant == 0) {
+        dest[0] = minMax[1];
+        dest[1] = (minMax[0] - minMax[1]);
+
+        steps = 100;
+        do {
+          temp = -40d * _ModelBase._exp(-14d * random.nextDouble());
+        } while (((--steps) > 0) && this.checkParameter(0, 2, temp, dest));
+        dest[2] = temp;
+
+        steps = 100;
+        do {
+          temp = -10d * _ModelBase._exp(-10d * random.nextDouble());
+        } while (((--steps) > 0) && this.checkParameter(0, 3, temp, dest));
+        dest[3] = temp;
+
+      } else {
+        dest[0] = minMax[0];
+        dest[1] = (minMax[1] - minMax[0]);
+
+        steps = 100;
+        do {
+          temp = -10d * _ModelBase._exp(-10d * random.nextDouble());
+        } while (((--steps) > 0) && this.checkParameter(0, 2, temp, dest));
+        dest[2] = temp;
+
+        steps = 100;
+        do {
+          temp = 2d * _ModelBase._exp(-10d * random.nextDouble());
+        } while (((--steps) > 0) && this.checkParameter(0, 3, temp, dest));
+        dest[3] = temp;
+      }
+
+      return true;
     }
 
     /** {@inheritDoc} */
@@ -415,174 +390,6 @@ public final class GompertzModel extends _ModelBase {
     protected final double value(final double x,
         final double[] parameters) {
       return GompertzModel.this.value(x, parameters);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected final boolean fallback(final double[] points,
-        final double[] dest, final Random random) {
-      double minY, maxY;
-      int i;
-
-      findMinY: {
-        if (random.nextInt(10) <= 0) {
-          minY = this.m_minY;
-          if (MathUtils.isFinite(minY)) {
-            break findMinY;
-          }
-        }
-        minY = Double.POSITIVE_INFINITY;
-        for (i = (points.length - 1); i > 0; i -= 2) {
-          minY = Math.min(minY, points[i]);
-        }
-      }
-
-      findMaxY: {
-        if (random.nextInt(10) <= 0) {
-          maxY = this.m_maxY;
-          if (MathUtils.isFinite(maxY)) {
-            break findMaxY;
-          }
-        }
-        maxY = Double.NEGATIVE_INFINITY;
-        for (i = (points.length - 1); i > 0; i -= 2) {
-          maxY = Math.max(maxY, points[i]);
-        }
-      }
-
-      GompertzModel._fallback(minY, maxY, dest, random);
-      return true;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected final void fallback(final double[] dest,
-        final Random random) {
-      final double maxY, minY;
-
-      minY = (random.nextBoolean() ? this.m_minY
-          : ((random.nextInt(11) - 5) + (random.nextGaussian() * 10)));
-      maxY = (random.nextBoolean() ? this.m_maxY
-          : (minY
-              + Math.abs(random.nextInt(1000) * random.nextGaussian())));
-      GompertzModel._fallback(minY, maxY, dest, random);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected final void guessBasedOnPermutation(final double[] points,
-        final double[] bestGuess, final double[] destGuess) {
-      final double oldA, oldB, oldC, oldD;
-      double newA, newB, newC, newD;
-      boolean changed, hasA, hasB, hasC, hasD;
-
-      hasA = hasB = hasC = hasD = false;
-      oldA = newA = bestGuess[0];
-      oldB = newB = bestGuess[1];
-      oldC = newC = bestGuess[2];
-      oldD = newD = bestGuess[3];
-
-      do {
-        changed = false;
-
-        // find A
-        findA: {
-          if (!hasA) {
-
-            newA = GompertzModel._a_x1y1x2y2cd(points[0], points[1],
-                points[2], points[3], (hasC ? newC : oldC),
-                (hasD ? newD : oldD));
-            if (GompertzModel.A.check(newA)) {
-              changed = hasA = true;
-              break findA;
-            }
-
-            newA = GompertzModel._a_x1y1bcd(points[0], points[1],
-                (hasB ? newB : oldB), (hasC ? newC : oldC),
-                (hasD ? newD : oldD));
-            if (GompertzModel.A.check(newA)) {
-              changed = hasA = true;
-              break findA;
-            }
-          }
-        }
-
-        // find B
-        findB: {
-          if (!hasB) {
-            newB = GompertzModel._b_x1y1x2y2cd(points[0], points[1],
-                points[2], points[3], (hasC ? newC : oldC),
-                (hasD ? newD : oldD));
-            if (GompertzModel.B.check(newB)) {
-              changed = hasB = true;
-              break findB;
-            }
-
-            newB = GompertzModel._b_x1y1acd(points[0], points[1],
-                (hasA ? newA : oldA), (hasC ? newC : oldC),
-                (hasD ? newD : oldD));
-            if (GompertzModel.B.check(newB)) {
-              changed = hasB = true;
-              break findB;
-            }
-          }
-        }
-
-        // find C
-        findC: {
-          if (!hasC) {
-            newC = GompertzModel._c_x1y1abd(points[0], points[1],
-                (hasA ? newA : oldA), (hasB ? newB : oldB),
-                (hasD ? newD : oldD));
-            if (GompertzModel.C.check(newC)) {
-              changed = hasC = true;
-              break findC;
-            }
-          }
-        }
-
-        // find D
-        findD: {
-          if (!hasD) {
-            newD = GompertzModel._d_x1y1abc(points[0], points[1],
-                (hasA ? newA : oldA), (hasB ? newB : oldB),
-                (hasC ? newC : oldC));
-            if (GompertzModel.D.check(newD)) {
-              changed = hasD = true;
-              break findD;
-            }
-          }
-        }
-
-        // OK, everything else has failed us
-        emergency: {
-          if (!(changed)) {
-
-            if (!(hasA)) {
-              newA = Math.min(points[1], Math.min(points[3], points[5]));
-              if (GompertzModel.A.check(newA)) {
-                hasA = changed = true;
-                break emergency;
-              }
-            }
-
-            if (!(hasB)) {
-              newB = ((hasA ? newA
-                  : Math.min(points[1], Math.min(points[3], points[5]))) - //
-                  Math.max(points[1], Math.max(points[3], points[5])));
-              if (GompertzModel.B.check(newB)) {
-                hasB = changed = true;
-                break emergency;
-              }
-            }
-          }
-        }
-      } while (changed);
-
-      destGuess[0] = newA;
-      destGuess[1] = newB;
-      destGuess[2] = newC;
-      destGuess[3] = newD;
     }
   }
 }

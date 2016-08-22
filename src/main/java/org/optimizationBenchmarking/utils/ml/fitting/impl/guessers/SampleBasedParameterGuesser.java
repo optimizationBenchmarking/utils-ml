@@ -80,6 +80,8 @@ public abstract class SampleBasedParameterGuesser
   private final int[] m_indexes;
   /** the distance measure choices */
   private final int[] m_distanceMeasureChoices;
+  /** the number of model "variants" */
+  private final int[] m_variants;
 
   /**
    * Create the sample-based guesser. Normally, the number of rows in the
@@ -88,20 +90,51 @@ public abstract class SampleBasedParameterGuesser
    *
    * @param data
    *          the data
-   * @param required
+   * @param requiredPoints
    *          the number of points needed for an educated guess
    */
   protected SampleBasedParameterGuesser(final IMatrix data,
-      final int required) {
+      final int requiredPoints) {
+    this(data, 1, requiredPoints);
+  }
+
+  /**
+   * Create the sample-based guesser. Normally, the number of rows in the
+   * {@code data} matrix should be much higher than the number of
+   * {@code required} points.
+   *
+   * @param data
+   *          the data
+   * @param variants
+   *          the number of model "variants"
+   * @param requiredPoints
+   *          the number of points needed for an educated guess
+   */
+  protected SampleBasedParameterGuesser(final IMatrix data,
+      final int variants, final int requiredPoints) {
     super();
 
     final int available;
     double t, minX, minY, maxX, maxY;
     int i, j;
 
+    if (requiredPoints <= 0) {
+      throw new IllegalArgumentException(
+          "Required number of points must be greater than 0, but is " //$NON-NLS-1$
+              + requiredPoints);
+    }
+    if (variants <= 0) {
+      throw new IllegalArgumentException(
+          "Number of variants must be at least 1, but is " //$NON-NLS-1$
+              + variants);
+    }
+    if (data == null) {
+      throw new IllegalArgumentException("Data matrix cannot be null."); //$NON-NLS-1$
+    }
+
     available = data.m();
 
-    if (required < available) {
+    if (requiredPoints < available) {
       this.m_data = data;
       i = (available - 1);
       minX = maxX = data.getDouble(i, 0);
@@ -126,10 +159,10 @@ public abstract class SampleBasedParameterGuesser
         }
       }
 
-      i = (required << 1);
+      i = (requiredPoints << 1);
       this.m_selection = new double[i];
       this.m_candidate = new double[i];
-      this.m_indexes = new int[required];
+      this.m_indexes = new int[requiredPoints];
     } else {
       if (available > 0) {
         j = (available << 1);
@@ -186,52 +219,65 @@ public abstract class SampleBasedParameterGuesser
 
     this.m_distanceMeasureChoices = CanonicalPermutation
         .createCanonicalZero(9);
+
+    this.m_variants = CanonicalPermutation.createCanonicalZero(variants);
   }
 
   /**
-   * guess if all required points are available
+   * guess if at least some points are available
    *
+   * @param variant
+   *          the guess variant to be used
    * @param points
-   *          an array with {@code x, y} coordinate pairs
+   *          an array with {@code x, y} coordinate pairs, with
+   *          {@code points!=null} and {@code points.length<=required} and
+   *          {@code points.length>0}
    * @param dest
    *          the destination
    * @param random
    *          the random number generator
    * @return {@code true} if guessing was successful
    */
-  protected boolean guess(final double[] points, final double[] dest,
-      final Random random) {
-    return this.fallback(points, dest, random);
-  }
-
-  /**
-   * guess if potentially not all required points are available
-   *
-   * @param points
-   *          an array with {@code x, y} coordinate pairs
-   * @param dest
-   *          the destination
-   * @param random
-   *          the random number generator
-   * @return {@code true} if guessing was successful
-   */
-  protected boolean fallback(final double[] points, final double[] dest,
-      final Random random) {
-    this.fallback(dest, random);
+  protected boolean guess(final int variant, final double[] points,
+      final double[] dest, final Random random) {
+    this.fallback(variant, dest, random);
     return true;
   }
 
   /**
-   * Guess if {@link #guess(double[], double[], Random)} or
-   * {@link #fallback(double[], double[], Random)} have failed, i.e.,
-   * returned {@code false}.
+   * the internal wrapper for calling
+   * {@link #guess(int, double[], double[], Random)}
    *
+   * @param variant
+   *          the guess variant to be used
+   * @param points
+   *          an array with {@code x, y} coordinate pairs, with
+   *          {@code points!=null} and {@code points.length<=required} and
+   *          {@code points.length>0}
+   * @param dest
+   *          the destination
+   * @param random
+   *          the random number generator
+   * @return {@code true} if guessing was successful
+   */
+  boolean _guess(final int variant, final double[] points,
+      final double[] dest, final Random random) {
+    return this.guess(variant, points, dest, random);
+  }
+
+  /**
+   * Guess if {@link #guess(int, double[], double[], Random)} has failed,
+   * i.e., returned {@code false}.
+   *
+   * @param variant
+   *          the guess variant to be used
    * @param dest
    *          the destination
    * @param random
    *          the random number generator
    */
-  protected void fallback(final double[] dest, final Random random) {
+  protected void fallback(final int variant, final double[] dest,
+      final Random random) {
     super.createRandomGuess(dest, random);
   }
 
@@ -374,6 +420,33 @@ public abstract class SampleBasedParameterGuesser
   }
 
   /**
+   * shuffle a set of selected points
+   *
+   * @param points
+   *          the points to shuffle
+   * @param random
+   *          the random number generator
+   */
+  private static final void __shuffle(final double[] points,
+      final Random random) {
+    int index, remaining, swapIndex;
+    double temp;
+
+    for (index = points.length, remaining = (index >>> 1); remaining > 1;) {
+      swapIndex = (1 + (random.nextInt(remaining--) << 1));
+
+      temp = points[--index];
+      points[index] = points[swapIndex];
+      points[swapIndex] = temp;
+
+      temp = points[--index];
+      points[index] = points[--swapIndex];
+      points[swapIndex] = temp;
+    }
+
+  }
+
+  /**
    * Format an {@code x}-coordinate for the distance computation
    *
    * @param curX
@@ -485,109 +558,129 @@ public abstract class SampleBasedParameterGuesser
       final Random random) {
     final IMatrix data;
     final double[] bestChoice, currentChoice;
-    final int[] indexes, distanceMeasureChoices;
+    final int[] indexes, distanceMeasureChoices, variants;
     boolean useX, useY, logScaleX, logScaleY;
     double bestQuality, currentQuality;
     int distanceMeasureLoop, distanceMeasureChoice, distanceMeasure,
-        pointSetChoice, pointChoice;
+        pointSetChoice, pointChoice, variantLoop, variantChoice, variant;
 
+    variants = this.m_variants;
     if ((data = this.m_data) != null) {
 
+      distanceMeasureChoices = this.m_distanceMeasureChoices;
+      indexes = this.m_indexes;
       bestChoice = this.m_selection;
       currentChoice = this.m_candidate;
-      indexes = this.m_indexes;
-      distanceMeasureChoices = this.m_distanceMeasureChoices;
 
-      for (distanceMeasureLoop = 9; (distanceMeasureLoop) > 0;) {
-        // In the main loop, we first choose a distance measure, then
-        // attempt to find points far away from each other under this
-        // measure.
-        distanceMeasureChoice = random.nextInt(distanceMeasureLoop);
-        distanceMeasure = distanceMeasureChoices[distanceMeasureChoice];
-        --distanceMeasureLoop;
-        distanceMeasureChoices[distanceMeasureChoice] = distanceMeasureChoices[distanceMeasureLoop];
-        distanceMeasureChoices[distanceMeasureLoop] = distanceMeasure;
+      for (variantLoop = variants.length; variantLoop > 0;) {
+        variantChoice = random.nextInt(variantLoop);
+        variant = variants[variantChoice];
+        --variantLoop;
 
-        switch (distanceMeasure) {
-          case 0: {
-            useX = useY = logScaleX = logScaleY = false;
-            break;
-          }
-          case 1: {
-            useX = true;
-            useY = logScaleX = logScaleY = false;
-            break;
-          }
-          case 2: {
-            useY = true;
-            useX = logScaleX = logScaleY = false;
-            break;
-          }
-          case 3: {
-            useX = useY = true;
-            logScaleX = logScaleY = false;
-            break;
-          }
-          case 4: {
-            useX = logScaleX = true;
-            useY = logScaleY = false;
-            break;
-          }
-          case 5: {
-            useX = useY = logScaleX = true;
-            logScaleY = false;
-            break;
-          }
-          case 6: {
-            useY = logScaleY = true;
-            useX = logScaleX = false;
-            break;
-          }
-          case 7: {
-            useX = useY = logScaleY = true;
-            logScaleX = false;
-            break;
-          }
-          default: {
-            useX = useY = logScaleX = logScaleY = true;
-            break;
-          }
-        }
+        for (distanceMeasureLoop = 9; (distanceMeasureLoop) > 0;) {
+          // In the main loop, we first choose a distance measure, then
+          // attempt to find points far away from each other under this
+          // measure.
+          distanceMeasureChoice = random.nextInt(distanceMeasureLoop);
+          distanceMeasure = distanceMeasureChoices[distanceMeasureChoice];
+          --distanceMeasureLoop;
 
-        for (pointSetChoice = 2; (--pointSetChoice) >= 0;) {
-          // Draw a set of points.
-          SampleBasedParameterGuesser.__drawCandidate(bestChoice, indexes,
-              data, random, useX, useY);
-          if (useX || useY) {// we do care about the distance
-            bestQuality = this.__quality(bestChoice, useX, useY, logScaleX,
-                logScaleY);
-            for (pointChoice = 10; (--pointChoice) >= 0;) {
-              SampleBasedParameterGuesser.__drawCandidate(currentChoice,
-                  indexes, data, random, useX, useY);
-              currentQuality = this.__quality(currentChoice, useX, useY,
-                  logScaleX, logScaleY);
-              if (currentQuality > bestQuality) {
-                System.arraycopy(currentChoice, 0, bestChoice, 0,
-                    bestChoice.length);
-                bestQuality = currentQuality;
-              }
+          switch (distanceMeasure) {
+            case 0: {
+              useX = useY = logScaleX = logScaleY = false;
+              break;
+            }
+            case 1: {
+              useX = true;
+              useY = logScaleX = logScaleY = false;
+              break;
+            }
+            case 2: {
+              useY = true;
+              useX = logScaleX = logScaleY = false;
+              break;
+            }
+            case 3: {
+              useX = useY = true;
+              logScaleX = logScaleY = false;
+              break;
+            }
+            case 4: {
+              useX = logScaleX = true;
+              useY = logScaleY = false;
+              break;
+            }
+            case 5: {
+              useX = useY = logScaleX = true;
+              logScaleY = false;
+              break;
+            }
+            case 6: {
+              useY = logScaleY = true;
+              useX = logScaleX = false;
+              break;
+            }
+            case 7: {
+              useX = useY = logScaleY = true;
+              logScaleX = false;
+              break;
+            }
+            default: {
+              useX = useY = logScaleX = logScaleY = true;
+              break;
             }
           }
 
-          if (this.guess(bestChoice, parameters, random)) {
-            return;
+          for (pointSetChoice = 2; (--pointSetChoice) >= 0;) {
+            // Draw a set of points.
+            SampleBasedParameterGuesser.__drawCandidate(bestChoice,
+                indexes, data, random, useX, useY);
+            if (useX || useY) {// we do care about the distance
+              bestQuality = this.__quality(bestChoice, useX, useY,
+                  logScaleX, logScaleY);
+              for (pointChoice = 10; (--pointChoice) >= 0;) {
+                SampleBasedParameterGuesser.__drawCandidate(currentChoice,
+                    indexes, data, random, useX, useY);
+                currentQuality = this.__quality(currentChoice, useX, useY,
+                    logScaleX, logScaleY);
+                if (currentQuality > bestQuality) {
+                  System.arraycopy(currentChoice, 0, bestChoice, 0,
+                      bestChoice.length);
+                  bestQuality = currentQuality;
+                }
+              }
+            }
+
+            SampleBasedParameterGuesser.__shuffle(bestChoice, random);
+            if (this._guess(variant, bestChoice, parameters, random)) {
+              return;
+            }
           }
+
+          distanceMeasureChoices[distanceMeasureChoice] = distanceMeasureChoices[distanceMeasureLoop];
+          distanceMeasureChoices[distanceMeasureLoop] = distanceMeasure;
         }
+        variants[variantChoice] = variants[variantLoop];
+        variants[variantLoop] = variant;
       }
     } else {
       if (this.m_selection != null) {
-        if (this.fallback(this.m_selection, parameters, random)) {
-          return;
+        SampleBasedParameterGuesser.__shuffle(this.m_selection, random);
+        for (variantLoop = variants.length; variantLoop > 0;) {
+          variantChoice = random.nextInt(variantLoop);
+          variant = variants[variantChoice];
+          --variantLoop;
+          if (this._guess(variant, this.m_selection, parameters, random)) {
+            return;
+          }
+          variants[variantChoice] = variants[variantLoop];
+          variants[variantLoop] = variant;
         }
       }
     }
 
     // no success?
-    this.fallback(parameters, random);
+    this.fallback(random.nextInt(this.m_variants.length), parameters,
+        random);
   }
 }

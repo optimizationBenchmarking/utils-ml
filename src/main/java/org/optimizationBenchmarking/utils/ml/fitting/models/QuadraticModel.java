@@ -105,28 +105,26 @@ public final class QuadraticModel extends BasicModel {
 
     /** {@inheritDoc} */
     @Override
-    protected final boolean guess(final double[] points,
-        final double[] dest, final Random random) {
-      return (Polynomials.degree2FindCoefficients(points[0], points[1],
-          points[2], points[3], points[4], points[5],
-          dest) < Double.POSITIVE_INFINITY);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected final boolean fallback(final double[] points,
+    protected final boolean guess(final int variant, final double[] points,
         final double[] dest, final Random random) {
       switch (points.length) {
         case 2: {
+          dest[1] = dest[2] = 0d;
           return (Polynomials.degree0FindCoefficients(points[0], points[1],
               dest) < Double.POSITIVE_INFINITY);
         }
         case 4: {
+          dest[2] = 0d;
           return (Polynomials.degree1FindCoefficients(points[0], points[1],
               points[2], points[3], dest) < Double.POSITIVE_INFINITY);
         }
+        case 6: {
+          return (Polynomials.degree2FindCoefficients(points[0], points[1],
+              points[2], points[3], points[4], points[5],
+              dest) < Double.POSITIVE_INFINITY);
+        }
         default: {
-          this.fallback(dest, random);
+          this.fallback(0, dest, random);
           return true;
         }
       }

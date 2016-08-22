@@ -8,7 +8,7 @@ import org.optimizationBenchmarking.utils.document.spec.IParameterRenderer;
 import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
 import org.optimizationBenchmarking.utils.math.text.INegatableParameterRenderer;
-import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.SamplingBasedParameterGuesser;
+import org.optimizationBenchmarking.utils.ml.fitting.impl.guessers.ImprovingSamplingBasedParameterGuesser;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IParameterGuesser;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
@@ -212,163 +212,9 @@ public final class ExponentialDecayModel extends _ModelBase {
     return new __DecayModelParameterGuesser(data);
   }
 
-  /**
-   * Compute {@code a} from one point and {@code b}, {@code c}, and
-   * {@code d}.
-   *
-   * @param x1
-   *          the point's {@code x}-coordinate
-   * @param y1
-   *          the point's {@code y}-coordinate
-   * @param dest
-   *          the in/out array of current parameter values
-   * @return {@code true} on success, {@code false} on failure
-   */
-  static final boolean _a_x1y1bcd(final double x1, final double y1,
-      final double[] dest) {
-    final double temp;
-    temp = y1 - (dest[1]
-        * _ModelBase._exp(dest[2] * _ModelBase._pow(x1, dest[3])));
-    if (_ModelBase._check(temp, dest[0], 1e-13d, 1e100d)) {
-      dest[0] = temp;
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Compute {@code b} from one point and {@code a}, {@code c}, and
-   * {@code d}.
-   *
-   * @param x1
-   *          the point's {@code x}-coordinate
-   * @param y1
-   *          the point's {@code y}-coordinate
-   * @param dest
-   *          the in/out array of current parameter values
-   * @return {@code true} on success, {@code false} on failure
-   */
-  static final boolean _b_x1y1acd(final double x1, final double y1,
-      final double[] dest) {
-    final double temp;
-
-    temp = _ModelBase._exp(-(dest[2] * _ModelBase._pow(x1, dest[3])))
-        * (y1 - dest[0]);
-    if (_ModelBase._check(temp, dest[1], 1e-13d, 1e100d)) {
-      dest[1] = temp;
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Compute {@code c} from one point and {@code a}, {@code b}, and
-   * {@code d}.
-   *
-   * @param x1
-   *          the point's {@code x}-coordinate
-   * @param y1
-   *          the point's {@code y}-coordinate
-   * @param dest
-   *          the in/out array of current parameter values
-   * @return {@code true} on success, {@code false} on failure
-   */
-  static final boolean _c_x1y1abd(final double x1, final double y1,
-      final double[] dest) {
-    final double l;
-    double res;
-
-    l = _ModelBase._log((y1 / dest[1]) - (dest[0] / dest[1]));
-    res = l / _ModelBase._pow(x1, dest[3]);
-    if (_ModelBase._check(res, dest[2], 1e-13d, 1e5d)) {
-      dest[2] = res;
-      return true;
-    }
-    res = l * _ModelBase._pow(x1, -dest[3]);
-    if (_ModelBase._check(res, dest[2], 1e-13d, 1e5d)) {
-      dest[2] = res;
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Compute {@code d} from one point and {@code a}, {@code b}, and
-   * {@code c}.
-   *
-   * @param x1
-   *          the point's {@code x}-coordinate
-   * @param y1
-   *          the point's {@code y}-coordinate
-   * @param dest
-   *          the in/out array of current parameter values
-   * @return {@code true} on success, {@code false} on failure
-   */
-  static final boolean _d_x1y1abc(final double x1, final double y1,
-      final double[] dest) {
-    final double temp;
-    temp = _ModelBase._log(
-        _ModelBase._log((y1 / dest[1]) - (dest[0] / dest[1])) / dest[2])
-        / _ModelBase._log(x1);
-    if (_ModelBase._check(temp, dest[3], 1e-13d, 1e5d)) {
-      dest[3] = temp;
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * the internal fallback routine
-   *
-   * @param model
-   *          the model selector
-   * @param minY
-   *          the minimal y coordinate
-   * @param maxY
-   *          the maximum y coordinate
-   * @param dest
-   *          the destination array
-   * @param random
-   *          the random number generator
-   */
-  static final void _fallback(final boolean model, final double minY,
-      final double maxY, final double[] dest, final Random random) {
-    double temp;
-    int steps;
-
-    if (model) {
-      dest[0] = minY;
-      dest[1] = (maxY - minY);
-      steps = 100;
-      do {
-        dest[2] = temp = -_ModelBase._exp(-7d * random.nextDouble());
-      } while ((((--steps) > 0) && (temp >= -1e-13d))
-          || (!(MathUtils.isFinite(temp))));
-      steps = 100;
-      do {
-        dest[3] = temp = 5d * _ModelBase._exp(-5d * random.nextDouble());
-      } while ((((--steps) > 0) && (temp <= 1e-13d))
-          || (!(MathUtils.isFinite(temp))));
-    } else {
-      dest[0] = maxY;
-      dest[1] = (minY - maxY);
-      steps = 100;
-      do {
-        dest[2] = temp = -(random.nextDouble() + random.nextInt(200));
-      } while ((((--steps) > 0) && (temp >= -1e-10d))
-          || (!(MathUtils.isFinite(temp))));
-      steps = 100;
-      do {
-        dest[3] = temp = -(1d / (Math.abs(random.nextGaussian())
-            + (1e-7d * random.nextDouble())));
-      } while ((((--steps) > 0) && (temp >= -1e-11d))
-          || (!(MathUtils.isFinite(temp))));
-    }
-  }
-
   /** the parameter guesser */
   private class __DecayModelParameterGuesser
-      extends SamplingBasedParameterGuesser {
+      extends ImprovingSamplingBasedParameterGuesser {
 
     /**
      * create the model
@@ -377,7 +223,7 @@ public final class ExponentialDecayModel extends _ModelBase {
      *          the data
      */
     __DecayModelParameterGuesser(final IMatrix data) {
-      super(data, 2, 3, 4);
+      super(data, 2, 4, new int[] { 1, 1, 2, 1, });
     }
 
     /** {@inheritDoc} */
@@ -390,61 +236,139 @@ public final class ExponentialDecayModel extends _ModelBase {
     /** {@inheritDoc} */
     @SuppressWarnings("incomplete-switch")
     @Override
-    protected final boolean guess(final int variant, final double[] points,
-        final double[] dest, final Random random) {
-      final double[] minMax;
+    protected final double improveParameter(final int variant,
+        final int parameter, final int guesser, final double[] points,
+        final double[] parameters, final Random random) {
+      final double x0, y0, a, b, c, d;
 
-      minMax = _ModelBase._getMinMax(true, this.m_minY, this.m_maxY,
-          points, random);
-      ExponentialDecayModel._fallback((variant == 0), minMax[0], minMax[1],
-          dest, random);
+      x0 = points[0];
+      y0 = points[1];
+      a = parameters[0];
+      b = parameters[1];
+      c = parameters[2];
+      d = parameters[3];
 
-      switch (random.nextInt(3)) {
-        case 0: {
-          ExponentialDecayModel._c_x1y1abd(points[0], points[1], dest);
-          ExponentialDecayModel._d_x1y1abc(points[0], points[1], dest);
+      switch (parameter) {
+        case 0: {// a
+          return y0 - (b * _ModelBase._exp(c * _ModelBase._pow(x0, d)));
+        }
+
+        case 1: {// b
+          return _ModelBase._exp(-(c * _ModelBase._pow(x0, d))) * (y0 - a);
+        }
+
+        case 2: {// c
+          switch (guesser) {
+            case 0: {
+              return ((_ModelBase._log((y0 / b) - (a / b)))
+                  / _ModelBase._pow(x0, d));
+            }
+
+            case 1: {
+              return ((_ModelBase._log((y0 / b) - (a / b)))
+                  * _ModelBase._pow(x0, -d));
+            }
+          }
           break;
         }
-        case 1: {
-          ExponentialDecayModel._d_x1y1abc(points[0], points[1], dest);
-          ExponentialDecayModel._c_x1y1abd(points[0], points[1], dest);
-          break;
+
+        case 3: {// d
+          return _ModelBase._log(_ModelBase._log((y0 / b) - (a / b)) / c)
+              / _ModelBase._log(x0);
         }
       }
 
-      switch (random.nextInt(3)) {
-        case 0: {
-          ExponentialDecayModel._a_x1y1bcd(points[0], points[1], dest);
-          ExponentialDecayModel._b_x1y1acd(points[0], points[1], dest);
-          break;
+      return super.improveParameter(variant, parameter, guesser, points,
+          parameters, random);
+    }
+
+    /** {@inheritDoc} */
+    @SuppressWarnings("incomplete-switch")
+    @Override
+    protected final boolean checkParameter(final int variant,
+        final int parameter, final double newValue,
+        final double[] parameters) {
+
+      if (variant == 0) {
+        switch (parameter) {
+          case 1: {
+            return ((newValue > 1e-13d) && (newValue < 1e100d));
+          }
+          case 2: {
+            return ((newValue > -1e4d) && (newValue < -1e-13d));
+          }
+          case 3: {
+            return ((newValue > 1e-13d) && (newValue < 1e4d));
+          }
         }
-        case 1: {
-          ExponentialDecayModel._b_x1y1acd(points[0], points[1], dest);
-          ExponentialDecayModel._a_x1y1bcd(points[0], points[1], dest);
-          break;
+      } else {
+        switch (parameter) {
+          case 1: {
+            return ((newValue < -1e-13d) && (newValue > -1e100d));
+          }
+          case 2: {
+            return ((newValue > -1e5d) && (newValue < -1e-13d));
+          }
+          case 3: {
+            return ((newValue < -1e-13d) && (newValue > -1e4d));
+          }
         }
+      }
+
+      return ((newValue > -1e100d) && (newValue < 1e100d));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected final boolean guess(final int variant, final double[] points,
+        final double[] dest, final Random random) {
+      final double[] minMax;
+      double temp;
+      int steps;
+
+      minMax = _ModelBase._getMinMax(true, this.m_minY, this.m_maxY,
+          points, random);
+
+      if (variant == 0) {
+        dest[0] = minMax[0];
+        dest[1] = (minMax[1] - minMax[0]);
+        steps = 100;
+
+        do {
+          temp = -_ModelBase._exp(-7d * random.nextDouble());
+        } while (((--steps) > 0)
+            && (!(this.checkParameter(0, 2, temp, dest))));
+        dest[2] = temp;
+
+        steps = 100;
+        do {
+          temp = 5d * _ModelBase._exp(-5d * random.nextDouble());
+        } while (((--steps) > 0)
+            && (!(this.checkParameter(0, 3, temp, dest))));
+        dest[3] = temp;
+
+      } else {
+        dest[0] = minMax[1];
+        dest[1] = (minMax[0] - minMax[1]);
+
+        steps = 100;
+        do {
+          temp = -(random.nextDouble() + random.nextInt(200));
+        } while (((--steps) > 0)
+            && (!(this.checkParameter(1, 2, temp, dest))));
+        dest[2] = temp;
+
+        steps = 100;
+        do {
+          temp = -(1d / (Math.abs(random.nextGaussian())
+              + (1e-7d * random.nextDouble())));
+        } while (((--steps) > 0)
+            && (!(this.checkParameter(1, 3, temp, dest))));
+        dest[3] = temp;
       }
 
       return true;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    protected final boolean fallback(final double[] points,
-        final double[] dest, final Random random) {
-      return this.guess(random.nextBoolean() ? 1 : 0, points, dest,
-          random);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected final void fallback(final double[] dest,
-        final Random random) {
-      final double[] minMax;
-      minMax = _ModelBase._getMinMax(true, this.m_minY, this.m_maxY, null,
-          random);
-      ExponentialDecayModel._fallback(random.nextBoolean(), minMax[0],
-          minMax[1], dest, random);
-    }
   }
 }

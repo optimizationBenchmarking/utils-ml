@@ -33,15 +33,23 @@ public class GuesserPlotter extends _Utils {
    *
    * @param parameters
    *          the parameters
+   * @param a
+   *          the first color
+   * @param b
+   *          the second color
    * @return the return value
    */
-  private static final Color __color1(final double[] parameters) {
+  private static final Color __color(final double[] parameters,
+      final Color a, final Color b) {
     return _Utils._colorBlend(//
-        _Utils._colorBlend(((parameters[0] < 0d) ? Color.RED : Color.BLUE), //
-            ((parameters[1] < 0d) ? Color.RED : Color.BLUE), //
+        _Utils._colorBlend(
+            ((parameters[0] < 0d) ? a.brighter() : b.brighter()), //
+            ((parameters[1] < 0d) ? a : b), //
             0.5d), //
-        _Utils._colorBlend(((parameters[2] < 0d) ? Color.RED : Color.BLUE), //
-            ((parameters[3] < 0d) ? Color.RED : Color.BLUE), //
+        _Utils._colorBlend(
+            ((parameters[2] < 0d) ? a.darker() : b.darker()), //
+            ((parameters[3] < 0d) ? a.darker().darker()
+                : b.darker().darker()), //
             0.5d), //
         0.5d);
   }
@@ -53,17 +61,19 @@ public class GuesserPlotter extends _Utils {
    *          the parameters
    * @return the return value
    */
+  private static final Color __color1(final double[] parameters) {
+    return GuesserPlotter.__color(parameters, Color.red, Color.blue);
+  }
+
+  /**
+   * get the parameters
+   *
+   * @param parameters
+   *          the parameters
+   * @return the return value
+   */
   private static final Color __color2(final double[] parameters) {
-    return _Utils._colorBlend(//
-        _Utils._colorBlend(
-            ((parameters[0] < 0d) ? Color.cyan : Color.orange), //
-            ((parameters[1] < 0d) ? Color.cyan : Color.orange), //
-            0.5d), //
-        _Utils._colorBlend(
-            ((parameters[2] < 0d) ? Color.cyan : Color.orange), //
-            ((parameters[3] < 0d) ? Color.cyan : Color.orange), //
-            0.5d), //
-        0.5d);
+    return GuesserPlotter.__color(parameters, Color.cyan, Color.orange);
   }
 
   /**
