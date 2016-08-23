@@ -4,10 +4,6 @@ import java.util.Random;
 
 import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.math.functions.arithmetic.AddN;
-import org.optimizationBenchmarking.utils.math.functions.power.Exp;
-import org.optimizationBenchmarking.utils.math.functions.power.Ln;
-import org.optimizationBenchmarking.utils.math.functions.power.Pow;
-import org.optimizationBenchmarking.utils.math.functions.power.Sqrt;
 
 /** A base class with some utility methods */
 abstract class _ModelBase extends BasicModel {
@@ -18,35 +14,6 @@ abstract class _ModelBase extends BasicModel {
   }
 
   /**
-   * check whether a new value can be used based on an old value
-   *
-   * @param newValue
-   *          the new value
-   * @param oldValue
-   *          the old value
-   * @param minAbs
-   *          the minimal absolute value
-   * @param maxAbs
-   *          the maximum permitted absolute value
-   * @return {@code true} if the new value is a suitable replacement of the
-   *         old value, {@code false} otherwise
-   */
-  static final boolean _check(final double newValue, final double oldValue,
-      final double minAbs, final double maxAbs) {
-    final double compare;
-    if (newValue == newValue) {
-      compare = ((oldValue != 0d) ? oldValue : newValue);
-      if (compare < 0d) {
-        return ((newValue < (-minAbs)) && (newValue > (-maxAbs)));
-      }
-      if (compare > 0d) {
-        return ((newValue > (minAbs)) && (newValue < maxAbs));
-      }
-    }
-    return false;
-  }
-
-  /**
    * compute the square root
    *
    * @param a
@@ -54,7 +21,7 @@ abstract class _ModelBase extends BasicModel {
    * @return the result
    */
   static final double _sqrt(final double a) {
-    return Sqrt.INSTANCE.computeAsDouble(a);
+    return Math.sqrt(a);
   }
 
   /**
@@ -65,7 +32,7 @@ abstract class _ModelBase extends BasicModel {
    * @return the exponent
    */
   static final double _exp(final double a) {
-    return Exp.INSTANCE.computeAsDouble(a);
+    return Math.exp(a);
   }
 
   /**
@@ -90,7 +57,7 @@ abstract class _ModelBase extends BasicModel {
    */
   static final double _pow(final double a, final double b) {
     final double res;
-    res = Pow.INSTANCE.computeAsDouble(a, b);
+    res = Math.pow(a, b);
     return ((res != 0d) ? res : 0d);
   }
 
@@ -108,7 +75,7 @@ abstract class _ModelBase extends BasicModel {
     if ((o == 0d) || (p == 0d)) {
       return 1d; // guard against infinity*0
     }
-    res = _ModelBase._exp(o * p);
+    res = Math.exp(o * p);
     return ((res == res) ? res : 0d);// guard against NaN
   }
 
@@ -120,8 +87,7 @@ abstract class _ModelBase extends BasicModel {
    * @return the logarithm
    */
   static final double _log(final double a) {
-    return ((a <= 0d) ? Double.NEGATIVE_INFINITY
-        : Ln.INSTANCE.computeAsDouble(a));
+    return Math.log(a);
   }
 
   /**
@@ -153,17 +119,11 @@ abstract class _ModelBase extends BasicModel {
     }
     if (gradient <= Double.NEGATIVE_INFINITY) {
       res = Math.ulp(original);
-      if ((res == res) && (res < Double.POSITIVE_INFINITY)) {
-        return (-res);
-      }
-      return (-1d);
+      return ((res < Double.POSITIVE_INFINITY) ? (-res) : (-1d));
     }
     if (gradient >= Double.POSITIVE_INFINITY) {
       res = Math.ulp(original);
-      if ((res == res) && (res < Double.POSITIVE_INFINITY)) {
-        return res;
-      }
-      return 1d;
+      return ((res < Double.POSITIVE_INFINITY) ? res : 1d);
     }
     return gradient;
   }
