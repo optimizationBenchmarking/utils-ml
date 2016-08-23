@@ -84,7 +84,7 @@ public final class ExponentialDecayModel extends _ModelBase {
     if (((c = parameters[2]) != 0d) && //
         (((res = _ModelBase._pow(x, parameters[3])) != 0d)) && //
         ((res *= c) != 0d)) {
-      if (((res = _ModelBase._exp(res)) != 0d) && //
+      if (((res = Math.exp(res)) != 0d) && //
           ((res *= b) != 0d)) {
         if (((res += a) != 0d) && MathUtils.isFinite(res)) {
           return res;
@@ -119,7 +119,7 @@ public final class ExponentialDecayModel extends _ModelBase {
     } else {
       cxd = c * xd;
     }
-    expcxd = _ModelBase._exp(cxd);
+    expcxd = Math.exp(cxd);
 
     b = parameters[1];
     gradient[1] = _ModelBase._gradient(expcxd, b);
@@ -128,7 +128,7 @@ public final class ExponentialDecayModel extends _ModelBase {
       g = b * xd * expcxd;
       gradient[2] = _ModelBase._gradient(g, c);
       gradient[3] = (((g *= c) != 0d)
-          ? _ModelBase._gradient(g * _ModelBase._log(x), d) : 0d);
+          ? _ModelBase._gradient(g * Math.log(x), d) : 0d);
     } else {
       gradient[2] = gradient[3] = 0d;
     }
@@ -250,22 +250,22 @@ public final class ExponentialDecayModel extends _ModelBase {
 
       switch (parameter) {
         case 0: {// a
-          return y0 - (b * _ModelBase._exp(c * _ModelBase._pow(x0, d)));
+          return y0 - (b * Math.exp(c * _ModelBase._pow(x0, d)));
         }
 
         case 1: {// b
-          return _ModelBase._exp(-(c * _ModelBase._pow(x0, d))) * (y0 - a);
+          return Math.exp(-(c * _ModelBase._pow(x0, d))) * (y0 - a);
         }
 
         case 2: {// c
           switch (guesser) {
             case 0: {
-              return ((_ModelBase._log((y0 / b) - (a / b)))
+              return ((Math.log((y0 / b) - (a / b)))
                   / _ModelBase._pow(x0, d));
             }
 
             case 1: {
-              return ((_ModelBase._log((y0 / b) - (a / b)))
+              return ((Math.log((y0 / b) - (a / b)))
                   * _ModelBase._pow(x0, -d));
             }
           }
@@ -273,8 +273,7 @@ public final class ExponentialDecayModel extends _ModelBase {
         }
 
         case 3: {// d
-          return _ModelBase._log(_ModelBase._log((y0 / b) - (a / b)) / c)
-              / _ModelBase._log(x0);
+          return Math.log(Math.log((y0 / b) - (a / b)) / c) / Math.log(x0);
         }
       }
 
@@ -335,14 +334,14 @@ public final class ExponentialDecayModel extends _ModelBase {
         steps = 100;
 
         do {
-          temp = -_ModelBase._exp(-7d * random.nextDouble());
+          temp = -Math.exp(-7d * random.nextDouble());
         } while (((--steps) > 0)
             && (!(this.checkParameter(0, 2, temp, dest))));
         dest[2] = temp;
 
         steps = 100;
         do {
-          temp = 5d * _ModelBase._exp(-5d * random.nextDouble());
+          temp = 5d * Math.exp(-5d * random.nextDouble());
         } while (((--steps) > 0)
             && (!(this.checkParameter(0, 3, temp, dest))));
         dest[3] = temp;

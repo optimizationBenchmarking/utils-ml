@@ -1,26 +1,26 @@
 package org.optimizationBenchmarking.utils.ml.clustering.impl.dist;
 
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
-import org.optimizationBenchmarking.utils.math.statistics.aggregate.StableSum;
+import org.optimizationBenchmarking.utils.math.statistics.aggregate.QuickStableSum;
 import org.optimizationBenchmarking.utils.ml.clustering.spec.IDistanceMeasure;
 
 /** The euclidean distance measure. */
 public final class EuclideanDistance implements IDistanceMeasure {
 
   /** the sum to use for distance computations */
-  private final StableSum m_sum;
+  private final QuickStableSum m_sum;
 
   /** create */
   public EuclideanDistance() {
     super();
-    this.m_sum = new StableSum();
+    this.m_sum = new QuickStableSum();
   }
 
   /** {@inheritDoc} */
   @Override
   public final double compute(final IMatrix matrixA, final int rowA,
       final IMatrix matrixB, final int rowB) {
-    final StableSum sum;
+    final QuickStableSum sum;
     int i;
     double d;
 

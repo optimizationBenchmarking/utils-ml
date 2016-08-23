@@ -14,28 +14,6 @@ abstract class _ModelBase extends BasicModel {
   }
 
   /**
-   * compute the square root
-   *
-   * @param a
-   *          the number
-   * @return the result
-   */
-  static final double _sqrt(final double a) {
-    return Math.sqrt(a);
-  }
-
-  /**
-   * compute the exponent
-   *
-   * @param a
-   *          the number
-   * @return the exponent
-   */
-  static final double _exp(final double a) {
-    return Math.exp(a);
-  }
-
-  /**
    * compute the square
    *
    * @param a
@@ -77,17 +55,6 @@ abstract class _ModelBase extends BasicModel {
     }
     res = Math.exp(o * p);
     return ((res == res) ? res : 0d);// guard against NaN
-  }
-
-  /**
-   * compute the natural logarithm
-   *
-   * @param a
-   *          the number
-   * @return the logarithm
-   */
-  static final double _log(final double a) {
-    return Math.log(a);
   }
 
   /**

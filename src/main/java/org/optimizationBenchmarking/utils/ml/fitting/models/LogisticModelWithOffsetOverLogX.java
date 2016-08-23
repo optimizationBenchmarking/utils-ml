@@ -246,8 +246,8 @@ public final class LogisticModelWithOffsetOverLogX extends _ModelBase {
 
     div = _ModelBase._add(1d, 2d * cxd, cxd * cxd);
     gradient[2] = _ModelBase._gradient(((-bxd) / div), c);
-    gradient[3] = _ModelBase
-        ._gradient(((-(c * bxd * _ModelBase._log(x))) / div), d);
+    gradient[3] = _ModelBase._gradient(((-(c * bxd * Math.log(x))) / div),
+        d);
   }
 
   /** {@inheritDoc} */
@@ -392,8 +392,7 @@ public final class LogisticModelWithOffsetOverLogX extends _ModelBase {
           return ((a + b) - y0) / (_ModelBase._pow(x0, d) * (y0 - a));
         }
         case 3: {
-          return _ModelBase._log((y0 - a - b) / (d * (a - y0)))
-              / _ModelBase._log(x0);
+          return Math.log((y0 - a - b) / (d * (a - y0))) / Math.log(x0);
         }
       }
 
@@ -460,13 +459,13 @@ public final class LogisticModelWithOffsetOverLogX extends _ModelBase {
 
         steps = 100;
         do {
-          temp = _ModelBase._exp(-12d * random.nextDouble());
+          temp = Math.exp(-12d * random.nextDouble());
         } while (((--steps) > 0) && this.checkParameter(0, 2, temp, dest));
         dest[2] = temp;
 
         steps = 100;
         do {
-          temp = 12d * _ModelBase._exp(-8d * random.nextDouble());
+          temp = 12d * Math.exp(-8d * random.nextDouble());
         } while (((--steps) > 0) && this.checkParameter(0, 3, temp, dest));
         dest[3] = temp;
 
@@ -482,14 +481,14 @@ public final class LogisticModelWithOffsetOverLogX extends _ModelBase {
 
         steps = 100;
         do {
-          temp = 30d * _ModelBase
-              ._exp(-7d * (random.nextDouble() * random.nextDouble()));
+          temp = 30d * Math
+              .exp(-7d * (random.nextDouble() * random.nextDouble()));
         } while (((--steps) > 0) && this.checkParameter(0, 2, temp, dest));
         dest[2] = temp;
 
         steps = 100;
         do {
-          temp = -2d * _ModelBase._exp(-random.nextDouble() * 6d);
+          temp = -2d * Math.exp(-random.nextDouble() * 6d);
         } while (((--steps) > 0) && this.checkParameter(0, 3, temp, dest));
         dest[3] = temp;
       }

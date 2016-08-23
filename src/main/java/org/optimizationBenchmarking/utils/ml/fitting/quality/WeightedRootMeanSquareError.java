@@ -4,7 +4,7 @@ import java.util.Random;
 
 import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
-import org.optimizationBenchmarking.utils.math.statistics.aggregate.StableSum;
+import org.optimizationBenchmarking.utils.math.statistics.aggregate.QuickStableSum;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.FittingEvaluation;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.ParametricUnaryFunction;
 import org.optimizationBenchmarking.utils.text.ETextCase;
@@ -58,12 +58,12 @@ public final class WeightedRootMeanSquareError
   @Override
   public final double evaluate(final ParametricUnaryFunction model,
       final double[] parameters) {
-    final StableSum sum;
+    final QuickStableSum sum;
     final double[] data;
     double residual;
     int index;
 
-    sum = new StableSum();
+    sum = new QuickStableSum();
 
     data = this.m_values;
     for (index = data.length; index > 0;) {
@@ -86,7 +86,7 @@ public final class WeightedRootMeanSquareError
     double[] residuals;
     final int numSamples, numParams;
     final double[] data;
-    final StableSum sum;
+    final QuickStableSum sum;
     double[] jacobianRow;
     double x, expectedY, residual, inverseWeight, squareErrorSum;
     int dataIndex, pointIndex, j;
@@ -110,7 +110,7 @@ public final class WeightedRootMeanSquareError
       }
     }
 
-    sum = new StableSum();
+    sum = new QuickStableSum();
 
     for (dataIndex = data.length, pointIndex = numSamples; (--pointIndex) >= 0;) {
       x = data[--dataIndex];

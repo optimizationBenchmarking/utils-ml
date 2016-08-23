@@ -93,7 +93,7 @@ public final class GompertzModel extends _ModelBase {
       expdx = 1d;
       cexpdx = (c == c) ? c : 0d;
     } else {
-      expdx = _ModelBase._exp(dx);
+      expdx = Math.exp(dx);
       if (expdx != expdx) {
         expdx = 0d;
         cexpdx = 0d;
@@ -106,9 +106,9 @@ public final class GompertzModel extends _ModelBase {
     }
 
     b = parameters[1];
-    gradient[1] = _ModelBase._gradient(_ModelBase._exp(cexpdx), b);
+    gradient[1] = _ModelBase._gradient(Math.exp(cexpdx), b);
     if ((b != 0d) && (b == b)) {
-      cexpdx = (b * _ModelBase._exp(cexpdx + dx));
+      cexpdx = (b * Math.exp(cexpdx + dx));
       gradient[2] = _ModelBase._gradient(cexpdx, c);
       gradient[3] = _ModelBase._gradient((cexpdx * c * x), d);
     } else {
@@ -271,13 +271,12 @@ public final class GompertzModel extends _ModelBase {
         case 2: {// c
           switch (guesser) {
             case 0: {
-              return _ModelBase._exp_o_p(-d, x0)
-                  * _ModelBase._log((y0 - a) / b);
+              return _ModelBase._exp_o_p(-d, x0) * Math.log((y0 - a) / b);
             }
 
             case 1: {
               return _ModelBase._exp_o_p(-d, x0)
-                  * _ModelBase._log((y0 / b) - (a / b));
+                  * Math.log((y0 / b) - (a / b));
             }
           }
           break;
@@ -286,12 +285,10 @@ public final class GompertzModel extends _ModelBase {
         case 3: {// d
           switch (guesser) {
             case 0: {
-              return (_ModelBase._log(_ModelBase._log((y0 - a) / b) / c)
-                  / x0);
+              return (Math.log(Math.log((y0 - a) / b) / c) / x0);
             }
             case 1: {
-              return (_ModelBase
-                  ._log(_ModelBase._log((y0 / b) - (a / b)) / c) / x0);
+              return (Math.exp(Math.log((y0 / b) - (a / b)) / c) / x0);
             }
           }
           break;
@@ -355,13 +352,13 @@ public final class GompertzModel extends _ModelBase {
 
         steps = 100;
         do {
-          temp = -40d * _ModelBase._exp(-14d * random.nextDouble());
+          temp = -40d * Math.exp(-14d * random.nextDouble());
         } while (((--steps) > 0) && this.checkParameter(0, 2, temp, dest));
         dest[2] = temp;
 
         steps = 100;
         do {
-          temp = -10d * _ModelBase._exp(-10d * random.nextDouble());
+          temp = -10d * Math.exp(-10d * random.nextDouble());
         } while (((--steps) > 0) && this.checkParameter(0, 3, temp, dest));
         dest[3] = temp;
 
@@ -371,13 +368,13 @@ public final class GompertzModel extends _ModelBase {
 
         steps = 100;
         do {
-          temp = -10d * _ModelBase._exp(-10d * random.nextDouble());
+          temp = -10d * Math.exp(-10d * random.nextDouble());
         } while (((--steps) > 0) && this.checkParameter(0, 2, temp, dest));
         dest[2] = temp;
 
         steps = 100;
         do {
-          temp = 2d * _ModelBase._exp(-10d * random.nextDouble());
+          temp = 2d * Math.exp(-10d * random.nextDouble());
         } while (((--steps) > 0) && this.checkParameter(0, 3, temp, dest));
         dest[3] = temp;
       }

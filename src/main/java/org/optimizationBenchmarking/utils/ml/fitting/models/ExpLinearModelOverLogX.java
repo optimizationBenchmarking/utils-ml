@@ -75,7 +75,7 @@ public class ExpLinearModelOverLogX extends _ModelBase {
     final double a, res;
 
     res = ((a = parameters[0]) + (parameters[1] * _ModelBase
-        ._exp_o_p(parameters[2], _ModelBase._log(parameters[3] + x))));
+        ._exp_o_p(parameters[2], Math.log(parameters[3] + x))));
     return (MathUtils.isFinite(res) ? res//
         : (MathUtils.isFinite(a) ? a : 0d));
   }
@@ -93,7 +93,7 @@ public class ExpLinearModelOverLogX extends _ModelBase {
     dxc = _ModelBase._pow(dx, c);
     b = parameters[1];
     gradient[1] = _ModelBase._gradient(dxc, b);
-    gradient[2] = _ModelBase._gradient(b * dxc * _ModelBase._log(dx), c);
+    gradient[2] = _ModelBase._gradient(b * dxc * Math.log(dx), c);
     gradient[3] = _ModelBase._gradient(b * c * _ModelBase._pow(dx, c - 1d),
         d);
   }
@@ -234,8 +234,7 @@ public class ExpLinearModelOverLogX extends _ModelBase {
         case 0: {
           switch (guesser) {
             case 0: {
-              return y0
-                  - (b * _ModelBase._exp(c * _ModelBase._log(x0 + d)));
+              return y0 - (b * Math.exp(c * Math.log(x0 + d)));
             }
             case 1: {
               return y0 - (b * _ModelBase._pow((d + x0), c));
@@ -253,9 +252,8 @@ public class ExpLinearModelOverLogX extends _ModelBase {
               if (points.length < 4) {
                 return Double.NaN;
               }
-              expclogx0d = _ModelBase._exp(c * _ModelBase._log(x0 + d));
-              expclogx1d = _ModelBase
-                  ._exp(c * _ModelBase._log(points[2] + d));
+              expclogx0d = Math.exp(c * Math.log(x0 + d));
+              expclogx1d = Math.exp(c * Math.log(points[2] + d));
 
               return ((y0 * expclogx1d) - (points[3] * expclogx0d))
                   / (expclogx1d - expclogx0d);
@@ -266,20 +264,18 @@ public class ExpLinearModelOverLogX extends _ModelBase {
         case 1: {
           switch (guesser) {
             case 0: {
-              return _ModelBase._exp(-(c * _ModelBase._log(x0 + d)))
-                  * (y0 - a);
+              return Math.exp(-(c * Math.log(x0 + d))) * (y0 - a);
             }
             case 1: {
-              return _ModelBase._exp(-(c * _ModelBase._log(x0 + d)))
-                  * (y0 - a);
+              return Math.exp(-(c * Math.log(x0 + d))) * (y0 - a);
             }
             case 2: {
               if (points.length < 4) {
                 return Double.NaN;
               }
               return (points[3] - y0)
-                  / (_ModelBase._exp(c * _ModelBase._log(points[2] + d))
-                      - _ModelBase._exp(c * _ModelBase._log(x0 + d)));
+                  / (Math.exp(c * Math.log(points[2] + d))
+                      - Math.exp(c * Math.log(x0 + d)));
             }
             case 3: {
               if (points.length < 4) {
@@ -294,17 +290,14 @@ public class ExpLinearModelOverLogX extends _ModelBase {
         case 2: {
           switch (guesser) {
             case 0: {
-              return (_ModelBase._log((y0 - a) / b))
-                  / (_ModelBase._log(d + x0));
+              return (Math.log((y0 - a) / b)) / (Math.log(d + x0));
             }
             case 1: {
               if (points.length < 4) {
                 return Double.NaN;
               }
-              return (_ModelBase._log(y0 - a)
-                  - _ModelBase._log(points[3] - a))
-                  / (_ModelBase._log(d + x0)
-                      - _ModelBase._log(d + points[2]));
+              return (Math.log(y0 - a) - Math.log(points[3] - a))
+                  / (Math.log(d + x0) - Math.log(d + points[2]));
             }
           }
           break;
@@ -373,7 +366,7 @@ public class ExpLinearModelOverLogX extends _ModelBase {
 
         steps = 100;
         do {
-          temp = -3d * _ModelBase._exp(-13d * random.nextDouble());
+          temp = -3d * Math.exp(-13d * random.nextDouble());
         } while (((--steps) > 0) && this.checkParameter(0, 2, temp, dest));
         dest[2] = temp;
 
@@ -383,14 +376,14 @@ public class ExpLinearModelOverLogX extends _ModelBase {
 
         steps = 100;
         do {
-          temp = -(_ModelBase._exp(random.nextDouble()
-              * _ModelBase._log(minMaxY[1] - minMaxY[0])));
+          temp = -(Math.exp(
+              random.nextDouble() * Math.log(minMaxY[1] - minMaxY[0])));
         } while (((--steps) > 0) && this.checkParameter(0, 1, temp, dest));
         dest[1] = temp;
 
         steps = 100;
         do {
-          temp = 2d * _ModelBase._exp(-3.5d * random.nextDouble());
+          temp = 2d * Math.exp(-3.5d * random.nextDouble());
         } while (((--steps) > 0) && this.checkParameter(0, 2, temp, dest));
         dest[2] = temp;
 
@@ -398,8 +391,8 @@ public class ExpLinearModelOverLogX extends _ModelBase {
 
       steps = 100;
       do {
-        temp = -(minMaxX[0] + _ModelBase._exp(random.nextDouble()
-            * _ModelBase._log(minMaxX[1] - minMaxX[0])));
+        temp = -(minMaxX[0] + Math
+            .exp(random.nextDouble() * Math.log(minMaxX[1] - minMaxX[0])));
       } while (((--steps) > 0) && this.checkParameter(0, 3, temp, dest));
       dest[3] = temp;
 
