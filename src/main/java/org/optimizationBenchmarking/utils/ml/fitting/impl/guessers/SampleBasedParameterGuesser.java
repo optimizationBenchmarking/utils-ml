@@ -4,7 +4,6 @@ import java.util.Random;
 
 import org.optimizationBenchmarking.utils.comparison.Compare;
 import org.optimizationBenchmarking.utils.math.combinatorics.CanonicalPermutation;
-import org.optimizationBenchmarking.utils.math.functions.trigonometric.Hypot;
 import org.optimizationBenchmarking.utils.math.matrix.IMatrix;
 
 /**
@@ -336,10 +335,10 @@ public abstract class SampleBasedParameterGuesser
         y = data.getDouble(index, 1);
         isOK: {
           for (j = (i << 1); j > 0;) {
-            if (Compare.compare(y, currentChoice[--j]) == 0) {
+            if (Compare.equals(y, currentChoice[--j])) {
               break isOK;
             }
-            if (Compare.compare(x, currentChoice[--j]) == 0) {
+            if (Compare.equals(x, currentChoice[--j])) {
               break isOK;
             }
           }
@@ -535,8 +534,10 @@ public abstract class SampleBasedParameterGuesser
       curY = (useY ? curY = this.__formatY(candidate[i], logScaleY) : 0d);
       ++i;
 
-      quality = Math.min(quality, //
-          Hypot.INSTANCE.computeAsDouble((curX - prevX), (curY - prevY)));
+      prevX = Math.hypot((curX - prevX), (curY - prevY));
+      if (prevX < quality) {
+        quality = prevX;
+      }
     }
 
     return quality;

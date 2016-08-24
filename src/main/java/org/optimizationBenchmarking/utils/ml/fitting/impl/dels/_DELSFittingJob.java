@@ -219,7 +219,7 @@ final class _DELSFittingJob
 
     this.getCopyOfBest(current);
     this.setLeastSquaresMaxIterations(maxIterations);
-    this.refineWithLeastSquaresAndSimplexSearch(current);
+    this.refineWithLevenbergMarquardtAndNelderMead(current);
   }
 
   /** {@inheritDoc} */

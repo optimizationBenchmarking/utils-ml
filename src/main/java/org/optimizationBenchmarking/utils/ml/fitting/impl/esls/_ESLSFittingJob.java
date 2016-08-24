@@ -182,7 +182,7 @@ final class _ESLSFittingJob
       if ((generation & 3) == 0) {
         // every 4 generations refine with least squares
         for (final _ESCandidate candidate : population) {
-          this.refineWithLeastSquares(candidate);
+          this.refineWithLevenbergMarquardt(candidate);
         }
       }
     }

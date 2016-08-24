@@ -7,7 +7,6 @@ import org.apache.commons.math3.exception.MathIllegalStateException;
 import org.apache.commons.math3.exception.NumberIsTooSmallException;
 import org.apache.commons.math3.exception.OutOfRangeException;
 import org.apache.commons.math3.exception.util.LocalizedFormats;
-import org.apache.commons.math3.fitting.leastsquares.GaussNewtonOptimizer;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem.Evaluation;
 import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
@@ -83,8 +82,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
   /** the shared point value pair checker */
   private __PointValuePairChecker m_pointValuePairChecker;
 
-  /** the Gauss-Newton optimizer */
-  private GaussNewtonOptimizer m_gaussNewton;
   /** the Levenberg-Marquardt optimizer */
   private LevenbergMarquardtOptimizer m_levenbergMarquardt;
   /** the simplex optimizer */
@@ -412,62 +409,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
   }
 
   /**
-   * Refine the current {@code solution} with the Gauss-Newton method.
-   *
-   * @param solution
-   *          the solution to refine
-   * @return one of the {@code RET_} codes
-   */
-  protected final int refineWithGaussNewton(final FCST solution) {
-    this.m_bestQuality = Double.POSITIVE_INFINITY;
-
-    try {
-      this.__copyToStartVector(solution.solution);
-
-      this.m_iterationCounter = new Incrementor(
-          this.m_leastSquaresMaxIterations);
-      this.m_evaluationCounter = new Incrementor(
-          this.m_leastSquaresMaxIterations
-              * this.m_leastSquaresMaxIterations);
-
-      if (this.m_gaussNewton == null) {
-        this.m_gaussNewton = new GaussNewtonOptimizer(
-            GaussNewtonOptimizer.Decomposition.SVD);
-      }
-
-      this.m_gaussNewton.optimize(this);
-    } catch (@SuppressWarnings("unused") final Throwable error) {
-      // ignored
-    } finally {
-      this.m_evaluationCounter = null;
-      this.m_iterationCounter = null;
-    }
-
-    return this.__return(solution);
-  }
-
-  /**
-   * Refine the given solution with a least-squares method
-   *
-   * @param solution
-   *          the solution to refine
-   * @return one of the {@code RET_} codes
-   */
-  protected final int refineWithLeastSquares(final FCST solution) {
-    final int retVal;
-
-    switch (retVal = this.refineWithLevenbergMarquardt(solution)) {
-      case RET_FAILED:
-      case RET_NO_IMPROVEMENT: {
-        return this.refineWithGaussNewton(solution);
-      }
-      default: {
-        return retVal;
-      }
-    }
-  }
-
-  /**
    * get the maximum evaluations: large enough for Nelder-Mead and BOBYQA
    *
    * @return the maximum evaluations fitting to the maximum iterations
@@ -545,17 +486,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
     }
 
     return this.__return(solution);
-  }
-
-  /**
-   * Refine a given solution using simplex search
-   *
-   * @param solution
-   *          the solution to refine
-   * @return one of the {@code RET_} codes
-   */
-  protected final int refineWithSimplexSearch(final FCST solution) {
-    return this.refineWithNelderMead(solution);
   }
 
   /**
@@ -697,7 +627,7 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
    *          the solution to refine
    * @return one of the {@code RET_} codes
    */
-  protected final int refineWithLeastSquaresAndSimplexSearch(
+  protected final int refineWithLevenbergMarquardtAndNelderMead(
       final FCST solution) {
     boolean doLocalSearch, hasImprovement;
     int retVal, maxIterations;
@@ -705,7 +635,7 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
     doLocalSearch = true;
     hasImprovement = false;
     loop: for (maxIterations = 100; (--maxIterations) > 0;) {
-      switch (retVal = this.refineWithLeastSquares(solution)) {
+      switch (retVal = this.refineWithLevenbergMarquardt(solution)) {
         case RET_IMPROVEMENT: {
           hasImprovement = doLocalSearch = true;
           break;
@@ -719,7 +649,7 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
         }
       }
       if (doLocalSearch) {
-        switch (this.refineWithSimplexSearch(solution)) {
+        switch (this.refineWithNelderMead(solution)) {
           case RET_IMPROVEMENT: {
             hasImprovement = true;
             doLocalSearch = false;
@@ -754,7 +684,6 @@ public abstract class OptimizationBasedFittingJob<FCST extends FittingCandidateS
       this.m_bestData = new double[this.m_function.getParameterCount()];
       this.doFit();
     } finally {
-      this.m_gaussNewton = null;
       this.m_levenbergMarquardt = null;
       this.m_cmaes = null;
       this.m_bobyqa = null;

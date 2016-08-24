@@ -50,8 +50,6 @@ public final class LSSimplexFitter extends OptimizationBasedFitter {
 
     next = OptimizationBasedFitter.printLevenbergMarcquardt(textCase,
         textOut, true);
-    textOut.append('/');
-    next = OptimizationBasedFitter.printGaussNewton(next, textOut, true);
     textOut.append('-');
     next = OptimizationBasedFitter.printNelderMead(next, textOut, true);
     textOut.append('-');

@@ -17,7 +17,7 @@ final class _LSSimplexFittingJob
     extends OptimizationBasedFittingJob<_Candidate> {
 
   /** the maximum number of iterations for the main loop */
-  private static final int MAIN_LOOP_ITERATIONS = 10;
+  private static final int MAIN_LOOP_ITERATIONS = 8;
   /** a similar solution has already been detected */
   private static final int RET_SAME = (OptimizationBasedFittingJob.RET_NO_IMPROVEMENT
       + 1);
@@ -118,7 +118,7 @@ final class _LSSimplexFittingJob
         tempSolution.quality = this.value(tempSolution.solution);
         this.m_steps = 2048L;
         initRetVal = (random.nextBoolean() //
-            ? this.refineWithLeastSquares(tempSolution)//
+            ? this.refineWithLevenbergMarquardt(tempSolution)//
             : this.refineWithNelderMead(tempSolution));
         this.deselectPoints();
 
@@ -133,7 +133,7 @@ final class _LSSimplexFittingJob
       }
       this.m_manager._add(bestSolution);
       this.m_steps = 32L;
-      this.refineWithLeastSquaresAndSimplexSearch(bestSolution);
+      this.refineWithLevenbergMarquardtAndNelderMead(bestSolution);
     }
 
     this.__afterburner(bestSolution);

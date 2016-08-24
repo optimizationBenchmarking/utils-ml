@@ -91,8 +91,6 @@ public final class ESLSFitter extends OptimizationBasedFitter {
     textOut.append('-');
     next = OptimizationBasedFitter.printLevenbergMarcquardt(next, textOut,
         true);
-    textOut.append('/');
-    next = OptimizationBasedFitter.printGaussNewton(next, textOut, true);
     textOut.append(' ');
     return next.appendWord("hybrid", textOut); //$NON-NLS-1$
   }

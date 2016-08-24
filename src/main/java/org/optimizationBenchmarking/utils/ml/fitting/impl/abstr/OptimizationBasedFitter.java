@@ -56,24 +56,6 @@ public abstract class OptimizationBasedFitter extends FunctionFitter {
       null, //
       "10.1137/0111030"); //$NON-NLS-1$
 
-  /** the Gauss-Newton reference */
-  private static final BibBook REFERENCE_GAUSS_NEWTON = new BibBook( //
-      new BibAuthors(new BibAuthor[] { //
-          new BibAuthor("\u00c5ke", "Bj\u00f6rck"), //$NON-NLS-1$//$NON-NLS-2$
-  }), "Numerical Methods for Least Squares Problems", //$NON-NLS-1$
-      new BibDate(1996), //
-      BibAuthors.EMPTY_AUTHORS, //
-      new BibOrganization(//
-          "Society for Industrial and Applied Mathematics (SIAM)", //$NON-NLS-1$
-          "Philadelphia, PA, USA", null), //$NON-NLS-1$
-      "Other Titles in Applied Mathematics", //$NON-NLS-1$
-      null, //
-      null, //
-      null, //
-      "978-0-89871-360-2", //$NON-NLS-1$
-      null, //
-      "10.1137/1.9781611971484");//$NON-NLS-1$
-
   /** the BOBYQA reference */
   private static final BibTechReport REFERENCE_BOBYQA = new BibTechReport( //
       new BibAuthors(new BibAuthor[] { //
@@ -140,8 +122,6 @@ public abstract class OptimizationBasedFitter extends FunctionFitter {
 
   /** the name of the Levenberg–Marquardt algorithm */
   protected static final String NAME_LEVENBERG_MARCQUARDT = "Levenberg-Marquardt"; //$NON-NLS-1$
-  /** the name of the Gauss-Newton algorithm */
-  protected static final String NAME_GAUSS_NEWTON = "Gauss-Newton"; //$NON-NLS-1$
   /** the name of the BOBYQA algorithm in short */
   protected static final String NAME_BOBYQA_SHORT = "BOBYQA"; //$NON-NLS-1$
   /** the name of the BOBYQA algorithm in lonf */
@@ -152,8 +132,6 @@ public abstract class OptimizationBasedFitter extends FunctionFitter {
   protected static final String NAME_CMAES_LONG = "Covariance Matrix Adaptation Evolution Strategy (CMAES)"; //$NON-NLS-1$
   /** the name of the Nelder-Mead algorithm */
   protected static final String NAME_NELDER_MEAD = "Nelder-Mead"; //$NON-NLS-1$
-  /** the name of the simplex algorithm */
-  protected static final String NAME_SIMPLEX = OptimizationBasedFitter.NAME_NELDER_MEAD;
 
   /** the algorithm string */
   private static final String NAME_ALGORITHM = "algorithm";//$NON-NLS-1$
@@ -175,7 +153,6 @@ public abstract class OptimizationBasedFitter extends FunctionFitter {
           "org.apache.commons.math3.exception.NumberIsTooSmallException", //$NON-NLS-1$
           "org.apache.commons.math3.exception.OutOfRangeException", //$NON-NLS-1$
           "org.apache.commons.math3.exception.util.LocalizedFormats", //$NON-NLS-1$
-          "org.apache.commons.math3.fitting.leastsquares.GaussNewtonOptimizer", //$NON-NLS-1$
           "org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer", //$NON-NLS-1$
           "org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem", //$NON-NLS-1$
           "org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer", //$NON-NLS-1$
@@ -240,40 +217,6 @@ public abstract class OptimizationBasedFitter extends FunctionFitter {
             .add(OptimizationBasedFitter.REFERENCE_LEVENBERG_MARCQUARDT_1);
         builder
             .add(OptimizationBasedFitter.REFERENCE_LEVENBERG_MARCQUARDT_2);
-      }
-    }
-
-    return next.nextCase();
-  }
-
-  /**
-   * Print the name and title of the Gauss-Newton algorithm
-   *
-   * @param textCase
-   *          the text case
-   * @param textOut
-   *          the text output destination
-   * @param useShortName
-   *          use the short name?
-   * @return the next case
-   */
-  protected static final ETextCase printGaussNewton(
-      final ETextCase textCase, final ITextOutput textOut,
-      final boolean useShortName) {
-    ETextCase next;
-
-    textOut.append(OptimizationBasedFitter.NAME_GAUSS_NEWTON);
-    next = textCase.nextCase();
-    if (!useShortName) {
-      textOut.append(' ');
-      next = next.appendWord(OptimizationBasedFitter.NAME_ALGORITHM,
-          textOut);
-    }
-
-    if (textOut instanceof IComplexText) {
-      try (final BibliographyBuilder builder = ((IComplexText) textOut)
-          .cite(ECitationMode.ID, next, ESequenceMode.COMMA)) {
-        builder.add(OptimizationBasedFitter.REFERENCE_GAUSS_NEWTON);
       }
     }
 

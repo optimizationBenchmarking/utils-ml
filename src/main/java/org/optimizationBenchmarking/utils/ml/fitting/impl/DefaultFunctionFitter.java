@@ -8,7 +8,6 @@ import org.optimizationBenchmarking.utils.error.ErrorUtils;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.cmaesls.CMAESLSFitter;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.dels.DELSFitter;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.esls.ESLSFitter;
-import org.optimizationBenchmarking.utils.ml.fitting.impl.lssimplex.LSSimplexFitter;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IFunctionFitter;
 
 /**
@@ -115,7 +114,7 @@ public final class DefaultFunctionFitter {
     /** {@inheritDoc} */
     @Override
     public final boolean hasNext() {
-      return (this.m_index <= 3);
+      return (this.m_index <= 2);
     }
 
     /** {@inheritDoc} */
@@ -130,9 +129,6 @@ public final class DefaultFunctionFitter {
         }
         case 2: {
           return CMAESLSFitter.getInstance();
-        }
-        case 3: {
-          return LSSimplexFitter.getInstance();
         }
         default: {
           return super.next();
