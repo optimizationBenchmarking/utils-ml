@@ -353,7 +353,7 @@ public class ModelPlotter extends _Utils {
    * @throws IOException
    *           if i/o fails
    */
-  public static final void plot_GompertzModel_1(final Path destDir,
+  public static final void plot_GompertzModel_2(final Path destDir,
       final ITextOutput gnuplotScript, final ITextOutput latexScript,
       final int index) throws IOException {
     final GompertzModel model;
@@ -407,7 +407,7 @@ public class ModelPlotter extends _Utils {
    * @throws IOException
    *           if i/o fails
    */
-  public static final void plot_GompertzModel_2(final Path destDir,
+  public static final void plot_GompertzModel_1(final Path destDir,
       final ITextOutput gnuplotScript, final ITextOutput latexScript,
       final int index) throws IOException {
     final GompertzModel model;
@@ -492,7 +492,7 @@ public class ModelPlotter extends _Utils {
     nD = ModelPlotter.plotModelStepWise(destDir, gnuplotScript, model,
         name, //
         parameters, 3, //
-        D = ModelPlotter.__stepLinear(0, 10));// 0, 3, 6, 9);
+        D = ModelPlotter.__stepLinear(-0.9d, 10));// 0, 3, 6, 9);
 
     ModelPlotter.__doPlot(latexScript, index, model, parameters,
         new String[] { nA, nB, nC, nD }, new double[][] { A, B, C, D });
