@@ -6,7 +6,6 @@ import java.util.Random;
 
 import org.optimizationBenchmarking.utils.comparison.EComparison;
 import org.optimizationBenchmarking.utils.error.ErrorUtils;
-import org.optimizationBenchmarking.utils.math.MathUtils;
 import org.optimizationBenchmarking.utils.math.combinatorics.Shuffle;
 import org.optimizationBenchmarking.utils.math.functions.numeric.CeilDiv;
 import org.optimizationBenchmarking.utils.ml.classification.spec.ClassifiedSample;
@@ -95,9 +94,10 @@ public final class ClassificationTools {
    * @return the {@code double}
    */
   public static final double featureNominalToDouble(final int nominal) {
-    if ((nominal <= 0) || (nominal > ClassificationTools.MAX_NOMINAL)) {
-      throw new IllegalArgumentException(
-          "Nominal feature cannot be " + nominal); //$NON-NLS-1$
+    if ((nominal < 0) || (nominal > ClassificationTools.MAX_NOMINAL)) {
+      throw new IllegalArgumentException(//
+          "Integer representation of value of nominal feature cannot be "//$NON-NLS-1$
+              + nominal);
     }
     return nominal;
   }
@@ -111,10 +111,11 @@ public final class ClassificationTools {
    * @return the nominal value index
    */
   public static final int featureDoubleToNominal(final double nominal) {
-    if ((nominal != nominal) || (nominal < 0d)
+    if ((nominal != nominal) || (nominal < -0.49d)
         || (nominal > ClassificationTools.MAX_NOMINAL)) {
-      throw new IllegalArgumentException("Nominal feature cannot be " //$NON-NLS-1$
-          + nominal);
+      throw new IllegalArgumentException(//
+          "Double representation of value of nominal feature cannot be " //$NON-NLS-1$
+              + nominal);
     }
     return ClassificationTools.__toInt(nominal);
   }
@@ -127,8 +128,10 @@ public final class ClassificationTools {
    * @return the {@code double}
    */
   public static final double classToDouble(final int clazz) {
-    if ((clazz <= 0) || (clazz > ClassifiedSample.MAX_CLASS)) {
-      throw new IllegalArgumentException("Class value cannot be " + clazz); //$NON-NLS-1$
+    if ((clazz < 0) || (clazz > ClassifiedSample.MAX_CLASS)) {
+      throw new IllegalArgumentException(//
+          "Integer representation of class value cannot be " //$NON-NLS-1$
+              + clazz);
     }
     return clazz;
   }
@@ -141,10 +144,11 @@ public final class ClassificationTools {
    * @return the {@code double}
    */
   public static final int doubleToClass(final double clazz) {
-    if ((clazz != clazz) || (clazz < 0d)
+    if ((clazz != clazz) || (clazz < -0.49d)
         || (clazz > ClassifiedSample.MAX_CLASS)) {
-      throw new IllegalArgumentException("Class feature cannot be " //$NON-NLS-1$
-          + clazz);
+      throw new IllegalArgumentException(//
+          "Double representation of Class value cannot be " //$NON-NLS-1$
+              + clazz);
     }
 
     return ClassificationTools.__toInt(clazz);
@@ -169,11 +173,12 @@ public final class ClassificationTools {
    * @return the {@code boolean} value index
    */
   public static final boolean featureDoubleToBoolean(final double bool) {
-    if (!(MathUtils.isFinite(bool))) {
-      throw new IllegalArgumentException("Boolean feature cannot be " //$NON-NLS-1$
-          + bool);
+    if (bool != bool) {
+      throw new IllegalArgumentException(//
+          "Double representation of boolean feature cannot be " //$NON-NLS-1$
+              + bool);
     }
-    return (Math.abs(bool) > 1e-12d);
+    return (Math.abs(bool) >= 0.5d);
   }
 
   /**

@@ -665,6 +665,7 @@ public class ModelPlotter extends _Utils {
         latexScript.append(
             " steps of equal length, while keeping the other parameters constant.");//$NON-NLS-1$
         latexScript.append("}%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
         latexScript.append("\\label{fig:modelChart}%");//$NON-NLS-1$
         latexScript.appendLineBreak();
         latexScript.append("\\end{figure}%");//$NON-NLS-1$
