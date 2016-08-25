@@ -656,7 +656,7 @@ public class ModelPlotter extends _Utils {
         latexScript.appendLineBreak();
         latexScript.append("\\caption{");//$NON-NLS-1$
         latexScript.append(
-            "Different models and examples for the parameterizations over a log-scaled $x$ axis with $x\\in[1,1E5]$ and $y\\in[0,100]$. ");//$NON-NLS-1$
+            "Different models and examples for the parameterizations over a log-scaled $x$ axis with $x\\in[\\textnormal{1},\\textnormal{1E5}]$ and $y\\in[\\textnormal{0},\\textnormal{100}]$. ");//$NON-NLS-1$
         latexScript.append(
             "Each of the four figures per row lets one of the parameters $A$, $B$, $C$, or $D$ (left to right) ");//$NON-NLS-1$
         latexScript.append(
