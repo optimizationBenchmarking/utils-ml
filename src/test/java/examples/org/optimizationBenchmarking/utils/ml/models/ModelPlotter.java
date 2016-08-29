@@ -577,7 +577,65 @@ public class ModelPlotter extends _Utils {
 
         latexScript = AbstractTextOutput.wrap(laTeXWriter);
 
+        latexScript.append("\\documentclass{article}%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
+        latexScript.append("\\RequirePackage{xcolor}%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
+        latexScript.append("\\RequirePackage{graphicx}%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
+        latexScript.append("\\RequirePackage{setspace}%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
+        latexScript.append("\\RequirePackage{nicefrac}%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
+        latexScript.append("\\begin{document}%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
+
         latexScript.append("\\begin{figure}%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
+
+        latexScript.append(
+            "\\ifx\\modelsPath\\undefined\\edef\\modelsPath{.}\\fi%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
+        latexScript.append(
+            "\\ifx\\timeDimension\\undefined\\edef\\timeDimension{x}\\fi%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
+        latexScript.append(
+            "\\ifx\\qualityDimension\\undefined\\edef\\qualityDimension{y}\\fi%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
+        latexScript.append(
+            "\\ifx\\modelHeader\\undefined\\ifx\\modelb\\undefined\\def\\modelHeader{\\ensuremath{\\qualityDimension=f(\\timeDimension)}}\\else\\def\\modelHeader{\\ensuremath{\\qualityDimension=\\modelb{\\timeDimension}}}\\fi\\fi%");//$NON-NLS-1$
+
+        latexScript.appendLineBreak();
+        latexScript.append(
+            "\\ifx\\ifPositive\\undefined\\makeatletter\\def\\ifPositive#1{\\@ifnextchar{-}{\\expandafter\\@secondoftwo\\remove@to@nnil}{\\expandafter\\@firstoftwo\\remove@to@nnil}#1\\@nnil}\\makeatother\\fi%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
+        latexScript.append(
+            "\\ifx\\ExpLinearModelOverLogX\\undefined\\def\\ExpLinearModelOverLogX#1#2#3#4#5{\\ensuremath{#1\\ifPositive{#2}{+#2}{#2}*\\exp\\left(#3*\\ln\\left(#5\\ifPositive{#4}{+#4}{#4}\\right)\\right)}}\\fi%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
+        latexScript.append(
+            "\\ifx\\ExponentialDecayModel\\undefined\\def\\ExponentialDecayModel#1#2#3#4#5{\\ensuremath{#1\\ifPositive{#2}{+#2}{#2}*\\exp\\left(#3*#5^{#4}\\right)}}\\fi%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
+        latexScript.append(
+            "\\ifx\\GompertzModel\\undefined\\def\\GompertzModel#1#2#3#4#5{\\ensuremath{#1\\ifPositive{#2}{+#2}{#2}*\\exp\\left(#3*\\exp\\left(#4*#5\\right)\\right)}}\\fi%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
+        latexScript.append(
+            "\\ifx\\LogisticModelWithOffsetOverLogX\\undefined\\makeatletter\\def\\LogisticModelWithOffsetOverLogX#1#2#3#4#5{\\ensuremath{#1\\ifPositive{#2}{+\\nicefrac{#2}{\\left(1\\ifPositive{#3}{+#3}{#3}*#5^{#4}\\right)}}{-\\nicefrac{\\expandafter\\@gobble#2}{\\left(1\\ifPositive{#3}{+#3}{#3}*#5^{#4}\\right)}}}}\\makeatother\\fi%");//$NON-NLS-1$
+
+        latexScript.appendLineBreak();
+        latexScript
+            .append("\\ifx\\modelA\\undefined\\edef\\modelA{A}\\fi%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
+        latexScript
+            .append("\\ifx\\modelB\\undefined\\edef\\modelB{B}\\fi%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
+        latexScript
+            .append("\\ifx\\modelC\\undefined\\edef\\modelC{C}\\fi%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
+        latexScript
+            .append("\\ifx\\modelD\\undefined\\edef\\modelD{D}\\fi%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
+
+        latexScript.append('%');
         latexScript.appendLineBreak();
         latexScript.append("\\definecolor{modelChartMinColor}{RGB}{");//$NON-NLS-1$
         latexScript.append(ModelPlotter.BLEND_COLORS[0].getRed());
@@ -656,9 +714,9 @@ public class ModelPlotter extends _Utils {
         latexScript.appendLineBreak();
         latexScript.append("\\caption{");//$NON-NLS-1$
         latexScript.append(
-            "Different models and examples for the parameterizations over a log-scaled $x$ axis with $x\\in[\\textnormal{1},\\textnormal{1E5}]$ and $y\\in[\\textnormal{0},\\textnormal{100}]$. ");//$NON-NLS-1$
+            "Different models and examples for the parameterizations over a log-scaled \\timeDimension-axis with $\\timeDimension\\in[\\textnormal{1},\\textnormal{1E5}]$ and $\\qualityDimension\\in[\\textnormal{0},\\textnormal{100}]$. ");//$NON-NLS-1$
         latexScript.append(
-            "Each of the four figures per row lets one of the parameters $A$, $B$, $C$, or $D$ (left to right) ");//$NON-NLS-1$
+            "Each of the four figures per row lets one of the parameters \\modelA, \\modelB, \\modelC, or \\modelD (left to right) ");//$NON-NLS-1$
         latexScript.append(
             "range from a \\textcolor{modelChartMinColor}{smaller} over a \\textcolor{modelChartMidColor}{mid} to a \\textcolor{modelChartMaxColor}{larger} value, in ");//$NON-NLS-1$
         latexScript.append(ModelPlotter.STEPS);
@@ -669,6 +727,8 @@ public class ModelPlotter extends _Utils {
         latexScript.append("\\label{fig:modelChart}%");//$NON-NLS-1$
         latexScript.appendLineBreak();
         latexScript.append("\\end{figure}%");//$NON-NLS-1$
+        latexScript.appendLineBreak();
+        latexScript.append("\\end{document}%");//$NON-NLS-1$
         latexScript.appendLineBreak();
 
       }
@@ -713,46 +773,60 @@ public class ModelPlotter extends _Utils {
       final int index, final ParametricUnaryFunction model,
       final double[] baseParams, final String[] files,
       final double[][] parameterization) {
+    final String currentFigure;
+    String name, namelc;
     int xindex;
     MemoryTextOutput mto;
-    String name;
 
     dest.append('%');
     dest.appendLineBreak();
+
     if (index > 0) {
       dest.append("\\\\");//$NON-NLS-1$
     }
+
+    currentFigure = Character.toString((char) ('a' + index));
+
     dest.append("\\noindent\\textbf{");//$NON-NLS-1$
-    dest.append((char) ('a' + index));
+    dest.append(currentFigure);
     dest.append(".}~"); //$NON-NLS-1$
+
     mto = new MemoryTextOutput();
     model.printLongName(mto, ETextCase.AT_SENTENCE_START);
-    name = mto.toString();
-    model.printLongName(dest, ETextCase.AT_SENTENCE_START);
-    if (!(name.toLowerCase().contains("model"))) { //$NON-NLS-1$
-      dest.append(" model"); //$NON-NLS-1$
+    name = mto.toString().trim();
+    namelc = name.toLowerCase();
+    if (namelc.startsWith("the ")) {//$NON-NLS-1$
+      name = name.substring(4).trim();
+      name = Character.toUpperCase(name.charAt(0)) + name.substring(1);
     }
-    dest.append(" \\"); //$NON-NLS-1$
+
+    dest.append(name);
+    if (!(namelc.contains("model"))) { //$NON-NLS-1$
+      if (!namelc.endsWith("function")) {//$NON-NLS-1$
+        if (!(namelc.contains("decay"))) { //$NON-NLS-1$
+          dest.append(" model"); //$NON-NLS-1$
+        }
+      }
+    }
+
+    dest.append(" \\ensuremath{\\modelHeader=\\"); //$NON-NLS-1$
     dest.append(model.getClass().getSimpleName());
 
     for (xindex = 0; xindex < files.length; xindex++) {
-      dest.append('{');
+      dest.append("{\\model");//$NON-NLS-1$
       dest.append((char) ('A' + xindex));
       dest.append('}');
     }
-    dest.append("{x} for "); //$NON-NLS-1$
+    dest.append("{\\timeDimension}} for "); //$NON-NLS-1$
 
     for (xindex = 0; xindex < files.length; xindex++) {
       if (xindex > 0) {
         dest.append(", "); //$NON-NLS-1$
-        if (xindex >= (files.length - 1)) {
-          dest.append("and "); //$NON-NLS-1$
-        }
       }
-      dest.append("\\mbox{\\ensuremath{"); //$NON-NLS-1$
+      dest.append("\\mbox{\\ensuremath{\\model"); //$NON-NLS-1$
       dest.append((char) ('A' + xindex));
       dest.append(
-          "\\in\\left[\\textnormal{\\textcolor{modelChartMinColor}{"); //$NON-NLS-1$
+          "\\hspace{-0.2em}\\in\\hspace{-0.1em}\\left[\\textnormal{\\textcolor{modelChartMinColor}{"); //$NON-NLS-1$
       SimpleNumberAppender.INSTANCE
           .appendTo(
               Math.min(Math.min(parameterization[xindex][0],
