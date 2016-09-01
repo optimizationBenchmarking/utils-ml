@@ -146,14 +146,19 @@ if(safeUsePackage("fpc")) {
 })# / safe exec wrapper
 #
 # fallback and error correction
-if( (!(exists("clusters"))) || (!(is.vector(clusters))) || (length(clusters) != m) ) {
+if(!(safeExec( { # this should work
+if( (!(exists("clusters"))) || (is.null(clusters)) || (!(is.vector(clusters))) || (length(clusters) != m) ) {
   useClusters = as.integer(0.5+(0.5*(minClusters+maxClusters)));
   clusters<-c(rep(1, m-useClusters), 1:useClusters);
   quality<-as.double(1);
 } else {
-  if( (!(exists("quality"))) || (length(quality) <= 0) || (quality < -1) || (quality > 1) ) {
+  if( (!(exists("quality"))) || (is.null(quality)) || (length(quality) <= 0) || (quality < -1) || (quality > 1) ) {
     quality<-as.double(1);
   } else {
     quality<-as.double(max(0, min(1, (0.5-(0.5*quality)))));
   }
+}
+} ))) { # well, the above, oddly enough, did not work
+  clusters<-rep(1, m);
+  quality<-as.double(1);
 }
