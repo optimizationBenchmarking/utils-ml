@@ -51,7 +51,7 @@ public abstract class ClassifierTrainingJob extends ToolJob
 
   /**
    * a small intermediate package-private hook to invoke {@link #doCall()}.
-   * 
+   *
    * @return the result
    */
   IClassifierTrainingResult _invokeDoCall() {
@@ -83,8 +83,9 @@ public abstract class ClassifierTrainingJob extends ToolJob
         }
         logger.finer("Finished executing " + use + //$NON-NLS-1$
             ", obtained a classifier of type "//$NON-NLS-1$
-            + result.getClassifier().toString() + " and quality " + //$NON-NLS-1$
-            result.getQuality() + '.');
+            + result.getClassifier().toString() + ", quality " + //$NON-NLS-1$
+            result.getQuality() + ", and complexity " + //$NON-NLS-1$
+            result.getComplexity() + '.');
       }
     } catch (final Throwable error) {
       if (use == null) {

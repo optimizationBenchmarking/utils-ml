@@ -7,6 +7,7 @@ import java.util.Random;
 import org.optimizationBenchmarking.utils.comparison.EComparison;
 import org.optimizationBenchmarking.utils.error.ErrorUtils;
 import org.optimizationBenchmarking.utils.math.combinatorics.Shuffle;
+import org.optimizationBenchmarking.utils.math.functions.arithmetic.AddN;
 import org.optimizationBenchmarking.utils.math.functions.numeric.CeilDiv;
 import org.optimizationBenchmarking.utils.ml.classification.spec.ClassifiedSample;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierParameterRenderer;
@@ -48,6 +49,29 @@ public final class ClassificationTools {
 
   /** the unspecified boolean value */
   public static final Boolean UNSPECIFIED_BOOLEAN = null;
+
+  /** the basic unit of complexity */
+  private static final double COMPLEXITY_UNIT = 1d;
+
+  /** the complexity unit for depth */
+  public static final double COMPLEXITY_DEPTH_UNIT = (COMPLEXITY_UNIT
+      / 32d);
+  /** the complexity unit for comparisons */
+  public static final double COMPLEXITY_COMPARISON_UNIT = (COMPLEXITY_UNIT
+      / 4d);
+  /** the complexity unit for arithmetic operations */
+  public static final double COMPLEXITY_ARITHMETIC_UNIT = (COMPLEXITY_UNIT
+      / 2d);
+  /** the complexity unit for features */
+  public static final double COMPLEXITY_FEATURE_UNIT = (COMPLEXITY_UNIT);
+  /** the complexity unit for constants */
+  public static final double COMPLEXITY_CONSTANT_UNIT = (COMPLEXITY_UNIT
+      / 8d);
+  /** the complexity unit for classes */
+  public static final double COMPLEXITY_CLASS_UNIT = (COMPLEXITY_UNIT);
+  /** the complexity unit for if-then-or-else decisions */
+  public static final double COMPLEXITY_DECISION_UNIT = (COMPLEXITY_UNIT
+      / 4d);
 
   /**
    * Can we cluster the given samples trivially? If so, return a job which
@@ -625,6 +649,22 @@ public final class ClassificationTools {
 
     textOutput.append(' ');
     renderer.renderFeatureValue(feature, value, textOutput);
+  }
+
+  /**
+   * Combine several nested complexities
+   *
+   * @param nested
+   *          the list of nested complexities
+   * @return the result
+   */
+  public static final double complexityNested(final double... nested) {
+    double[] add;
+
+    add = new double[nested.length + 1];
+    System.arraycopy(nested, 0, add, 0, nested.length);
+    add[nested.length] = ClassificationTools.COMPLEXITY_DEPTH_UNIT;
+    return AddN.destructiveSum(add);
   }
 
   /** do not call */

@@ -3,6 +3,7 @@ package org.optimizationBenchmarking.utils.ml.classification.impl.weka;
 import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.ClassifierTrainingJobBuilder;
 
 import weka.classifiers.trees.J48;
+import weka.classifiers.trees.WekaTreeAccessor;
 import weka.core.Instances;
 
 /** a classifier training job wrapping around Weka */
@@ -114,5 +115,11 @@ class _WekaJ48ClassifierTrainingJob
             : WekaJ48TrainerUnpruned.METHOD);
       }
     }
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  final double _getComplexity(final J48 classifier) {
+    return WekaTreeAccessor.getJ48Complexity(classifier);
   }
 }

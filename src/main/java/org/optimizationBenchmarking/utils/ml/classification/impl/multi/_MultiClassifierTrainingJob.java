@@ -64,7 +64,8 @@ final class _MultiClassifierTrainingJob extends ClassifierTrainingJob {
     ClassifiedSample[][][] folds;
     Future<Double>[] crossValidationTestQualities;
     Future<IClassifierTrainingResult>[] results;
-    double bestMedian, currentMedian, bestQuality, currentQuality;
+    double bestMedian, currentMedian, bestQuality, bestComplexity,
+        currentQuality, currentComplexity;
     QuantileAggregate median;
     int index, index2;
     IClassifierTrainingResult bestResult, currentResult;
@@ -244,15 +245,20 @@ final class _MultiClassifierTrainingJob extends ClassifierTrainingJob {
     // OK, all the tasks are running, we can now reap the results.
     bestResult = null;
     bestQuality = Double.POSITIVE_INFINITY;
+    bestComplexity = Double.POSITIVE_INFINITY;
     for (index = 0; index < results.length; index++) {
       try {
         currentResult = results[index].get();
         results[index] = null;
         currentQuality = currentResult.getQuality();
-        if ((bestResult == null) || ((currentQuality >= 0d)
-            && (currentQuality < bestQuality))) {
+        currentComplexity = currentResult.getComplexity();
+        if ((bestResult == null)
+            || ((currentQuality >= 0d) && ((currentQuality < bestQuality)
+                || ((currentQuality <= bestQuality)
+                    && (currentComplexity < bestComplexity))))) {
           bestQuality = currentQuality;
           bestResult = currentResult;
+          bestComplexity = currentComplexity;
         }
       } catch (final Throwable error) {
         if (errors == null) {

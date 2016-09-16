@@ -100,6 +100,18 @@ public final class WekaTreeAccessor {
   }
 
   /**
+   * Get the complexity of a J48 tree
+   *
+   * @param tree
+   *          the tree
+   * @return its complexity
+   */
+  public static final double getJ48Complexity(final J48 tree) {
+    return WekaClassifierTreeAccessor
+        .getClassifierTreeComplexity(tree.m_root);
+  }
+
+  /**
    * Render the classifier REPTree tree to a given text output destination.
    *
    * @param name
@@ -269,5 +281,56 @@ public final class WekaTreeAccessor {
             (depth + 2), false);
       }
     }
+  }
+
+  /**
+   * Get the complexity of a REPTree tree classifier
+   *
+   * @param tree
+   *          the tree to compute the complexity of
+   * @return its complexity
+   */
+  public static final double getREPTreeComplexity(final REPTree tree) {
+    return WekaTreeAccessor.__getREPTreeComplexity(tree.m_Tree);
+
+  }
+
+  /**
+   * Get the complexity of a REPTree tree classifier
+   *
+   * @param tree
+   *          the tree to compute the complexity of
+   * @return its complexity
+   */
+  private static final double __getREPTreeComplexity(
+      final REPTree.Tree tree) {
+    int sonIndex, dataIndex;
+    double[] add;
+    final int end;
+
+    if (tree.m_Attribute < 0) {
+      return ClassificationTools.COMPLEXITY_CLASS_UNIT;
+    }
+
+    end = tree.m_Successors.length - 1;
+    add = new double[tree.m_Successors.length << 1];
+    for (sonIndex = 0, dataIndex = (-1); sonIndex <= end; sonIndex++) {
+
+      if (tree.m_Info.attribute(tree.m_Attribute).isNominal()
+          || (sonIndex <= 0)) {
+        add[++dataIndex] = ClassificationTools.COMPLEXITY_DECISION_UNIT
+            + ClassificationTools.COMPLEXITY_FEATURE_UNIT
+            + ClassificationTools.COMPLEXITY_COMPARISON_UNIT
+            + ClassificationTools.COMPLEXITY_CONSTANT_UNIT;
+      } else {
+        add[++dataIndex] = ClassificationTools.COMPLEXITY_DECISION_UNIT;
+      }
+
+      add[++dataIndex] = WekaTreeAccessor
+          .__getREPTreeComplexity(tree.m_Successors[sonIndex]);
+
+    }
+
+    return ClassificationTools.complexityNested(add);
   }
 }

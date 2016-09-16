@@ -58,6 +58,15 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
       final _InternalInstance instance);
 
   /**
+   * Get the complexity of the given classifier
+   *
+   * @param classifier
+   *          the classifier
+   * @return its complexity
+   */
+  abstract double _getComplexity(final CT classifier);
+
+  /**
    * convert an integer to a name
    *
    * @param index
@@ -171,7 +180,8 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
     this.m_knownSamples = null;
     this.m_qualityMeasure = null;
 
-    result = new ClassifierTrainingResult(classifier, quality);
+    result = new ClassifierTrainingResult(classifier, quality,
+        this._getComplexity(wekaClassifier));
     classifier = null;
 
     return result;

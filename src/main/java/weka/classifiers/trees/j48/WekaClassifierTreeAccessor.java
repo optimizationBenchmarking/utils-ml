@@ -289,4 +289,40 @@ public final class WekaClassifierTreeAccessor {
       final ITextOutput textOutput) {
     textOutput.append(ClassificationTools.RULE_ALWAYS_TRUE);
   }
+
+  /**
+   * Get the complexity of a classifier tree
+   *
+   * @param tree
+   *          the tree to render
+   * @return the tree's complexity
+   */
+  public static final double getClassifierTreeComplexity(
+      final ClassifierTree tree) {
+    int end, sonIndex, dataIndex;
+    double[] add;
+
+    if (tree.m_isLeaf) {
+      return ClassificationTools.COMPLEXITY_CLASS_UNIT;
+    }
+
+    end = tree.m_sons.length;
+    add = new double[tree.m_sons.length * 2];
+    --end;
+    for (sonIndex = 0, dataIndex = (-1); sonIndex <= end; sonIndex++) {
+      if (sonIndex < end) {
+        add[++dataIndex] = ClassificationTools.COMPLEXITY_DECISION_UNIT
+            + ClassificationTools.COMPLEXITY_COMPARISON_UNIT
+            + ClassificationTools.COMPLEXITY_FEATURE_UNIT
+            + ClassificationTools.COMPLEXITY_CONSTANT_UNIT;
+
+      } else {
+        add[++dataIndex] = ClassificationTools.COMPLEXITY_DECISION_UNIT;
+      }
+      add[++dataIndex] = WekaClassifierTreeAccessor
+          .getClassifierTreeComplexity(tree.m_sons[sonIndex]);
+    }
+
+    return ClassificationTools.complexityNested(add);
+  }
 }

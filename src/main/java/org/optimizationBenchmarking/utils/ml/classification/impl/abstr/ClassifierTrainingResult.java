@@ -13,6 +13,8 @@ public final class ClassifierTrainingResult implements
   public final IClassifier classifier;
   /** the quality of the classifier */
   public final double quality;
+  /** the complexity of the classifier */
+  public final double complexity;
 
   /**
    * Create the classifier training result record
@@ -21,9 +23,11 @@ public final class ClassifierTrainingResult implements
    *          the classifier
    * @param _quality
    *          the quality
+   * @param _complexity
+   *          the complexity
    */
   public ClassifierTrainingResult(final IClassifier _classifier,
-      final double _quality) {
+      final double _quality, final double _complexity) {
     super();
 
     if (_classifier == null) {
@@ -33,8 +37,13 @@ public final class ClassifierTrainingResult implements
       throw new IllegalArgumentException(
           "Invalid classifier quality: " + _quality);//$NON-NLS-1$
     }
+    if ((_complexity < 0d) || (_complexity != _complexity)) {
+      throw new IllegalArgumentException(
+          "Invalid classifier complexity: " + _complexity);//$NON-NLS-1$
+    }
     this.classifier = _classifier;
     this.quality = _quality;
+    this.complexity = _complexity;
   }
 
   /** {@inheritDoc} */
@@ -53,7 +62,8 @@ public final class ClassifierTrainingResult implements
   @Override
   public final int hashCode() {
     return HashUtils.combineHashes(HashUtils.hashCode(this.classifier),
-        HashUtils.hashCode(this.quality));
+        HashUtils.combineHashes(HashUtils.hashCode(this.quality),
+            HashUtils.hashCode(this.complexity)));
 
   }
 
@@ -67,6 +77,7 @@ public final class ClassifierTrainingResult implements
     if (other instanceof IClassifierTrainingResult) {
       otherRes = ((IClassifierTrainingResult) other);
       return ((Compare.equals(this.quality, otherRes.getQuality())
+          && (Compare.equals(this.complexity, otherRes.getComplexity()))
           && Compare.equals(this.classifier, otherRes.getClassifier())));
     }
     return true;
@@ -84,6 +95,17 @@ public final class ClassifierTrainingResult implements
     if (res != 0) {
       return res;
     }
+    res = Compare.compare(this.complexity, o.getComplexity());
+    if (res != 0) {
+      return res;
+    }
+
     return Compare.compare(this, o);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public final double getComplexity() {
+    return this.complexity;
   }
 }

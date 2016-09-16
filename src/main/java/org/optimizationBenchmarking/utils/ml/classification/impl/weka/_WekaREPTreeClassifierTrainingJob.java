@@ -3,6 +3,7 @@ package org.optimizationBenchmarking.utils.ml.classification.impl.weka;
 import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.ClassifierTrainingJobBuilder;
 
 import weka.classifiers.trees.REPTree;
+import weka.classifiers.trees.WekaTreeAccessor;
 import weka.core.Instances;
 
 /** a classifier training job wrapping around Weka for REPTree */
@@ -61,5 +62,11 @@ class _WekaREPTreeClassifierTrainingJob
   protected final String getJobName() {
     return (this.m_pruning ? WekaREPTreeTrainerPruned.METHOD
         : WekaREPTreeTrainerUnpruned.METHOD);
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  final double _getComplexity(final REPTree classifier) {
+    return WekaTreeAccessor.getREPTreeComplexity(classifier);
   }
 }
