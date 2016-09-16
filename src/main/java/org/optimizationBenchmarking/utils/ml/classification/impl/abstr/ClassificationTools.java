@@ -38,6 +38,17 @@ public final class ClassificationTools {
    */
   public static final int MAX_NOMINAL = ClassifiedSample.MAX_CLASS;
 
+  /** the unspecified encoded value value */
+  public static final double UNSPECIFIED_DOUBLE = Double.NaN;
+  /** the unspecified numerical value */
+  public static final double UNSPECIFIED_NUMERICAL = ClassificationTools.UNSPECIFIED_DOUBLE;
+
+  /** the unspecified nominal value */
+  public static final int UNSPECIFIED_NOMINAL = -1;
+
+  /** the unspecified boolean value */
+  public static final Boolean UNSPECIFIED_BOOLEAN = null;
+
   /**
    * Can we cluster the given samples trivially? If so, return a job which
    * just directly returns a fixed result. Otherwise return {@code null}.
@@ -75,6 +86,19 @@ public final class ClassificationTools {
   }
 
   /**
+   * Check whether a value of an encoded feature is unspecified.
+   *
+   * @param feature
+   *          the feature feature
+   * @return {@code true} if the feature value is unspecified,
+   *         {@code false} otherwise
+   */
+  public static final boolean featureDoubleIsUnspecified(
+      final double feature) {
+    return (feature != feature);
+  }
+
+  /**
    * convert a {@code double} value to {@code int}
    *
    * @param value
@@ -86,6 +110,59 @@ public final class ClassificationTools {
   }
 
   /**
+   * Check whether a value of a numerical feature is unspecified.
+   *
+   * @param numerical
+   *          the numerical feature
+   * @return {@code true} if the feature value is unspecified,
+   *         {@code false} otherwise
+   */
+  public static final boolean featureNumericalIsUnspecified(
+      final double numerical) {
+    return ((numerical != numerical) ? true : false);
+  }
+
+  /**
+   * Convert the numerical value to a {@code double}
+   *
+   * @param value
+   *          the numerical value
+   * @return the {@code double}
+   */
+  public static final double featureNumericalToDouble(final double value) {
+    return ClassificationTools.featureNumericalIsUnspecified(value)
+        ? ClassificationTools.UNSPECIFIED_DOUBLE : value;
+  }
+
+  /**
+   * Convert a {@code double} to a numerical value
+   *
+   * @param numerical
+   *          the {@code double} value
+   * @return the numerical value index
+   */
+  public static final double featureDoubleToNumerical(
+      final double numerical) {
+    if (ClassificationTools.featureDoubleIsUnspecified(numerical)) {
+      return ClassificationTools.UNSPECIFIED_NUMERICAL;
+    }
+    return numerical;
+  }
+
+  /**
+   * Check whether a value of a nominal feature is unspecified.
+   *
+   * @param nominal
+   *          the nominal feature
+   * @return {@code true} if the feature value is unspecified,
+   *         {@code false} otherwise
+   */
+  public static final boolean featureNominalIsUnspecified(
+      final int nominal) {
+    return (nominal == (-1));
+  }
+
+  /**
    * Convert the index of a nominal value in the sorted list of values to a
    * {@code double}
    *
@@ -94,6 +171,9 @@ public final class ClassificationTools {
    * @return the {@code double}
    */
   public static final double featureNominalToDouble(final int nominal) {
+    if (ClassificationTools.featureNominalIsUnspecified(nominal)) {
+      return ClassificationTools.UNSPECIFIED_DOUBLE;
+    }
     if ((nominal < 0) || (nominal > ClassificationTools.MAX_NOMINAL)) {
       throw new IllegalArgumentException(//
           "Integer representation of value of nominal feature cannot be "//$NON-NLS-1$
@@ -111,7 +191,10 @@ public final class ClassificationTools {
    * @return the nominal value index
    */
   public static final int featureDoubleToNominal(final double nominal) {
-    if ((nominal != nominal) || (nominal < -0.49d)
+    if (ClassificationTools.featureDoubleIsUnspecified(nominal)) {
+      return ClassificationTools.UNSPECIFIED_NOMINAL;
+    }
+    if ((nominal < -0.49d)
         || (nominal > ClassificationTools.MAX_NOMINAL)) {
       throw new IllegalArgumentException(//
           "Double representation of value of nominal feature cannot be " //$NON-NLS-1$
@@ -155,14 +238,29 @@ public final class ClassificationTools {
   }
 
   /**
+   * Check whether a value of a boolean feature is unspecified.
+   *
+   * @param feature
+   *          the boolean feature
+   * @return {@code true} if the feature value is unspecified,
+   *         {@code false} otherwise
+   */
+  public static final boolean featureBooleanIsUnspecified(
+      final Boolean feature) {
+    return (feature == null) ? true : false;
+  }
+
+  /**
    * Convert the {@code boolean} value to a {@code double}
    *
    * @param bool
    *          the {@code boolean} value
    * @return the {@code double}
    */
-  public static final double featureBooleanToDouble(final boolean bool) {
-    return (bool ? 1d : 0d);
+  public static final double featureBooleanToDouble(final Boolean bool) {
+    return ClassificationTools.featureBooleanIsUnspecified(bool)
+        ? ClassificationTools.UNSPECIFIED_DOUBLE
+        : (bool.booleanValue() ? 1d : 0d);
   }
 
   /**
@@ -172,13 +270,11 @@ public final class ClassificationTools {
    *          the {@code double} value
    * @return the {@code boolean} value index
    */
-  public static final boolean featureDoubleToBoolean(final double bool) {
-    if (bool != bool) {
-      throw new IllegalArgumentException(//
-          "Double representation of boolean feature cannot be " //$NON-NLS-1$
-              + bool);
+  public static final Boolean featureDoubleToBoolean(final double bool) {
+    if (ClassificationTools.featureDoubleIsUnspecified(bool)) {
+      return ClassificationTools.UNSPECIFIED_BOOLEAN;
     }
-    return (Math.abs(bool) >= 0.5d);
+    return (Math.abs(bool) >= 0.5d) ? Boolean.TRUE : Boolean.FALSE;
   }
 
   /**
@@ -471,6 +567,26 @@ public final class ClassificationTools {
       final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
     renderer.renderShortFeatureName(feature, textOutput);
+
+    if (ClassificationTools.featureDoubleIsUnspecified(value)) {
+      switch (comparison) {
+        case EQUAL: {
+          textOutput.append(" is unspecified"); //$NON-NLS-1$
+          return;
+        }
+        case NOT_EQUAL: {
+          textOutput.append(" is specified"); //$NON-NLS-1$
+          return;
+        }
+        default: {
+          throw new IllegalArgumentException("The " + feature //$NON-NLS-1$
+              + "th feature is unspecified and the comparison to be used in the expression is " //$NON-NLS-1$
+              + comparison
+              + ", but only EQUAL and NOT_EQUAL are permitted for unspecified features."); //$NON-NLS-1$
+        }
+      }
+    }
+
     textOutput.append(' ');
 
     switch (comparison) {

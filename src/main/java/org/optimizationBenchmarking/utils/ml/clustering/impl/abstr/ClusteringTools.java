@@ -43,6 +43,7 @@ public final class ClusteringTools {
   public static final DoubleMatrix1D preprocessDataMatrix(
       final IMatrix matrix) {
     final double[] min, max;
+    final boolean[] atLeastOneNotNaN;
     final int[] columns;
     final int m;
     double[] data, data2;
@@ -55,11 +56,16 @@ public final class ClusteringTools {
     Arrays.fill(min, Double.POSITIVE_INFINITY);
     max = new double[n];
     Arrays.fill(max, Double.NEGATIVE_INFINITY);
+    atLeastOneNotNaN = new boolean[n];
 
     // find minima and maxima
     for (i = m; (--i) >= 0;) {
       for (j = n; (--j) >= 0;) {
         d = matrix.getDouble(i, j);
+        if (d != d) {
+          continue;
+        }
+        atLeastOneNotNaN[j] = true;
         if (d < min[j]) {
           min[j] = d;
         }
@@ -78,7 +84,8 @@ public final class ClusteringTools {
 
     // check for columns that can be deleted based on their raw data values
     outer: for (j = n; (--j) >= 0;) {
-      if (ClusteringTools.__equals(min[j], max[j])) {
+      if ((!(atLeastOneNotNaN[j])) || (min[j] >= max[j])
+          || ClusteringTools.__equals(min[j], max[j])) {
         // the column contains only one single value
         columns[j] = columns[--realN];
         continue outer;

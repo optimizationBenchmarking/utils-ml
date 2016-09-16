@@ -32,7 +32,7 @@ public abstract class SimplifyingClassifierTrainingJob
     int index, featureSize;
     int[] features;
     int intValue;
-    boolean booleanValue;
+    Boolean booleanValue;
     double doubleValue;
 
     features = new int[this.m_featureTypes.length];
