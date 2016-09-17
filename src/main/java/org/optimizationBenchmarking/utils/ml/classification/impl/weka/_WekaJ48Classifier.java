@@ -137,7 +137,7 @@ final class _WekaJ48Classifier extends _WekaClassifier<J48> {
     if (pruningMode == _WekaJ48ClassifierTrainingJob.PRUNING_OFF) {
       textOut.append(" with binary splits");//$NON-NLS-1$
     } else {
-      textOut.append(" with ");//$NON-NLS-1$
+      textOut.append(" with");//$NON-NLS-1$
       if (pruningMode == _WekaJ48ClassifierTrainingJob.PRUNING_REDUCED_ERROR) {
         textOut.append(" reduced-error");//$NON-NLS-1$
       }

@@ -57,7 +57,7 @@ public final class MCC extends ConfusionMatrixBasedMeasure {
       new BibAuthors(new BibAuthor[] { //
           new BibAuthor("B. W.", "Matthews"), //$NON-NLS-1$//$NON-NLS-2$
   }), "Comparison of the Predicted and Observed Secondary Structure of T4 Phage Lysozyme", //$NON-NLS-1$
-      new BibDate(195, EBibMonth.OCTOBER, 20),
+      new BibDate(1995, EBibMonth.OCTOBER, 20),
       "Biochimica et Biophysica Acta (BBA) - Protein Structure", //$NON-NLS-1$
       null, //
       "405", //$NON-NLS-1$
