@@ -265,7 +265,8 @@ public final class WekaTreeAccessor {
       if (tree.m_Successors[index].m_Attribute < 0) {
         textOutput.append(' ');
 
-        if ((successorProbs = tree.m_ClassProbs) == null) {
+        successorProbs = tree.m_Successors[index].m_ClassProbs;
+        if (successorProbs == null) {
           successorProbs = tree.m_ClassProbs;
         }
 
