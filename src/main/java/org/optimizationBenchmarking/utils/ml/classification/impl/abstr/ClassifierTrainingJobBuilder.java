@@ -119,7 +119,7 @@ public class ClassifierTrainingJobBuilder extends
   @Override
   public final ClassifierTrainingJobBuilder setTrainingSamples(
       final ClassifiedSample... knownSamples) {
-    int index, featureIndex;
+    int index;
     ClassifiedSample sample;
 
     if (this.m_featureTypes == null) {
@@ -138,10 +138,6 @@ public class ClassifierTrainingJobBuilder extends
       if (sample == null) {
         throw new IllegalArgumentException("Known sample at index " //$NON-NLS-1$
             + index + " is null.");//$NON-NLS-1$
-      }
-      featureIndex = (-1);
-      for (final EFeatureType type : this.m_featureTypes) {
-        type.checkFeatureValue(sample.featureValues[++featureIndex]);
       }
     }
 

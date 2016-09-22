@@ -1,7 +1,7 @@
 package org.optimizationBenchmarking.utils.ml.classification.impl.weka;
 
-import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.ClassificationTools;
 import org.optimizationBenchmarking.utils.ml.classification.spec.ClassifiedSample;
+import org.optimizationBenchmarking.utils.ml.classification.spec.EFeatureType;
 
 import weka.core.DenseInstance;
 
@@ -66,7 +66,7 @@ final class _InternalInstance extends DenseInstance {
    * @return the assignment
    */
   private static final double __format(final double value) {
-    if (ClassificationTools.featureDoubleIsUnspecified(value)) {
+    if (EFeatureType.featureDoubleIsUnspecified(value)) {
       return Double.NaN;
     }
     return ((value <= _InternalInstance.FEATURE_MIN)

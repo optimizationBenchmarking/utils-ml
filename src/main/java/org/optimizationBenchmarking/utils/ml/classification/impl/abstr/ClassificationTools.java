@@ -10,6 +10,7 @@ import org.optimizationBenchmarking.utils.math.combinatorics.Shuffle;
 import org.optimizationBenchmarking.utils.math.functions.arithmetic.AddN;
 import org.optimizationBenchmarking.utils.math.functions.numeric.CeilDiv;
 import org.optimizationBenchmarking.utils.ml.classification.spec.ClassifiedSample;
+import org.optimizationBenchmarking.utils.ml.classification.spec.EFeatureType;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierParameterRenderer;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrainingJob;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrainingResult;
@@ -33,44 +34,27 @@ public final class ClassificationTools {
   /** the default number of cross validation elements */
   private static final int DEFAULT_CROSSVALIDATION_FOLDS = 10;
 
-  /**
-   * the maximum value a nominal feature is allowed to take on:
-   * {@value} (the minimum is {@code 0})
-   */
-  public static final int MAX_NOMINAL = ClassifiedSample.MAX_CLASS;
-
-  /** the unspecified encoded value value */
-  public static final double UNSPECIFIED_DOUBLE = Double.NaN;
-  /** the unspecified numerical value */
-  public static final double UNSPECIFIED_NUMERICAL = ClassificationTools.UNSPECIFIED_DOUBLE;
-
-  /** the unspecified nominal value */
-  public static final int UNSPECIFIED_NOMINAL = -1;
-
-  /** the unspecified boolean value */
-  public static final Boolean UNSPECIFIED_BOOLEAN = null;
-
   /** the basic unit of complexity */
   private static final double COMPLEXITY_UNIT = 1d;
 
   /** the complexity unit for depth */
-  public static final double COMPLEXITY_DEPTH_UNIT = (COMPLEXITY_UNIT
+  public static final double COMPLEXITY_DEPTH_UNIT = (ClassificationTools.COMPLEXITY_UNIT
       / 32d);
   /** the complexity unit for comparisons */
-  public static final double COMPLEXITY_COMPARISON_UNIT = (COMPLEXITY_UNIT
+  public static final double COMPLEXITY_COMPARISON_UNIT = (ClassificationTools.COMPLEXITY_UNIT
       / 4d);
   /** the complexity unit for arithmetic operations */
-  public static final double COMPLEXITY_ARITHMETIC_UNIT = (COMPLEXITY_UNIT
+  public static final double COMPLEXITY_ARITHMETIC_UNIT = (ClassificationTools.COMPLEXITY_UNIT
       / 2d);
   /** the complexity unit for features */
-  public static final double COMPLEXITY_FEATURE_UNIT = (COMPLEXITY_UNIT);
+  public static final double COMPLEXITY_FEATURE_UNIT = (ClassificationTools.COMPLEXITY_UNIT);
   /** the complexity unit for constants */
-  public static final double COMPLEXITY_CONSTANT_UNIT = (COMPLEXITY_UNIT
+  public static final double COMPLEXITY_CONSTANT_UNIT = (ClassificationTools.COMPLEXITY_UNIT
       / 8d);
   /** the complexity unit for classes */
-  public static final double COMPLEXITY_CLASS_UNIT = (COMPLEXITY_UNIT);
+  public static final double COMPLEXITY_CLASS_UNIT = (ClassificationTools.COMPLEXITY_UNIT);
   /** the complexity unit for if-then-or-else decisions */
-  public static final double COMPLEXITY_DECISION_UNIT = (COMPLEXITY_UNIT
+  public static final double COMPLEXITY_DECISION_UNIT = (ClassificationTools.COMPLEXITY_UNIT
       / 4d);
 
   /**
@@ -107,198 +91,6 @@ public final class ClassificationTools {
     }
 
     return null;
-  }
-
-  /**
-   * Check whether a value of an encoded feature is unspecified.
-   *
-   * @param feature
-   *          the feature feature
-   * @return {@code true} if the feature value is unspecified,
-   *         {@code false} otherwise
-   */
-  public static final boolean featureDoubleIsUnspecified(
-      final double feature) {
-    return (feature != feature);
-  }
-
-  /**
-   * convert a {@code double} value to {@code int}
-   *
-   * @param value
-   *          the value
-   * @return the integer
-   */
-  private static final int __toInt(final double value) {
-    return ((int) (0.5d + value));
-  }
-
-  /**
-   * Check whether a value of a numerical feature is unspecified.
-   *
-   * @param numerical
-   *          the numerical feature
-   * @return {@code true} if the feature value is unspecified,
-   *         {@code false} otherwise
-   */
-  public static final boolean featureNumericalIsUnspecified(
-      final double numerical) {
-    return ((numerical != numerical) ? true : false);
-  }
-
-  /**
-   * Convert the numerical value to a {@code double}
-   *
-   * @param value
-   *          the numerical value
-   * @return the {@code double}
-   */
-  public static final double featureNumericalToDouble(final double value) {
-    return ClassificationTools.featureNumericalIsUnspecified(value)
-        ? ClassificationTools.UNSPECIFIED_DOUBLE : value;
-  }
-
-  /**
-   * Convert a {@code double} to a numerical value
-   *
-   * @param numerical
-   *          the {@code double} value
-   * @return the numerical value index
-   */
-  public static final double featureDoubleToNumerical(
-      final double numerical) {
-    if (ClassificationTools.featureDoubleIsUnspecified(numerical)) {
-      return ClassificationTools.UNSPECIFIED_NUMERICAL;
-    }
-    return numerical;
-  }
-
-  /**
-   * Check whether a value of a nominal feature is unspecified.
-   *
-   * @param nominal
-   *          the nominal feature
-   * @return {@code true} if the feature value is unspecified,
-   *         {@code false} otherwise
-   */
-  public static final boolean featureNominalIsUnspecified(
-      final int nominal) {
-    return (nominal == (-1));
-  }
-
-  /**
-   * Convert the index of a nominal value in the sorted list of values to a
-   * {@code double}
-   *
-   * @param nominal
-   *          the nominal value
-   * @return the {@code double}
-   */
-  public static final double featureNominalToDouble(final int nominal) {
-    if (ClassificationTools.featureNominalIsUnspecified(nominal)) {
-      return ClassificationTools.UNSPECIFIED_DOUBLE;
-    }
-    if ((nominal < 0) || (nominal > ClassificationTools.MAX_NOMINAL)) {
-      throw new IllegalArgumentException(//
-          "Integer representation of value of nominal feature cannot be "//$NON-NLS-1$
-              + nominal);
-    }
-    return nominal;
-  }
-
-  /**
-   * Convert a {@code double} to the index of a nominal value in the sorted
-   * list of values
-   *
-   * @param nominal
-   *          the {@code double} value
-   * @return the nominal value index
-   */
-  public static final int featureDoubleToNominal(final double nominal) {
-    if (ClassificationTools.featureDoubleIsUnspecified(nominal)) {
-      return ClassificationTools.UNSPECIFIED_NOMINAL;
-    }
-    if ((nominal < -0.49d)
-        || (nominal > ClassificationTools.MAX_NOMINAL)) {
-      throw new IllegalArgumentException(//
-          "Double representation of value of nominal feature cannot be " //$NON-NLS-1$
-              + nominal);
-    }
-    return ClassificationTools.__toInt(nominal);
-  }
-
-  /**
-   * Convert the index of a class to a {@code double}
-   *
-   * @param clazz
-   *          the class value
-   * @return the {@code double}
-   */
-  public static final double classToDouble(final int clazz) {
-    if ((clazz < 0) || (clazz > ClassifiedSample.MAX_CLASS)) {
-      throw new IllegalArgumentException(//
-          "Integer representation of class value cannot be " //$NON-NLS-1$
-              + clazz);
-    }
-    return clazz;
-  }
-
-  /**
-   * Convert the index of a class to a {@code double}
-   *
-   * @param clazz
-   *          the class value
-   * @return the {@code double}
-   */
-  public static final int doubleToClass(final double clazz) {
-    if ((clazz != clazz) || (clazz < -0.49d)
-        || (clazz > ClassifiedSample.MAX_CLASS)) {
-      throw new IllegalArgumentException(//
-          "Double representation of Class value cannot be " //$NON-NLS-1$
-              + clazz);
-    }
-
-    return ClassificationTools.__toInt(clazz);
-  }
-
-  /**
-   * Check whether a value of a boolean feature is unspecified.
-   *
-   * @param feature
-   *          the boolean feature
-   * @return {@code true} if the feature value is unspecified,
-   *         {@code false} otherwise
-   */
-  public static final boolean featureBooleanIsUnspecified(
-      final Boolean feature) {
-    return (feature == null) ? true : false;
-  }
-
-  /**
-   * Convert the {@code boolean} value to a {@code double}
-   *
-   * @param bool
-   *          the {@code boolean} value
-   * @return the {@code double}
-   */
-  public static final double featureBooleanToDouble(final Boolean bool) {
-    return ClassificationTools.featureBooleanIsUnspecified(bool)
-        ? ClassificationTools.UNSPECIFIED_DOUBLE
-        : (bool.booleanValue() ? 1d : 0d);
-  }
-
-  /**
-   * Convert a {@code double} to the {@code boolean} value
-   *
-   * @param bool
-   *          the {@code double} value
-   * @return the {@code boolean} value index
-   */
-  public static final Boolean featureDoubleToBoolean(final double bool) {
-    if (ClassificationTools.featureDoubleIsUnspecified(bool)) {
-      return ClassificationTools.UNSPECIFIED_BOOLEAN;
-    }
-    return (Math.abs(bool) >= 0.5d) ? Boolean.TRUE : Boolean.FALSE;
   }
 
   /**
@@ -592,7 +384,7 @@ public final class ClassificationTools {
       final ITextOutput textOutput) {
     renderer.renderShortFeatureName(feature, textOutput);
 
-    if (ClassificationTools.featureDoubleIsUnspecified(value)) {
+    if (EFeatureType.featureDoubleIsUnspecified(value)) {
       switch (comparison) {
         case EQUAL: {
           textOutput.append(" is unspecified"); //$NON-NLS-1$

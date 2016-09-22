@@ -43,10 +43,10 @@ public abstract class SimplifyingClassifierTrainingJob
 
       switcher: switch (type) {
         case BOOLEAN: {
-          booleanValue = ClassificationTools.featureDoubleToBoolean(
+          booleanValue = EFeatureType.featureDoubleToBoolean(
               this.m_knownSamples[0].featureValues[index]);
           for (final ClassifiedSample sample : this.m_knownSamples) {
-            if (ClassificationTools.featureDoubleToBoolean(
+            if (EFeatureType.featureDoubleToBoolean(
                 sample.featureValues[index]) != booleanValue) {
               break switcher;
             }
@@ -55,10 +55,10 @@ public abstract class SimplifyingClassifierTrainingJob
         }
 
         case NOMINAL: {
-          intValue = ClassificationTools.featureDoubleToNominal(
+          intValue = EFeatureType.featureDoubleToNominal(
               this.m_knownSamples[0].featureValues[index]);
           for (final ClassifiedSample sample : this.m_knownSamples) {
-            if (ClassificationTools.featureDoubleToNominal(
+            if (EFeatureType.featureDoubleToNominal(
                 sample.featureValues[index]) != intValue) {
               break switcher;
             }

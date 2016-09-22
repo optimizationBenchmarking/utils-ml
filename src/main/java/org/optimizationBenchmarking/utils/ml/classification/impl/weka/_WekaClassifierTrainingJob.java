@@ -3,7 +3,6 @@ package org.optimizationBenchmarking.utils.ml.classification.impl.weka;
 import java.util.ArrayList;
 
 import org.optimizationBenchmarking.utils.collections.lists.ArrayListView;
-import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.ClassificationTools;
 import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.ClassifierTrainingJobBuilder;
 import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.ClassifierTrainingResult;
 import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.SimplifyingClassifierTrainingJob;
@@ -121,7 +120,7 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
         // i.e., max+1 in total.
         max = 0;
         for (final ClassifiedSample sample : this.m_knownSamples) {
-          current = ClassificationTools.featureDoubleToNominal(
+          current = EFeatureType.featureDoubleToNominal(
               sample.featureValues[this.m_selectedFeatures[index]]);
           if (current > max) {
             max = current;

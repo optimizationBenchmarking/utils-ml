@@ -9,6 +9,7 @@ import org.optimizationBenchmarking.utils.document.spec.ISectionBody;
 import org.optimizationBenchmarking.utils.document.spec.ISemanticComponent;
 import org.optimizationBenchmarking.utils.document.spec.IText;
 import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.ClassificationTools;
+import org.optimizationBenchmarking.utils.ml.classification.spec.EFeatureType;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierParameterRenderer;
 import org.optimizationBenchmarking.utils.text.ESequenceMode;
 import org.optimizationBenchmarking.utils.text.ETextCase;
@@ -229,7 +230,7 @@ public final class WekaTreeAccessor {
       }
       ClassificationTools.printClass(//
           ((tree.m_Info.classAttribute().isNumeric())//
-              ? ClassificationTools.doubleToClass(currentProbs[0])//
+              ? EFeatureType.doubleToClass(currentProbs[0])//
               : Utils.maxIndex(currentProbs)),
           renderer, textOutput);
       return;
@@ -271,7 +272,7 @@ public final class WekaTreeAccessor {
         ClassificationTools
             .printClass(//
                 ((tree.m_Info.classAttribute().isNumeric())//
-                    ? ClassificationTools.doubleToClass(successorProbs[0])//
+                    ? EFeatureType.doubleToClass(successorProbs[0])//
                     : Utils.maxIndex(successorProbs)),
                 renderer, textOutput);
 
