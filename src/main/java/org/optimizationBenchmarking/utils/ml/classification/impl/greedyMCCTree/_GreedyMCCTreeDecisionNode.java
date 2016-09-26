@@ -67,6 +67,9 @@ final class _GreedyMCCTreeDecisionNode extends _GreedyMCCTree {
         this.m_assignments[index]._render(this.m_attribute, renderer,
             textOutput);
         textOutput.append(ClassificationTools.RULE_THEN);
+        if (this.m_assignments[index].m_classifier instanceof _GreedyMCCTreeLeaf) {
+          textOutput.append(' ');
+        }
       }
       this.m_assignments[index].m_classifier._render(renderer, textOutput,
           depth + 1, false);

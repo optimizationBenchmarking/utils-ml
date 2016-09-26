@@ -90,7 +90,7 @@ final class _RangeAssignment extends _Assignment {
     boolean first, braces, has;
 
     first = true;
-    braces = this.m_values.length > 0;
+    braces = this.m_values.length > 1;
     for (final double[] values : this.m_values) {
       if (first) {
         first = false;
@@ -112,6 +112,9 @@ final class _RangeAssignment extends _Assignment {
           renderer.renderShortFeatureName(attribute, textOutput);
           textOutput.append(" = ");//$NON-NLS-1$
           renderer.renderFeatureValue(attribute, values[0], textOutput);
+          if (braces) {
+            textOutput.append(')');
+          }
           continue;
         }
         if (values[0] > Double.NEGATIVE_INFINITY) {
@@ -123,6 +126,9 @@ final class _RangeAssignment extends _Assignment {
         if (values[1] < Double.POSITIVE_INFINITY) {
           textOutput.append(" < ");//$NON-NLS-1$
           renderer.renderFeatureValue(attribute, values[1], textOutput);
+          if (braces) {
+            textOutput.append(')');
+          }
           continue;
         }
         if (has) {

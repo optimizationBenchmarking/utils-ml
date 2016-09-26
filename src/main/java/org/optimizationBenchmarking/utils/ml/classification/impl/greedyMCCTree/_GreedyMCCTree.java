@@ -31,7 +31,8 @@ abstract class _GreedyMCCTree extends Classifier {
 
   /** {@inheritDoc} */
   @Override
-  public final void render(final IClassifierParameterRenderer renderer,
+  protected final void renderAsCode(
+      final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
     this._render(renderer, textOutput, 0, true);
   }

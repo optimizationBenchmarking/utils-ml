@@ -1,18 +1,10 @@
 package weka.classifiers.trees;
 
 import org.optimizationBenchmarking.utils.comparison.EComparison;
-import org.optimizationBenchmarking.utils.document.impl.SemanticComponentUtils;
-import org.optimizationBenchmarking.utils.document.spec.ELabelType;
-import org.optimizationBenchmarking.utils.document.spec.ICode;
-import org.optimizationBenchmarking.utils.document.spec.ILabel;
-import org.optimizationBenchmarking.utils.document.spec.ISectionBody;
 import org.optimizationBenchmarking.utils.document.spec.ISemanticComponent;
-import org.optimizationBenchmarking.utils.document.spec.IText;
 import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.ClassificationTools;
 import org.optimizationBenchmarking.utils.ml.classification.spec.EFeatureType;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierParameterRenderer;
-import org.optimizationBenchmarking.utils.text.ESequenceMode;
-import org.optimizationBenchmarking.utils.text.ETextCase;
 import org.optimizationBenchmarking.utils.text.TextUtils;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
@@ -47,37 +39,8 @@ public final class WekaTreeAccessor {
       final ISemanticComponent name, final int[] selectedFeatures,
       final J48 tree, final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
-    final ILabel label;
-    ISectionBody body;
-    if (textOutput instanceof ISectionBody) {
-      body = ((ISectionBody) textOutput);
-      label = body.createLabel(ELabelType.CODE);
-      body.append("The structure of the classifier is rendered in "); //$NON-NLS-1$
-      body.reference(ETextCase.IN_SENTENCE, ESequenceMode.AND, label);
-      body.append('.');
-
-      try (final ICode code = ((ISectionBody) textOutput).code(label,
-          true)) {
-        try (final IText caption = code.caption()) {
-          caption.append("The structure of the ");//$NON-NLS-1$
-          SemanticComponentUtils.printLongAndShortNameIfDifferent(name,
-              caption, ETextCase.IN_SENTENCE);
-          caption.append('.');
-        }
-        try (final IText codeBody = code.body()) {
-          WekaTreeAccessor.__renderJ48Classifier(selectedFeatures, tree,
-              renderer, codeBody);
-        }
-      }
-    } else {
-      textOutput.append("Below you can find the structure of the ");//$NON-NLS-1$
-      SemanticComponentUtils.printLongAndShortNameIfDifferent(name,
-          textOutput, ETextCase.IN_SENTENCE);
-      textOutput.append('.');
-      textOutput.appendLineBreak();
-      WekaTreeAccessor.__renderJ48Classifier(selectedFeatures, tree,
-          renderer, textOutput);
-    }
+    WekaTreeAccessor.__renderJ48Classifier(selectedFeatures, tree,
+        renderer, textOutput);
   }
 
   /**
@@ -134,37 +97,8 @@ public final class WekaTreeAccessor {
       final ISemanticComponent name, final int[] selectedFeatures,
       final REPTree tree, final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
-    final ILabel label;
-    ISectionBody body;
-    if (textOutput instanceof ISectionBody) {
-      body = ((ISectionBody) textOutput);
-      label = body.createLabel(ELabelType.CODE);
-      body.append("The structure of the classifier is rendered in "); //$NON-NLS-1$
-      body.reference(ETextCase.IN_SENTENCE, ESequenceMode.AND, label);
-      body.append('.');
-
-      try (final ICode code = ((ISectionBody) textOutput).code(label,
-          true)) {
-        try (final IText caption = code.caption()) {
-          caption.append("The structure of the ");//$NON-NLS-1$
-          SemanticComponentUtils.printLongAndShortNameIfDifferent(name,
-              caption, ETextCase.IN_SENTENCE);
-          caption.append('.');
-        }
-        try (final IText codeBody = code.body()) {
-          WekaTreeAccessor.__renderREPTreeClassifier(selectedFeatures,
-              tree, renderer, codeBody);
-        }
-      }
-    } else {
-      textOutput.append("Below you can find the structure of the ");//$NON-NLS-1$
-      SemanticComponentUtils.printLongAndShortNameIfDifferent(name,
-          textOutput, ETextCase.IN_SENTENCE);
-      textOutput.append('.');
-      textOutput.appendLineBreak();
-      WekaTreeAccessor.__renderREPTreeClassifier(selectedFeatures, tree,
-          renderer, textOutput);
-    }
+    WekaTreeAccessor.__renderREPTreeClassifier(selectedFeatures, tree,
+        renderer, textOutput);
   }
 
   /**
