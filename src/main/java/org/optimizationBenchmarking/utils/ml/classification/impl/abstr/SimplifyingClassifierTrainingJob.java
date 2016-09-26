@@ -88,7 +88,8 @@ public abstract class SimplifyingClassifierTrainingJob
     if ((featureSize < features.length) || (featureSize <= 0)) {
       if (featureSize <= 0) {
         return new _AllTheSameClass(
-            ClassificationTools.getMostFrequentClass(this.m_knownSamples));
+            new ClassifiedSampleInfo(this.m_knownSamples)
+                .getBiggestSampleClass());
       }
       this.m_selectedFeatures = new int[featureSize];
       System.arraycopy(features, 0, this.m_selectedFeatures, 0,

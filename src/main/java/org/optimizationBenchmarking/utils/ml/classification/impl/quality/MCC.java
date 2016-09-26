@@ -11,6 +11,7 @@ import org.optimizationBenchmarking.utils.document.spec.ECitationMode;
 import org.optimizationBenchmarking.utils.document.spec.IComplexText;
 import org.optimizationBenchmarking.utils.math.functions.arithmetic.Div;
 import org.optimizationBenchmarking.utils.math.functions.power.Sqrt;
+import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.ConfusionMatrix;
 import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.ConfusionMatrixBasedMeasure;
 import org.optimizationBenchmarking.utils.ml.classification.spec.ClassifiedSample;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifier;
@@ -77,9 +78,9 @@ public final class MCC extends ConfusionMatrixBasedMeasure {
   /** {@inheritDoc} */
   @Override
   public final double evaluate(final IClassifier classifier,
-      final int[][] token, final ClassifiedSample[] trainingSamples) {
-    ConfusionMatrixBasedMeasure.fillInConfusionMatrix(classifier,
-        trainingSamples, token);
+      final ConfusionMatrix token,
+      final ClassifiedSample[] trainingSamples) {
+    token.fillInConfusionMatrix(classifier, trainingSamples);
     return (1d - (0.5d * MCC.computeMCC(token)));
   }
 
@@ -126,40 +127,38 @@ public final class MCC extends ConfusionMatrixBasedMeasure {
    * Compute the MCC based on a confusion matrix. This function returns the
    * un-normalized MCC, i.e., -1 means worst possible classification, 1 is
    * best. This is thus different from the result of
-   * {@link #evaluate(IClassifier, int[][], ClassifiedSample[])}, which
-   * returns a shifted and normalized value.
+   * {@link #evaluate(IClassifier, ConfusionMatrix, ClassifiedSample[])},
+   * which returns a shifted and normalized value.
    *
    * @param C
    *          the confusion matrix
    * @return the MCC measure
    */
-  public static final double computeMCC(final int[][] C) {
-    int k, l, m, sumBelow11, sumBelow21;
-    long sumAbove, totalSum, Ckk, Ckl, sumBelow1, sumBelow2;
+  public static final double computeMCC(final ConfusionMatrix C) {
+    final int length;
+    int k, l, m, sumBelow11, sumBelow21, totalSum;
+    long sumAbove, Ckk, Ckl, sumBelow1, sumBelow2;
     double sqrt1, sqrt2;
 
     sumAbove = sumBelow1 = sumBelow2 = 0L;
 
-    totalSum = 0;
-    for (final int[] row : C) {
-      for (final int cell : row) {
-        totalSum += cell;
-      }
-    }
+    totalSum = C.getSampleSize();
 
-    for (k = C.length; (--k) >= 0;) {
-      Ckk = C[k][k];
+    length = C.getClassCount();
+    for (k = length; (--k) >= 0;) {
+      Ckk = C.getConfusionForIndexClasses(k, k);
 
       sumBelow11 = sumBelow21 = 0;
 
-      for (l = C.length; (--l) >= 0;) {
-        Ckl = C[k][l];
-        for (m = C.length; (--m) >= 0;) {
-          sumAbove += ((Ckk * C[l][m]) - (Ckl * C[m][k]));
+      for (l = length; (--l) >= 0;) {
+        Ckl = C.getConfusionForIndexClasses(k, l);
+        for (m = length; (--m) >= 0;) {
+          sumAbove += ((Ckk * C.getConfusionForIndexClasses(l, m))
+              - (Ckl * C.getConfusionForIndexClasses(m, k)));
         }
 
         sumBelow11 += Ckl;
-        sumBelow21 += C[l][k];
+        sumBelow21 += C.getConfusionForIndexClasses(l, k);
       }
 
       sumBelow1 += (sumBelow11 * (totalSum - sumBelow11));

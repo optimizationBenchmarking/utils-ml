@@ -46,6 +46,9 @@ public final class ClassificationTools {
   /** the complexity unit for arithmetic operations */
   public static final double COMPLEXITY_ARITHMETIC_UNIT = (ClassificationTools.COMPLEXITY_UNIT
       / 2d);
+  /** the complexity unit for logic operations */
+  public static final double COMPLEXITY_LOGIC_UNIT = (ClassificationTools.COMPLEXITY_ARITHMETIC_UNIT
+      / 2d);
   /** the complexity unit for features */
   public static final double COMPLEXITY_FEATURE_UNIT = (ClassificationTools.COMPLEXITY_UNIT);
   /** the complexity unit for constants */
@@ -56,6 +59,13 @@ public final class ClassificationTools {
   /** the complexity unit for if-then-or-else decisions */
   public static final double COMPLEXITY_DECISION_UNIT = (ClassificationTools.COMPLEXITY_UNIT
       / 4d);
+
+  /** The text for unspecified features */
+  public static final char[] FEATURE_IS_UNSPECIFIED = { 'u', 'n', 's', 'p',
+      'e', 'c', 'i', 'f', 'i', 'e', 'd' };
+  /** The text for specified features */
+  public static final char[] FEATURE_IS_SPECIFIED = { 's', 'p', 'e', 'c',
+      'i', 'f', 'i', 'e', 'd' };
 
   /**
    * Can we cluster the given samples trivially? If so, return a job which
@@ -94,56 +104,7 @@ public final class ClassificationTools {
   }
 
   /**
-   * Find the total number of classes.
-   *
-   * @param samples
-   *          the samples
-   * @return the number of classes
-   */
-  public static final int getClassCount(final ClassifiedSample[] samples) {
-    int maxClass;
-
-    maxClass = (-1);
-    for (final ClassifiedSample sample : samples) {
-      if (sample.sampleClass > maxClass) {
-        maxClass = sample.sampleClass;
-      }
-    }
-
-    return (maxClass + 1);
-  }
-
-  /**
-   * Get the most frequently occurring class.
-   *
-   * @param samples
-   *          the training samples
-   * @return the most frequent class
-   */
-  public static final int getMostFrequentClass(
-      final ClassifiedSample[] samples) {
-    final int classCount;
-    final int[] counts;
-    int max, difference;
-
-    classCount = ClassificationTools.getClassCount(samples);
-    if (classCount <= 1) {
-      return 0;
-    }
-
-    max = 0;
-    counts = new int[classCount];
-    for (final ClassifiedSample sample : samples) {
-      difference = ((++counts[sample.sampleClass]) - counts[max]);
-      if ((difference > 0)
-          || ((difference == 0) && (sample.sampleClass < max))) {
-        max = sample.sampleClass;
-      }
-    }
-    return max;
-  }
-
-  /**
+   * <p>
    * Divide the data sample for cross validation. This will create an array
    * of cross-validation tuples, where the first element of each tuple is a
    * test set and the second element is a training set. This goal of this
@@ -157,6 +118,12 @@ public final class ClassificationTools {
    * {@value #DEFAULT_CROSSVALIDATION_FOLDS} samples. If there is a class
    * with less than two samples or all samples belong to the same class,
    * cross validation makes no sense and {@code null} is returned.
+   * </p>
+   * <p>
+   * TODO: This should rely only on {@link ClassifiedSampleInfo} for
+   * statistics. Right now, it will only work on top-level jobs where all
+   * classes appear.
+   * </p>
    *
    * @param samples
    *          the sample
@@ -179,7 +146,7 @@ public final class ClassificationTools {
         index, index2, add;
 
     // We first find the number of classes.
-    classCount = ClassificationTools.getClassCount(samples);
+    classCount = new ClassifiedSampleInfo(samples).getBiggestSampleClass();
 
     // Cross-validation makes no sense on one class or if we have less
     // samples than two times the number of folds, i.e., less than 20
@@ -387,11 +354,13 @@ public final class ClassificationTools {
     if (EFeatureType.featureDoubleIsUnspecified(value)) {
       switch (comparison) {
         case EQUAL: {
-          textOutput.append(" is unspecified"); //$NON-NLS-1$
+          textOutput.append(" is "); //$NON-NLS-1$
+          textOutput.append(ClassificationTools.FEATURE_IS_UNSPECIFIED);
           return;
         }
         case NOT_EQUAL: {
-          textOutput.append(" is specified"); //$NON-NLS-1$
+          textOutput.append(" is "); //$NON-NLS-1$
+          textOutput.append(ClassificationTools.FEATURE_IS_SPECIFIED);
           return;
         }
         default: {
