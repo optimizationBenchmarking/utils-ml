@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.optimizationBenchmarking.utils.collections.iterators.IterableIterator;
 import org.optimizationBenchmarking.utils.collections.lists.ArrayListView;
 import org.optimizationBenchmarking.utils.error.ErrorUtils;
+import org.optimizationBenchmarking.utils.ml.classification.impl.greedyMCCTree.GreedyMCCTreeTrainer;
 import org.optimizationBenchmarking.utils.ml.classification.impl.weka.WekaJ48TrainerPruned;
 import org.optimizationBenchmarking.utils.ml.classification.impl.weka.WekaJ48TrainerPrunedBinary;
 import org.optimizationBenchmarking.utils.ml.classification.impl.weka.WekaJ48TrainerReducedErrorPruned;
@@ -120,7 +121,7 @@ public final class DefaultClassifierTrainer {
     /** {@inheritDoc} */
     @Override
     public final boolean hasNext() {
-      return (this.m_index <= 7);
+      return (this.m_index <= 8);
     }
 
     /** {@inheritDoc} */
@@ -128,27 +129,30 @@ public final class DefaultClassifierTrainer {
     public final IClassifierTrainer next() {
       switch (this.m_index++) {
         case 0: {
-          return WekaJ48TrainerPruned.getInstance();
+          return GreedyMCCTreeTrainer.getInstance();
         }
         case 1: {
-          return WekaJ48TrainerPrunedBinary.getInstance();
+          return WekaJ48TrainerPruned.getInstance();
         }
         case 2: {
-          return WekaJ48TrainerReducedErrorPruned.getInstance();
+          return WekaJ48TrainerPrunedBinary.getInstance();
         }
         case 3: {
-          return WekaJ48TrainerReducedErrorPrunedBinary.getInstance();
+          return WekaJ48TrainerReducedErrorPruned.getInstance();
         }
         case 4: {
-          return WekaJ48TrainerUnpruned.getInstance();
+          return WekaJ48TrainerReducedErrorPrunedBinary.getInstance();
         }
         case 5: {
-          return WekaJ48TrainerUnprunedBinary.getInstance();
+          return WekaJ48TrainerUnpruned.getInstance();
         }
         case 6: {
-          return WekaREPTreeTrainerPruned.getInstance();
+          return WekaJ48TrainerUnprunedBinary.getInstance();
         }
         case 7: {
+          return WekaREPTreeTrainerPruned.getInstance();
+        }
+        case 8: {
           return WekaREPTreeTrainerUnpruned.getInstance();
         }
         default: {
