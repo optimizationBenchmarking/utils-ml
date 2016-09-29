@@ -82,7 +82,7 @@ public abstract class Classifier implements IClassifier {
           caption.append('.');
         }
         try (final IText codeBody = code.body()) {
-          this.renderAsCode(renderer, textOutput);
+          this.renderAsCode(renderer, codeBody);
         }
       }
     } else {
