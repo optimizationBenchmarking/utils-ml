@@ -2,6 +2,7 @@ package org.optimizationBenchmarking.utils.ml.classification.impl.greedyMCCTree;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 
 import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.ClassifierTrainingJobBuilder;
@@ -271,10 +272,11 @@ final class _GreedyMCCTreeTrainingJob
   private static final double[][] __selectionToArray(
       final double[] selection, final HashSet<Double> remaining) {
     ArrayList<double[]> intervals;
-    int current, next;
+    int current, next, size;
     double currentValue, nextValue, forbiddenValue, nextBigger;
     Double currentDouble;
     double[] currentInterval;
+    double[][] array;
 
     intervals = new ArrayList<>();
 
@@ -290,7 +292,7 @@ final class _GreedyMCCTreeTrainingJob
           currentInterval = null;
         } else {
           currentInterval = new double[] { currentValue,
-              nextValue = currentValue };
+              nextValue = currentValue, 0d, current };
 
           // attempt to make interval bigger, but avoid swallowing values
           // coming later
@@ -317,6 +319,8 @@ final class _GreedyMCCTreeTrainingJob
               currentInterval[1] = nextValue;
             }
           }
+
+          currentInterval[2] = (currentInterval[1] - currentInterval[0]);
 
           // try to expand to bigger numbers
           nextBigger = Double.POSITIVE_INFINITY;
@@ -368,10 +372,41 @@ final class _GreedyMCCTreeTrainingJob
       }
     }
 
-    if (intervals.isEmpty()) {
+    size = intervals.size();
+    if (size <= 0) {
       return null;
     }
-    return intervals.toArray(new double[intervals.size()][]);
+
+    array = intervals.toArray(new double[size][]);
+    switch (array.length) {
+      case 0: {
+        return null;
+      }
+      case 1: {
+        return new double[][] { //
+            { array[0][0], array[0][1] },//
+        };
+      }
+      case 2: {
+        return new double[][] { //
+            { array[0][0], array[0][1] }, //
+            { array[1][0], array[1][1] },//
+        };
+      }
+      default: {// very inefficient..
+        Arrays.sort(array, new __IntervalComparator(2));
+        Arrays.fill(array, 0, (array.length - 3), null);
+        Arrays.sort(array, new __IntervalComparator(3));
+      }
+        //$FALL-THROUGH$
+      case 3: {
+        return new double[][] { //
+            { array[0][0], array[0][1] }, //
+            { array[1][0], array[1][1] }, //
+            { array[2][0], array[2][1] },//
+        };
+      }
+    }
   }
 
   /**
@@ -571,5 +606,39 @@ final class _GreedyMCCTreeTrainingJob
   @Override
   protected final String getJobName() {
     return GreedyMCCTreeTrainer.NAME;
+  }
+
+  /** the interval comparator */
+  private static final class __IntervalComparator
+      implements Comparator<double[]> {
+    /** the index */
+    private final int m_index;
+
+    /**
+     * create the interval comparator
+     *
+     * @param index
+     *          the index
+     */
+    __IntervalComparator(final int index) {
+      super();
+      this.m_index = index;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public final int compare(final double[] o1, final double[] o2) {
+      if (o1 == o2) {
+        return 0;
+      }
+      if (o1 == null) {
+        return 1;
+      }
+      if (o2 == null) {
+        return (-1);
+      }
+      return Double.compare(o1[this.m_index], o2[this.m_index]);
+    }
+
   }
 }
