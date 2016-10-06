@@ -6,6 +6,7 @@ import org.optimizationBenchmarking.utils.collections.iterators.IterableIterator
 import org.optimizationBenchmarking.utils.collections.lists.ArrayListView;
 import org.optimizationBenchmarking.utils.error.ErrorUtils;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.cmaesls.CMAESLSFitter;
+import org.optimizationBenchmarking.utils.ml.fitting.impl.debug.DebugFitter;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.dels.DELSFitter;
 import org.optimizationBenchmarking.utils.ml.fitting.impl.esls.ESLSFitter;
 import org.optimizationBenchmarking.utils.ml.fitting.spec.IFunctionFitter;
@@ -57,6 +58,21 @@ public final class DefaultFunctionFitter {
     return fitters;
   }
 
+  /**
+   * Set the available function fitters.
+   *
+   * @param fitters
+   *          the fitters
+   */
+  public static final void setAllInstances(
+      final ArrayListView<IFunctionFitter> fitters) {
+    if ((fitters == null) || (fitters.isEmpty())) {
+      throw new IllegalArgumentException(
+          "Default fitters cannot be null or empty."); //$NON-NLS-1$
+    }
+    __AllHolder.INSTANCES = fitters;
+  }
+
   /** the internal holder for the default fitter */
   private static final class __DefaultHolder {
 
@@ -64,12 +80,18 @@ public final class DefaultFunctionFitter {
     static final IFunctionFitter INSTANCE;
 
     static {
+      IFunctionFitter current2;
       find: {
         for (final IFunctionFitter current : new __FitterIterator()) {
           if ((current != null) && (current.canUse())) {
             INSTANCE = current;
             break find;
           }
+        }
+        current2 = DebugFitter.getInstance();
+        if ((current2 != null) && (current2.canUse())) {
+          INSTANCE = current2;
+          break find;
         }
         INSTANCE = null;
       }
@@ -80,7 +102,7 @@ public final class DefaultFunctionFitter {
   private static final class __AllHolder {
 
     /** the instances */
-    static final ArrayListView<IFunctionFitter> INSTANCES;
+    static volatile ArrayListView<IFunctionFitter> INSTANCES;
 
     static {
       ArrayList<IFunctionFitter> fitters;
@@ -93,9 +115,10 @@ public final class DefaultFunctionFitter {
       }
 
       if (!(fitters.isEmpty())) {
-        INSTANCES = ArrayListView.collectionToView(fitters, false);
+        __AllHolder.INSTANCES = ArrayListView.collectionToView(fitters,
+            false);
       } else {
-        INSTANCES = null;
+        __AllHolder.INSTANCES = null;
       }
     }
   }
