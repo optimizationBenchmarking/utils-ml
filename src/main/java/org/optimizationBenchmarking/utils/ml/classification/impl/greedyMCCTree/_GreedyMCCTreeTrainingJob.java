@@ -39,11 +39,13 @@ final class _GreedyMCCTreeTrainingJob
    *          the measure
    * @param skip
    *          the attribute to skip
+   * @param maxIntervals
+   *          the maximum number of real intervals
    * @return the node
    */
   private static final ClassifierTrainingResult __train(
       final ClassifiedSample[] samples, final EFeatureType[] types,
-      final MCC mcc, final int skip) {
+      final MCC mcc, final int skip, final int maxIntervals) {
     ConfusionMatrix matrix;
     _GreedyMCCTree node;
     ClassifierTrainingResult bestResult, testResult;
@@ -59,7 +61,7 @@ final class _GreedyMCCTreeTrainingJob
         continue;
       }
       testResult = _GreedyMCCTreeTrainingJob.__trainForAttribute(index,
-          samples, types, matrix, mcc);
+          samples, types, matrix, mcc, maxIntervals);
       if (testResult == null) {
         continue;
       }
@@ -86,13 +88,15 @@ final class _GreedyMCCTreeTrainingJob
    *          the confusion matrix
    * @param mcc
    *          the measure
+   * @param maxIntervals
+   *          the maximum number of real intervals
    * @return the node
    */
   @SuppressWarnings("unchecked")
   private static final ClassifierTrainingResult __trainForAttribute(
       final int attributeIndex, final ClassifiedSample[] samples,
       final EFeatureType[] types, final ConfusionMatrix matrix,
-      final MCC mcc) {
+      final MCC mcc, final int maxIntervals) {
     HashSet<Double>[] values;
     HashSet<Double> all;
     Double value;
@@ -146,12 +150,13 @@ final class _GreedyMCCTreeTrainingJob
     if (isNumerical) {
       node = _GreedyMCCTreeTrainingJob.__trainForNumericalAttribute(
           attributeIndex, allSamples, types, matrix, mcc, dvalues, found,
-          all);
+          all, maxIntervals);
       all = null;
     } else {
       all = null;
       node = _GreedyMCCTreeTrainingJob.__trainForNominalAttribute(
-          attributeIndex, allSamples, types, matrix, mcc, dvalues, found);
+          attributeIndex, allSamples, types, matrix, mcc, dvalues, found,
+          maxIntervals);
     }
 
     if ((node == null) || (node instanceof _GreedyMCCTreeLeaf)) {
@@ -216,13 +221,15 @@ final class _GreedyMCCTreeTrainingJob
    *          the number of splits
    * @param all
    *          all the values found so far
+   * @param maxIntervals
+   *          the maximum number of real intervals
    * @return the node
    */
   private static final _GreedyMCCTree __trainForNumericalAttribute(
       final int attributeIndex, final ArrayList<ClassifiedSample> samples,
       final EFeatureType[] types, final ConfusionMatrix matrix,
       final MCC mcc, final double[][] values, final int found,
-      final HashSet<Double> all) {
+      final HashSet<Double> all, final int maxIntervals) {
     final ArrayList<_RangeAssignment> assignments;
     final ArrayList<ClassifiedSample> choice;
     double[][] intervals;
@@ -238,7 +245,7 @@ final class _GreedyMCCTreeTrainingJob
       }
 
       intervals = _GreedyMCCTreeTrainingJob.__selectionToArray(selection,
-          all);
+          all, maxIntervals);
       if (intervals == null) {
         continue;
       }
@@ -246,7 +253,7 @@ final class _GreedyMCCTreeTrainingJob
       current = new _RangeAssignment(intervals);
 
       if (_GreedyMCCTreeTrainingJob.__setClassifier(attributeIndex,
-          samples, types, mcc, choice, current)) {
+          samples, types, mcc, choice, current, maxIntervals)) {
         assignments.add(current);
       }
     }
@@ -266,17 +273,20 @@ final class _GreedyMCCTreeTrainingJob
    *          the selection
    * @param remaining
    *          the remaining values
+   * @param maxIntervals
+   *          the maximum number of real intervals
    * @return the selection
    */
   @SuppressWarnings("null")
   private static final double[][] __selectionToArray(
-      final double[] selection, final HashSet<Double> remaining) {
+      final double[] selection, final HashSet<Double> remaining,
+      final int maxIntervals) {
     ArrayList<double[]> intervals;
     int current, next, size;
     double currentValue, nextValue, forbiddenValue, nextBigger;
     Double currentDouble;
     double[] currentInterval;
-    double[][] array;
+    double[][] array, array2;
 
     intervals = new ArrayList<>();
 
@@ -387,24 +397,19 @@ final class _GreedyMCCTreeTrainingJob
             { array[0][0], array[0][1] },//
         };
       }
-      case 2: {
-        return new double[][] { //
-            { array[0][0], array[0][1] }, //
-            { array[1][0], array[1][1] },//
-        };
-      }
       default: {// very inefficient..
         Arrays.sort(array, new __IntervalComparator(2));
-        Arrays.fill(array, 0, (array.length - 3), null);
-        Arrays.sort(array, new __IntervalComparator(3));
-      }
-        //$FALL-THROUGH$
-      case 3: {
-        return new double[][] { //
-            { array[0][0], array[0][1] }, //
-            { array[1][0], array[1][1] }, //
-            { array[2][0], array[2][1] },//
-        };
+        Arrays.fill(array, 0, (array.length - maxIntervals), null);
+        Arrays.sort(array, new __IntervalComparator(maxIntervals));
+        array2 = new double[maxIntervals][];
+        current = 0;
+        for (final double[] vec : intervals) {
+          array2[current] = new double[] { vec[0], vec[1] };
+          if ((++current) >= maxIntervals) {
+            break;
+          }
+        }
+        return array2;
       }
     }
   }
@@ -483,12 +488,15 @@ final class _GreedyMCCTreeTrainingJob
    *          the values
    * @param found
    *          the number of splits
+   * @param maxIntervals
+   *          the maximum number of real intervals
    * @return the node
    */
   private static final _GreedyMCCTree __trainForNominalAttribute(
       final int attributeIndex, final ArrayList<ClassifiedSample> samples,
       final EFeatureType[] types, final ConfusionMatrix matrix,
-      final MCC mcc, final double[][] values, final int found) {
+      final MCC mcc, final double[][] values, final int found,
+      final int maxIntervals) {
     ArrayList<_ListAssignment> assignments;
     ArrayList<ClassifiedSample> choice;
     HashSet<Integer> done;
@@ -530,7 +538,7 @@ final class _GreedyMCCTreeTrainingJob
       use.clear();
 
       if (_GreedyMCCTreeTrainingJob.__setClassifier(attributeIndex,
-          samples, types, mcc, choice, current)) {
+          samples, types, mcc, choice, current, maxIntervals)) {
         assignments.add(current);
       }
     }
@@ -558,13 +566,15 @@ final class _GreedyMCCTreeTrainingJob
    *          the choice destination
    * @param current
    *          the current assignment
+   * @param maxIntervals
+   *          the maximum number of real intervals
    * @return {@code true} on success, {@code false} on failure
    */
   private static final boolean __setClassifier(final int attributeIndex,
       final ArrayList<ClassifiedSample> samples,
       final EFeatureType[] types, final MCC mcc,
       final ArrayList<ClassifiedSample> choiceDest,
-      final _Assignment current) {
+      final _Assignment current, final int maxIntervals) {
     int index;
     ClassifiedSample sample2;
     ClassifierTrainingResult result;
@@ -584,7 +594,7 @@ final class _GreedyMCCTreeTrainingJob
 
     result = _GreedyMCCTreeTrainingJob.__train(
         choiceDest.toArray(new ClassifiedSample[choiceDest.size()]), types,
-        mcc, attributeIndex);
+        mcc, attributeIndex, maxIntervals);
     if (result == null) {
       samples.addAll(choiceDest);
       choiceDest.clear();
@@ -599,7 +609,7 @@ final class _GreedyMCCTreeTrainingJob
   @Override
   protected final IClassifierTrainingResult doCall() {
     return _GreedyMCCTreeTrainingJob.__train(this.m_knownSamples,
-        this.m_featureTypes, MCC.INSTANCE, -1);
+        this.m_featureTypes, MCC.INSTANCE, -1, 1);
   }
 
   /** {@inheritDoc} */
