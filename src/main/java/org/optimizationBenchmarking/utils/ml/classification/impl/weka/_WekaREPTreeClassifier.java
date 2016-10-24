@@ -34,7 +34,8 @@ final class _WekaREPTreeClassifier extends _WekaClassifier<REPTree> {
 
   /** {@inheritDoc} */
   @Override
-  public final void render(final IClassifierParameterRenderer renderer,
+  public final void renderAsCode(
+      final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
     WekaTreeAccessor.renderREPTreeClassifier(this, this.m_selectedFeatures,
         this.m_classifier, renderer, textOutput);

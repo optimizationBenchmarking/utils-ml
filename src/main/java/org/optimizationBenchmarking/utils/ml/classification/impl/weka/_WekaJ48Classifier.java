@@ -54,7 +54,8 @@ final class _WekaJ48Classifier extends _WekaClassifier<J48> {
 
   /** {@inheritDoc} */
   @Override
-  public final void render(final IClassifierParameterRenderer renderer,
+  public final void renderAsCode(
+      final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
     WekaTreeAccessor.renderJ48Classifier(this, this.m_selectedFeatures,
         this.m_classifier, renderer, textOutput);

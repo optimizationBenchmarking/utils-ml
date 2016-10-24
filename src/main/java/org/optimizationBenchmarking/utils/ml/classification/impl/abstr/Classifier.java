@@ -62,7 +62,7 @@ public abstract class Classifier implements IClassifier {
 
   /** {@inheritDoc} */
   @Override
-  public void render(final IClassifierParameterRenderer renderer,
+  public final void render(final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
     final ILabel label;
     ISectionBody body;

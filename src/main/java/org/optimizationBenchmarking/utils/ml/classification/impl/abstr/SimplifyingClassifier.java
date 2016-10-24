@@ -1,6 +1,5 @@
 package org.optimizationBenchmarking.utils.ml.classification.impl.abstr;
 
-import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierParameterRenderer;
 import org.optimizationBenchmarking.utils.text.ETextCase;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
@@ -50,12 +49,5 @@ public abstract class SimplifyingClassifier extends Classifier {
   @Override
   public String getPathComponentSuggestion() {
     return this.getClass().getSimpleName();
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void render(final IClassifierParameterRenderer renderer,
-      final ITextOutput textOutput) {
-    this.printDescription(textOutput, ETextCase.AT_SENTENCE_START);
   }
 }

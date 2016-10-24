@@ -1,7 +1,5 @@
 package org.optimizationBenchmarking.utils.ml.classification.impl.abstr;
 
-import org.optimizationBenchmarking.utils.document.spec.IComplexText;
-import org.optimizationBenchmarking.utils.document.spec.IText;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifier;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierParameterRenderer;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrainingJob;
@@ -41,33 +39,15 @@ final class _AllTheSameClass extends Classifier
 
   /** {@inheritDoc} */
   @Override
-  public final void render(final IClassifierParameterRenderer renderer,
-      final ITextOutput textOutput) {
-    if (textOutput instanceof IComplexText) {
-      try (final IText text = ((IComplexText) textOutput).inlineCode()) {
-        this.__render(renderer, text);
-      }
-    } else {
-      this.__render(renderer, textOutput);
-    }
-  }
-
-  /** {@inheritDoc} */
-  @Override
   public ETextCase printShortName(final ITextOutput textOut,
       final ETextCase textCase) {
     return textCase.appendWords("fixed class", textOut); //$NON-NLS-1$
   }
 
-  /**
-   * Render the classifier to a given text output destination.
-   *
-   * @param renderer
-   *          the renderer
-   * @param textOutput
-   *          the text output destination
-   */
-  private final void __render(final IClassifierParameterRenderer renderer,
+  /** {@inheritDoc} */
+  @Override
+  protected final void renderAsCode(
+      final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
     textOutput.append("The classifier always returns class "); //$NON-NLS-1$
     renderer.renderShortClassName(this.m_clazz, textOutput);
