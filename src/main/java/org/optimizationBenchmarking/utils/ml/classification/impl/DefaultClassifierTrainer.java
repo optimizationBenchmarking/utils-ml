@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import org.optimizationBenchmarking.utils.collections.iterators.IterableIterator;
 import org.optimizationBenchmarking.utils.collections.lists.ArrayListView;
 import org.optimizationBenchmarking.utils.error.ErrorUtils;
-import org.optimizationBenchmarking.utils.ml.classification.impl.greedyMCCTree.GreedyMCCTreeTrainer;
 import org.optimizationBenchmarking.utils.ml.classification.impl.weka.WekaJ48TrainerPruned;
 import org.optimizationBenchmarking.utils.ml.classification.impl.weka.WekaJ48TrainerPrunedBinary;
 import org.optimizationBenchmarking.utils.ml.classification.impl.weka.WekaJ48TrainerReducedErrorPruned;
@@ -121,7 +120,7 @@ public final class DefaultClassifierTrainer {
     /** {@inheritDoc} */
     @Override
     public final boolean hasNext() {
-      return (this.m_index <= 8);
+      return (this.m_index <= 7);
     }
 
     /** {@inheritDoc} */
@@ -129,32 +128,32 @@ public final class DefaultClassifierTrainer {
     public final IClassifierTrainer next() {
       switch (this.m_index++) {
         case 0: {
-          return GreedyMCCTreeTrainer.getInstance();
-        }
-        case 1: {
           return WekaJ48TrainerPruned.getInstance();
         }
-        case 2: {
+        case 1: {
           return WekaJ48TrainerPrunedBinary.getInstance();
         }
-        case 3: {
+        case 2: {
           return WekaJ48TrainerReducedErrorPruned.getInstance();
         }
-        case 4: {
+        case 3: {
           return WekaJ48TrainerReducedErrorPrunedBinary.getInstance();
         }
-        case 5: {
+        case 4: {
           return WekaJ48TrainerUnpruned.getInstance();
         }
-        case 6: {
+        case 5: {
           return WekaJ48TrainerUnprunedBinary.getInstance();
         }
-        case 7: {
+        case 6: {
           return WekaREPTreeTrainerPruned.getInstance();
         }
-        case 8: {
+        case 7: {
           return WekaREPTreeTrainerUnpruned.getInstance();
         }
+          // case 8: {
+          // return GreedyMCCTreeTrainer.getInstance();
+          // }
         default: {
           return super.next();
         }

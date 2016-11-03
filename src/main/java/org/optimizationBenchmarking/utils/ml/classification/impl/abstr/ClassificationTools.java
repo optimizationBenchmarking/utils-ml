@@ -345,30 +345,78 @@ public final class ClassificationTools {
    * @param textOutput
    *          the text output destination
    */
+  @SuppressWarnings("incomplete-switch")
   public static final void printFeatureExpression(final int feature,
       final EComparison comparison, final double value,
       final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
+    final int specifiedSwitch;
+
     renderer.renderShortFeatureName(feature, textOutput);
 
-    if (EFeatureType.featureDoubleIsUnspecified(value)) {
-      switch (comparison) {
-        case EQUAL: {
-          textOutput.append(" is "); //$NON-NLS-1$
-          textOutput.append(ClassificationTools.FEATURE_IS_UNSPECIFIED);
-          return;
+    findSpec: {
+      if (EFeatureType.featureDoubleIsUnspecified(value)) {
+        switch (comparison) {
+          case EQUAL: {
+            specifiedSwitch = -1;
+            break findSpec;
+          }
+          case NOT_EQUAL: {
+            specifiedSwitch = 1;
+            break findSpec;
+          }
+          default: {
+            throw new IllegalArgumentException("The " + feature //$NON-NLS-1$
+                + "th feature is unspecified and the comparison to be used in the expression is " //$NON-NLS-1$
+                + comparison
+                + ", but only EQUAL and NOT_EQUAL are permitted for unspecified features."); //$NON-NLS-1$
+          }
         }
-        case NOT_EQUAL: {
-          textOutput.append(" is "); //$NON-NLS-1$
-          textOutput.append(ClassificationTools.FEATURE_IS_SPECIFIED);
-          return;
+      }
+
+      // try to deal with odd situations where a feature seems to be
+      // specified via a "back-door"
+      comp: switch (comparison) {
+        case LESS:
+        case LESS_OR_EQUAL: {
+          if (value >= Double.MAX_VALUE) {
+            specifiedSwitch = 1;
+            break findSpec;
+          }
+          if (value <= (-Double.MAX_VALUE)) {
+            specifiedSwitch = -1;
+            break findSpec;
+          }
+          break comp;
         }
-        default: {
-          throw new IllegalArgumentException("The " + feature //$NON-NLS-1$
-              + "th feature is unspecified and the comparison to be used in the expression is " //$NON-NLS-1$
-              + comparison
-              + ", but only EQUAL and NOT_EQUAL are permitted for unspecified features."); //$NON-NLS-1$
+
+        case GREATER:
+        case GREATER_OR_EQUAL: {
+          if (value >= Double.MAX_VALUE) {
+            specifiedSwitch = -1;
+            break findSpec;
+          }
+          if (value <= (-Double.MAX_VALUE)) {
+            specifiedSwitch = 1;
+            break findSpec;
+          }
+          break comp;
         }
+      }
+
+      specifiedSwitch = 0;
+    }
+
+    switch (specifiedSwitch) {
+      case -1: {
+        textOutput.append(" is "); //$NON-NLS-1$
+        textOutput.append(ClassificationTools.FEATURE_IS_UNSPECIFIED);
+        return;
+      }
+      case 1: {
+        textOutput.append(" is "); //$NON-NLS-1$
+        textOutput.append(ClassificationTools.FEATURE_IS_SPECIFIED);
+        return;
       }
     }
 
