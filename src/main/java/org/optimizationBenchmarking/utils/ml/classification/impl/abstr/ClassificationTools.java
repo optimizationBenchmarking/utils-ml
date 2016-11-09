@@ -14,6 +14,7 @@ import org.optimizationBenchmarking.utils.ml.classification.spec.EFeatureType;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierParameterRenderer;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrainingJob;
 import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierTrainingResult;
+import org.optimizationBenchmarking.utils.text.TextUtils;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
 /** Some simple tools for classification. */
@@ -352,112 +353,122 @@ public final class ClassificationTools {
       final ITextOutput textOutput) {
     final int specifiedSwitch;
 
-    renderer.renderShortFeatureName(feature, textOutput);
+    try {
+      renderer.renderShortFeatureName(feature, textOutput);
 
-    findSpec: {
-      if (EFeatureType.featureDoubleIsUnspecified(value)) {
-        switch (comparison) {
-          case EQUAL: {
-            specifiedSwitch = -1;
-            break findSpec;
+      findSpec: {
+        if (EFeatureType.featureDoubleIsUnspecified(value)) {
+          switch (comparison) {
+            case EQUAL: {
+              specifiedSwitch = -1;
+              break findSpec;
+            }
+            case NOT_EQUAL: {
+              specifiedSwitch = 1;
+              break findSpec;
+            }
+            default: {
+              throw new IllegalArgumentException("The " + feature //$NON-NLS-1$
+                  + "th feature is unspecified and the comparison to be used in the expression is " //$NON-NLS-1$
+                  + comparison
+                  + ", but only EQUAL and NOT_EQUAL are permitted for unspecified features."); //$NON-NLS-1$
+            }
           }
-          case NOT_EQUAL: {
-            specifiedSwitch = 1;
-            break findSpec;
+        }
+
+        // try to deal with odd situations where a feature seems to be
+        // specified via a "back-door"
+        comp: switch (comparison) {
+          case LESS:
+          case LESS_OR_EQUAL: {
+            if (value >= Double.MAX_VALUE) {
+              specifiedSwitch = 1;
+              break findSpec;
+            }
+            if (value <= (-Double.MAX_VALUE)) {
+              specifiedSwitch = -1;
+              break findSpec;
+            }
+            break comp;
           }
-          default: {
-            throw new IllegalArgumentException("The " + feature //$NON-NLS-1$
-                + "th feature is unspecified and the comparison to be used in the expression is " //$NON-NLS-1$
-                + comparison
-                + ", but only EQUAL and NOT_EQUAL are permitted for unspecified features."); //$NON-NLS-1$
+
+          case GREATER:
+          case GREATER_OR_EQUAL: {
+            if (value >= Double.MAX_VALUE) {
+              specifiedSwitch = -1;
+              break findSpec;
+            }
+            if (value <= (-Double.MAX_VALUE)) {
+              specifiedSwitch = 1;
+              break findSpec;
+            }
+            break comp;
           }
+        }
+
+        specifiedSwitch = 0;
+      }
+
+      switch (specifiedSwitch) {
+        case -1: {
+          textOutput.append(" is "); //$NON-NLS-1$
+          textOutput.append(ClassificationTools.FEATURE_IS_UNSPECIFIED);
+          return;
+        }
+        case 1: {
+          textOutput.append(" is "); //$NON-NLS-1$
+          textOutput.append(ClassificationTools.FEATURE_IS_SPECIFIED);
+          return;
         }
       }
 
-      // try to deal with odd situations where a feature seems to be
-      // specified via a "back-door"
-      comp: switch (comparison) {
-        case LESS:
+      textOutput.append(' ');
+
+      switch (comparison) {
+        case LESS: {
+          textOutput.append('<');
+          break;
+        }
         case LESS_OR_EQUAL: {
-          if (value >= Double.MAX_VALUE) {
-            specifiedSwitch = 1;
-            break findSpec;
-          }
-          if (value <= (-Double.MAX_VALUE)) {
-            specifiedSwitch = -1;
-            break findSpec;
-          }
-          break comp;
+          textOutput.append('<');
+          textOutput.append('=');
+          break;
         }
-
-        case GREATER:
+        case EQUAL: {
+          textOutput.append('=');
+          break;
+        }
         case GREATER_OR_EQUAL: {
-          if (value >= Double.MAX_VALUE) {
-            specifiedSwitch = -1;
-            break findSpec;
-          }
-          if (value <= (-Double.MAX_VALUE)) {
-            specifiedSwitch = 1;
-            break findSpec;
-          }
-          break comp;
+          textOutput.append('>');
+          textOutput.append('=');
+          break;
+        }
+        case GREATER: {
+          textOutput.append('>');
+          break;
+        }
+        case NOT_EQUAL: {
+          textOutput.append('!');
+          textOutput.append('=');
+          break;
+        }
+        default: {
+          throw new IllegalArgumentException(
+              "Unsupported comparison: " + comparison); //$NON-NLS-1$
         }
       }
 
-      specifiedSwitch = 0;
+      textOutput.append(' ');
+      renderer.renderFeatureValue(feature, value, textOutput);
+    } catch (final Throwable error) {
+      throw new IllegalArgumentException(//
+          "Error when rendering value " + value //$NON-NLS-1$
+              + " for feature " + feature + //$NON-NLS-1$
+              " and comparison " + comparison + //$NON-NLS-1$
+              " for renderer " + TextUtils.className(renderer) //$NON-NLS-1$
+              + " to output " + TextUtils.className(textOutput), //$NON-NLS-1$
+          error);
     }
-
-    switch (specifiedSwitch) {
-      case -1: {
-        textOutput.append(" is "); //$NON-NLS-1$
-        textOutput.append(ClassificationTools.FEATURE_IS_UNSPECIFIED);
-        return;
-      }
-      case 1: {
-        textOutput.append(" is "); //$NON-NLS-1$
-        textOutput.append(ClassificationTools.FEATURE_IS_SPECIFIED);
-        return;
-      }
-    }
-
-    textOutput.append(' ');
-
-    switch (comparison) {
-      case LESS: {
-        textOutput.append('<');
-        break;
-      }
-      case LESS_OR_EQUAL: {
-        textOutput.append('<');
-        textOutput.append('=');
-        break;
-      }
-      case EQUAL: {
-        textOutput.append('=');
-        break;
-      }
-      case GREATER_OR_EQUAL: {
-        textOutput.append('>');
-        textOutput.append('=');
-        break;
-      }
-      case GREATER: {
-        textOutput.append('>');
-        break;
-      }
-      case NOT_EQUAL: {
-        textOutput.append('!');
-        textOutput.append('=');
-        break;
-      }
-      default: {
-        throw new IllegalArgumentException(
-            "Unsupported comparison: " + comparison); //$NON-NLS-1$
-      }
-    }
-
-    textOutput.append(' ');
-    renderer.renderFeatureValue(feature, value, textOutput);
   }
 
   /**

@@ -21,7 +21,7 @@ public abstract class SimplifyingClassifier extends Classifier {
       throw new IllegalArgumentException(//
           "Selected features cannot be null or empty."); //$NON-NLS-1$
     }
-    this.m_selectedFeatures = selectedFeatures;
+    this.m_selectedFeatures = selectedFeatures.clone();
   }
 
   /** {@inheritDoc} */

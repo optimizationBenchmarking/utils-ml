@@ -6,6 +6,7 @@ import org.optimizationBenchmarking.utils.ml.classification.spec.IClassifierPara
 import org.optimizationBenchmarking.utils.text.TextUtils;
 import org.optimizationBenchmarking.utils.text.textOutput.ITextOutput;
 
+import weka.classifiers.trees.WekaTreeAccessor;
 import weka.core.Instances;
 
 /**
@@ -175,12 +176,12 @@ public final class WekaClassifierTreeAccessor {
       final ITextOutput textOutput) {
 
     if (trainingData.attribute(model.m_attIndex).isNominal()) {
-      ClassificationTools.printFeatureExpression(
+      WekaTreeAccessor.printFeatureExpression(
           selectedFeatures[model.m_attIndex],
           ((index <= 0) ? EComparison.EQUAL : EComparison.NOT_EQUAL),
           model.m_splitPoint, renderer, textOutput);
     } else {
-      ClassificationTools
+      WekaTreeAccessor
           .printFeatureExpression(selectedFeatures[model.m_attIndex],
               ((index <= 0) ? EComparison.LESS_OR_EQUAL
                   : EComparison.GREATER),
@@ -211,15 +212,14 @@ public final class WekaClassifierTreeAccessor {
       final ITextOutput textOutput) {
 
     if (trainingData.attribute(model.m_attIndex).isNominal()) {
-      ClassificationTools.printFeatureExpression(
+      WekaTreeAccessor.printFeatureExpression(
           selectedFeatures[model.m_attIndex], EComparison.EQUAL,
           model.m_splitPoint, renderer, textOutput);
     } else {
-      ClassificationTools
-          .printFeatureExpression(selectedFeatures[model.m_attIndex],
-              ((index <= 0) ? EComparison.LESS_OR_EQUAL
-                  : EComparison.GREATER),
-              model.m_splitPoint, renderer, textOutput);
+      WekaTreeAccessor.printFeatureExpression(//
+          selectedFeatures[model.m_attIndex],
+          ((index <= 0) ? EComparison.LESS_OR_EQUAL : EComparison.GREATER),
+          model.m_splitPoint, renderer, textOutput);
     }
   }
 

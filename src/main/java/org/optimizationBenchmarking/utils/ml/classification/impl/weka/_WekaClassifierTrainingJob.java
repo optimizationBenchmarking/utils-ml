@@ -85,7 +85,7 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
     ArrayList<String> baseValues;
     Instances instances;
     String name;
-    int index, index2, max, current;
+    int index, index2, max, current, featureIndex;
     IClassifier classifier;
     Object token;
     ClassifierTrainingResult result;
@@ -99,19 +99,20 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
     baseValues = new ArrayList<>();
 
     // Create the feature sets.
-    for (index = 0; index <= this.m_selectedFeatures.length; index++) {
-
+    outer: for (index = 0; index <= this.m_selectedFeatures.length; index++) {
       for (index2 = baseValues.size(); index2 <= index; index2++) {
         baseValues.add(_WekaClassifierTrainingJob.__name(index2));
       }
       name = baseValues.get(index);
 
       if (index < this.m_selectedFeatures.length) {
-        // OK, this is a normal feature
-        if (this.m_featureTypes[this.m_selectedFeatures[index]] == EFeatureType.NUMERICAL) {
+        featureIndex = this.m_selectedFeatures[index];
+
+        // OK, is this a normal feature?
+        if (this.m_featureTypes[featureIndex] == EFeatureType.NUMERICAL) {
           // Numerical features just need a name, nothing else
           features.add(new Attribute(name));
-          continue;
+          continue outer;
         }
 
         // Find the number of different values of the binary or nominal
@@ -120,8 +121,8 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
         // i.e., max+1 in total.
         max = 0;
         for (final ClassifiedSample sample : this.m_knownSamples) {
-          current = EFeatureType.featureDoubleToNominal(
-              sample.featureValues[this.m_selectedFeatures[index]]);
+          current = EFeatureType.featureDoubleToNominal(//
+              sample.featureValues[featureIndex]);
           if (current > max) {
             max = current;
           }

@@ -18,6 +18,32 @@ import weka.core.Utils;
 public final class WekaTreeAccessor {
 
   /**
+   * Print an expression which compares a the value of an feature with a
+   * specified value.
+   *
+   * @param feature
+   *          the feature
+   * @param comparison
+   *          the comparison
+   * @param value
+   *          the value to compare with
+   * @param renderer
+   *          the renderer
+   * @param textOutput
+   *          the text output destination
+   */
+  public static final void printFeatureExpression(final int feature,
+      final EComparison comparison, final double value,
+      final IClassifierParameterRenderer renderer,
+      final ITextOutput textOutput) {
+    ClassificationTools.printFeatureExpression(feature, comparison, //
+        ((value != value) || (value <= (-Double.MAX_VALUE))
+            || (value >= Double.MAX_VALUE))//
+                ? EFeatureType.UNSPECIFIED_DOUBLE : value, //
+        renderer, textOutput);
+  }
+
+  /**
    * Render the J48 classifier tree to a given text output destination.
    *
    * @param name
@@ -180,14 +206,14 @@ public final class WekaTreeAccessor {
       if (tree.m_Info.attribute(tree.m_Attribute).isNominal()) {
         textOutput.append(((index <= 0) ? ClassificationTools.RULE_IF
             : ClassificationTools.RULE_ELSE_IF));
-        ClassificationTools.printFeatureExpression(//
+        WekaTreeAccessor.printFeatureExpression(//
             selectedFeatures[tree.m_Attribute], //
             EComparison.EQUAL, index, renderer, textOutput);
         textOutput.append(ClassificationTools.RULE_THEN);
       } else {
         if (index <= 0) {
           textOutput.append(ClassificationTools.RULE_IF);
-          ClassificationTools.printFeatureExpression(//
+          WekaTreeAccessor.printFeatureExpression(//
               selectedFeatures[tree.m_Attribute], EComparison.LESS,
               tree.m_SplitPoint, renderer, textOutput);
           textOutput.append(ClassificationTools.RULE_THEN);
