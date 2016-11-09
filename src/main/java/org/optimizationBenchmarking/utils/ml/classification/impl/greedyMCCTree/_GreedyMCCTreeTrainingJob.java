@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 
+import org.optimizationBenchmarking.utils.math.functions.power.Log;
 import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.ClassifierTrainingJobBuilder;
 import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.ClassifierTrainingResult;
 import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.ConfusionMatrix;
@@ -41,11 +42,14 @@ final class _GreedyMCCTreeTrainingJob
    *          the attribute to skip
    * @param maxIntervals
    *          the maximum number of real intervals
+   * @param maxDepth
+   *          the maximum depth
    * @return the node
    */
   private static final ClassifierTrainingResult __train(
       final ClassifiedSample[] samples, final EFeatureType[] types,
-      final MCC mcc, final int skip, final int maxIntervals) {
+      final MCC mcc, final int skip, final int maxIntervals,
+      final int maxDepth) {
     ConfusionMatrix matrix;
     _GreedyMCCTree node;
     ClassifierTrainingResult bestResult, testResult;
@@ -56,19 +60,21 @@ final class _GreedyMCCTreeTrainingJob
     bestResult = new ClassifierTrainingResult(node,
         mcc.evaluate(node, matrix, samples), node._complexity());
 
-    for (index = 0; index < types.length; index++) {
-      if (index == skip) {
-        continue;
-      }
-      testResult = _GreedyMCCTreeTrainingJob.__trainForAttribute(index,
-          samples, types, matrix, mcc, maxIntervals);
-      if (testResult == null) {
-        continue;
-      }
-      if ((testResult.quality < bestResult.quality)
-          || ((testResult.quality <= bestResult.quality)
-              && (testResult.complexity < bestResult.complexity))) {
-        bestResult = testResult;
+    if (maxDepth > 0) {
+      for (index = 0; index < types.length; index++) {
+        if (index == skip) {
+          continue;
+        }
+        testResult = _GreedyMCCTreeTrainingJob.__trainForAttribute(index,
+            samples, types, matrix, mcc, maxIntervals, (maxDepth - 1));
+        if (testResult == null) {
+          continue;
+        }
+        if ((testResult.quality < bestResult.quality)
+            || ((testResult.quality <= bestResult.quality)
+                && (testResult.complexity < bestResult.complexity))) {
+          bestResult = testResult;
+        }
       }
     }
 
@@ -90,13 +96,15 @@ final class _GreedyMCCTreeTrainingJob
    *          the measure
    * @param maxIntervals
    *          the maximum number of real intervals
+   * @param maxDepth
+   *          the maximum depth
    * @return the node
    */
   @SuppressWarnings("unchecked")
   private static final ClassifierTrainingResult __trainForAttribute(
       final int attributeIndex, final ClassifiedSample[] samples,
       final EFeatureType[] types, final ConfusionMatrix matrix,
-      final MCC mcc, final int maxIntervals) {
+      final MCC mcc, final int maxIntervals, final int maxDepth) {
     HashSet<Double>[] values;
     HashSet<Double> all;
     Double value;
@@ -150,13 +158,13 @@ final class _GreedyMCCTreeTrainingJob
     if (isNumerical) {
       node = _GreedyMCCTreeTrainingJob.__trainForNumericalAttribute(
           attributeIndex, allSamples, types, matrix, mcc, dvalues, found,
-          all, maxIntervals);
+          all, maxIntervals, maxDepth);
       all = null;
     } else {
       all = null;
       node = _GreedyMCCTreeTrainingJob.__trainForNominalAttribute(
           attributeIndex, allSamples, types, matrix, mcc, dvalues, found,
-          maxIntervals);
+          maxIntervals, maxDepth);
     }
 
     if ((node == null) || (node instanceof _GreedyMCCTreeLeaf)) {
@@ -223,13 +231,16 @@ final class _GreedyMCCTreeTrainingJob
    *          all the values found so far
    * @param maxIntervals
    *          the maximum number of real intervals
+   * @param maxDepth
+   *          the maximum depth
    * @return the node
    */
   private static final _GreedyMCCTree __trainForNumericalAttribute(
       final int attributeIndex, final ArrayList<ClassifiedSample> samples,
       final EFeatureType[] types, final ConfusionMatrix matrix,
       final MCC mcc, final double[][] values, final int found,
-      final HashSet<Double> all, final int maxIntervals) {
+      final HashSet<Double> all, final int maxIntervals,
+      final int maxDepth) {
     final ArrayList<_RangeAssignment> assignments;
     final ArrayList<ClassifiedSample> choice;
     double[][] intervals;
@@ -253,7 +264,7 @@ final class _GreedyMCCTreeTrainingJob
       current = new _RangeAssignment(intervals);
 
       if (_GreedyMCCTreeTrainingJob.__setClassifier(attributeIndex,
-          samples, types, mcc, choice, current, maxIntervals)) {
+          samples, types, mcc, choice, current, maxIntervals, maxDepth)) {
         assignments.add(current);
       }
     }
@@ -490,13 +501,15 @@ final class _GreedyMCCTreeTrainingJob
    *          the number of splits
    * @param maxIntervals
    *          the maximum number of real intervals
+   * @param maxDepth
+   *          the maximum depth
    * @return the node
    */
   private static final _GreedyMCCTree __trainForNominalAttribute(
       final int attributeIndex, final ArrayList<ClassifiedSample> samples,
       final EFeatureType[] types, final ConfusionMatrix matrix,
       final MCC mcc, final double[][] values, final int found,
-      final int maxIntervals) {
+      final int maxIntervals, final int maxDepth) {
     ArrayList<_ListAssignment> assignments;
     ArrayList<ClassifiedSample> choice;
     HashSet<Integer> done;
@@ -538,7 +551,7 @@ final class _GreedyMCCTreeTrainingJob
       use.clear();
 
       if (_GreedyMCCTreeTrainingJob.__setClassifier(attributeIndex,
-          samples, types, mcc, choice, current, maxIntervals)) {
+          samples, types, mcc, choice, current, maxIntervals, maxDepth)) {
         assignments.add(current);
       }
     }
@@ -568,13 +581,16 @@ final class _GreedyMCCTreeTrainingJob
    *          the current assignment
    * @param maxIntervals
    *          the maximum number of real intervals
+   * @param maxDepth
+   *          the maximum depth
    * @return {@code true} on success, {@code false} on failure
    */
   private static final boolean __setClassifier(final int attributeIndex,
       final ArrayList<ClassifiedSample> samples,
       final EFeatureType[] types, final MCC mcc,
       final ArrayList<ClassifiedSample> choiceDest,
-      final _Assignment current, final int maxIntervals) {
+      final _Assignment current, final int maxIntervals,
+      final int maxDepth) {
     int index;
     ClassifiedSample sample2;
     ClassifierTrainingResult result;
@@ -594,7 +610,7 @@ final class _GreedyMCCTreeTrainingJob
 
     result = _GreedyMCCTreeTrainingJob.__train(
         choiceDest.toArray(new ClassifiedSample[choiceDest.size()]), types,
-        mcc, attributeIndex, maxIntervals);
+        mcc, attributeIndex, maxIntervals, maxDepth);
     if (result == null) {
       samples.addAll(choiceDest);
       choiceDest.clear();
@@ -608,8 +624,13 @@ final class _GreedyMCCTreeTrainingJob
   /** {@inheritDoc} */
   @Override
   protected final IClassifierTrainingResult doCall() {
+    int maxDepth;
+
+    maxDepth = ((int) (Math.round(Log.INSTANCE.computeAsDouble(
+        Math.max(2, (this.m_featureTypes.length - 1)), 100000000))));
     return _GreedyMCCTreeTrainingJob.__train(this.m_knownSamples,
-        this.m_featureTypes, MCC.INSTANCE, -1, 1);
+        this.m_featureTypes, MCC.INSTANCE, //
+        -1, 1, Math.max(2, Math.min(10000, maxDepth)));
   }
 
   /** {@inheritDoc} */

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.optimizationBenchmarking.utils.collections.iterators.IterableIterator;
 import org.optimizationBenchmarking.utils.collections.lists.ArrayListView;
 import org.optimizationBenchmarking.utils.error.ErrorUtils;
+import org.optimizationBenchmarking.utils.ml.classification.impl.greedyMCCTree.GreedyMCCTreeTrainer;
 import org.optimizationBenchmarking.utils.ml.classification.impl.weka.WekaJ48TrainerPruned;
 import org.optimizationBenchmarking.utils.ml.classification.impl.weka.WekaJ48TrainerPrunedBinary;
 import org.optimizationBenchmarking.utils.ml.classification.impl.weka.WekaJ48TrainerReducedErrorPruned;
@@ -120,7 +121,7 @@ public final class DefaultClassifierTrainer {
     /** {@inheritDoc} */
     @Override
     public final boolean hasNext() {
-      return (this.m_index <= 7);
+      return (this.m_index <= 8);
     }
 
     /** {@inheritDoc} */
@@ -151,9 +152,9 @@ public final class DefaultClassifierTrainer {
         case 7: {
           return WekaREPTreeTrainerUnpruned.getInstance();
         }
-          // case 8: {
-          // return GreedyMCCTreeTrainer.getInstance();
-          // }
+        case 8: {
+          return GreedyMCCTreeTrainer.getInstance();
+        }
         default: {
           return super.next();
         }
