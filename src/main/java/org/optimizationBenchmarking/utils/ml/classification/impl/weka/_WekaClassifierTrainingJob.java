@@ -1,8 +1,8 @@
 package org.optimizationBenchmarking.utils.ml.classification.impl.weka;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
-import org.optimizationBenchmarking.utils.collections.lists.ArrayListView;
 import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.ClassifierTrainingJobBuilder;
 import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.ClassifierTrainingResult;
 import org.optimizationBenchmarking.utils.ml.classification.impl.abstr.SimplifyingClassifierTrainingJob;
@@ -89,7 +89,7 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
     IClassifier classifier;
     Object token;
     ClassifierTrainingResult result;
-    double quality;
+    double quality, possible;
     CT wekaClassifier;
     String[] values;
 
@@ -120,9 +120,12 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
         // the maximum value is "max", then there are values like 0...max,
         // i.e., max+1 in total.
         max = 0;
-        for (final ClassifiedSample sample : this.m_knownSamples) {
-          current = EFeatureType.featureDoubleToNominal(//
-              sample.featureValues[featureIndex]);
+        innerest: for (final ClassifiedSample sample : this.m_knownSamples) {
+          possible = sample.featureValues[featureIndex];
+          if (EFeatureType.featureDoubleIsUnspecified(possible)) {
+            continue innerest;// handle missing values by ignoring them
+          }
+          current = EFeatureType.featureDoubleToNominal(possible);
           if (current > max) {
             max = current;
           }
@@ -150,7 +153,7 @@ abstract class _WekaClassifierTrainingJob<CT extends Classifier>
         values[index2] = baseValues.get(index2);
       }
 
-      features.add(new Attribute(name, new ArrayListView<>(values)));
+      features.add(new Attribute(name, Arrays.asList(values)));
     }
 
     // Now build the instances set.

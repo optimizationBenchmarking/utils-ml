@@ -213,8 +213,8 @@ public final class WekaClassifierTreeAccessor {
 
     if (trainingData.attribute(model.m_attIndex).isNominal()) {
       WekaTreeAccessor.printFeatureExpression(
-          selectedFeatures[model.m_attIndex], EComparison.EQUAL,
-          model.m_splitPoint, renderer, textOutput);
+          selectedFeatures[model.m_attIndex], EComparison.EQUAL, index,
+          renderer, textOutput);
     } else {
       WekaTreeAccessor.printFeatureExpression(//
           selectedFeatures[model.m_attIndex],
