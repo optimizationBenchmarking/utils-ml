@@ -36,10 +36,7 @@ public final class WekaTreeAccessor {
       final EComparison comparison, final double value,
       final IClassifierParameterRenderer renderer,
       final ITextOutput textOutput) {
-    ClassificationTools.printFeatureExpression(feature, comparison, //
-        ((value != value) || (value <= (-Double.MAX_VALUE))
-            || (value >= Double.MAX_VALUE))//
-                ? EFeatureType.UNSPECIFIED_DOUBLE : value, //
+    ClassificationTools.printFeatureExpression(feature, comparison, value,
         renderer, textOutput);
   }
 
