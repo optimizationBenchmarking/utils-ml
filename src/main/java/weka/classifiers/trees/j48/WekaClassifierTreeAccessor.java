@@ -179,7 +179,7 @@ public final class WekaClassifierTreeAccessor {
       WekaTreeAccessor.printFeatureExpression(
           selectedFeatures[model.m_attIndex],
           ((index <= 0) ? EComparison.EQUAL : EComparison.NOT_EQUAL),
-          model.m_splitPoint, renderer, textOutput);
+          ((int) (model.m_splitPoint)), renderer, textOutput);
     } else {
       WekaTreeAccessor
           .printFeatureExpression(selectedFeatures[model.m_attIndex],
